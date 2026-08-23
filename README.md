@@ -105,3 +105,7 @@ Para mantener el proyecto organizado y evitar romper la rama principal (`main`),
 - No se trabaja directamente sobre `main`.
 - No se abre un PR si los tests no pasan.
 - Un PR debe resolver una sola tarea/feature/bug de forma clara.
+
+## Documentación del proyecto
+
+- [Plan y guía de recursos](docs/plan_guia.md): reglas para crear, reutilizar y organizar audios, imágenes y assets de minijuegos.

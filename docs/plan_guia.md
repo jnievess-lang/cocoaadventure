@@ -1,0 +1,365 @@
+# Plan y guía de recursos de Cocoa Adventure
+
+Esta guía define cómo crear, reutilizar, nombrar y ubicar los recursos del juego. Su objetivo es que los próximos módulos conserven la misma identidad audiovisual y que ningún archivo termine en una carpeta que no corresponda.
+
+## 1. Principios obligatorios
+
+1. Reutilizar antes de crear. Antes de generar un sonido o imagen, revisar si ya existe un recurso que comunica la misma acción.
+2. La categoría semántica manda. Un personaje pertenece a `characters/` aunque se use en un solo minijuego.
+3. Un recurso debe tener una sola fuente de verdad. No se deben guardar copias de la misma imagen en varias carpetas públicas.
+4. Los recursos de producción viven en `public/`. Los archivos fuente, candidatos y descartes locales de `design/` no se publican ni se incluyen en Git.
+5. Todo recurso debe funcionar en pantallas táctiles y en el lienzo lógico de 1920 × 1080 configurado con `Phaser.Scale.FIT`.
+6. El audio complementa la experiencia, pero nunca puede ser la única forma de comunicar una instrucción o resultado.
+
+## 2. Arquitectura de audio
+
+```text
+public/audio/
+├── music/   Música ambiental y pistas en bucle
+├── sfx/     Efectos cortos de interacción y retroalimentación
+└── voice/   Instrucciones y mensajes hablados
+```
+
+### Música (`audio/music`)
+
+- Debe poder reproducirse en bucle sin un corte evidente.
+- No debe contener instrucciones, diálogos ni efectos propios del minijuego.
+- Debe acompañar sin competir con la voz.
+- Se crea una sola instancia global y se reutiliza al cambiar de escena.
+- Volumen de referencia actual en Phaser: `0.22`.
+- Mientras habla una voz, reducir temporalmente el volumen a aproximadamente `0.08`.
+- Al terminar o fallar la voz, restaurar siempre el volumen anterior.
+
+Recurso disponible:
+
+| Clave Phaser | Archivo | Uso |
+| --- | --- | --- |
+| `musicaFondo` | `music/MusicaFondo.mp3` | Música general de Cosecha y sus niveles. |
+
+### Efectos (`audio/sfx`)
+
+- Deben ser cortos y responder inmediatamente a la acción.
+- Evitar silencios perceptibles al inicio.
+- No reproducir varios efectos fuertes al mismo tiempo.
+- Una respuesta incorrecta debe ser amable, nunca sonar como castigo.
+- Un mismo significado debe conservar el mismo sonido en todos los módulos.
+
+| Clave Phaser | Archivo | Reutilización indicada |
+| --- | --- | --- |
+| `sfxBotonTocar` | `sfx/BotonTocar.m4a` | Pulsación de botones interactivos. Es la única excepción actual al estándar MP3. |
+| `sfxAvisoTiempo` | `sfx/AvisoTiempo.mp3` | Aviso cuando quedan pocos segundos. No repetir cada segundo. |
+| `sfxContadorCompleto` | `sfx/ContadorCompleto.mp3` | Objetivo o contador completado. |
+| `sfxEstrellaResultado` | `sfx/EstrellaResultado.mp3` | Aparición de cada estrella en resultados. |
+| `sfxSeleccionCorrecta` | `sfx/SeleccionCorrecta.mp3` | Selección correcta de un objeto. |
+| `sfxSeleccionVerde` | `sfx/SeleccionVerde.mp3` | Objeto todavía no listo o selección que requiere esperar. |
+
+Para recursos nuevos, el formato estándar será MP3. No se debe convertir `BotonTocar.m4a` sin comparar antes que la conversión conserve el ataque corto del sonido.
+
+### Cambio o reemplazo de un sonido compartido
+
+Ningún integrante debe reemplazar, renombrar o borrar un sonido compartido por decisión individual. Un archivo puede estar siendo utilizado por varios módulos aunque se haya creado originalmente para uno solo.
+
+Antes de proponer el cambio:
+
+1. Buscar todas sus referencias en `PreloadScene` y en las escenas del proyecto.
+2. Confirmar qué módulos, niveles y componentes lo reproducen.
+3. Enviar al grupo el sonido actual y el sonido propuesto.
+4. Explicar el motivo del cambio y en qué momentos se escuchará.
+5. Comparar ambos archivos en PC y celular, junto con música y voz.
+6. Esperar la aprobación explícita del grupo o responsable del proyecto.
+
+Si el grupo aprueba un reemplazo que conserva exactamente el mismo significado:
+
+- Eliminar el archivo anterior y colocar el sonido aprobado usando exactamente el mismo nombre, extensión y ruta.
+- Mantener la misma clave de Phaser para no romper los módulos consumidores.
+- No conservar en `public/` variantes como `Nuevo`, `Final`, `Final2` o copias duplicadas.
+- Verificar nuevamente todos los módulos que utilizan esa clave, no solamente el nivel donde se solicitó el cambio.
+- Registrar en el Pull Request qué sonido se reemplazó, quién aprobó el cambio y qué escenas se probaron.
+
+Git conserva el historial del archivo anterior, por lo que no es necesario mantener una copia duplicada dentro de `public/`.
+
+Si el sonido propuesto comunica una acción diferente, no es un reemplazo: debe recibir un nombre, archivo y clave nuevos. Reutilizar el nombre anterior en ese caso cambiaría silenciosamente el significado en otros módulos.
+
+### Voces (`audio/voice`)
+
+- Usar siempre una voz femenina de español de Ecuador.
+- Mantener tono cálido, paciente y positivo.
+- Una instrucción debe explicar una sola acción principal.
+- Preferir una o dos oraciones cortas.
+- Evitar tecnicismos, reglas encadenadas y expresiones que culpabilicen al niño.
+- El texto visible y la voz deben comunicar la misma regla.
+- Los mensajes correctivos deben explicar qué hacer: “Esa mazorca todavía está verde” es mejor que “Incorrecto”.
+- Solo puede hablar una voz a la vez. Antes de iniciar otra, detener y destruir la anterior.
+
+Cada minijuego debería considerar estas cuatro voces:
+
+| Tipo | Momento | Ejemplo de intención |
+| --- | --- | --- |
+| Instrucción | Antes de iniciar | Explica qué debe tocar, arrastrar o seleccionar. |
+| Ayuda | Primer error o inactividad | Da una pista corta sin penalizar. |
+| Éxito | Al completar | Reconoce la acción realizada. |
+| Tiempo agotado | Al terminar el tiempo | Invita a intentarlo nuevamente. |
+
+## 3. Generación de voces con Edge TTS
+
+La voz oficial del proyecto es `es-EC-AndreaNeural`, voz femenina de español de Ecuador.
+
+Existen dos métodos aprobados. Ambos deben usar la misma voz, velocidad normal y texto definitivo.
+
+### Método A: instalar Edge TTS en la computadora
+
+#### Instalación
+
+```bash
+python -m pip install edge-tts
+```
+
+#### Verificar que la voz esté disponible
+
+```bash
+edge-tts --list-voices
+```
+
+Buscar `es-EC-AndreaNeural` en el resultado antes de generar un lote nuevo.
+
+#### Perfil de generación local
+
+Usar el mismo perfil para todas las voces nuevas:
+
+```bash
+edge-tts \
+  --voice es-EC-AndreaNeural \
+  --rate=+0% \
+  --pitch=+0Hz \
+  --volume=+0% \
+  --text "Toca las mazorcas amarillas y anaranjadas." \
+  --write-media SeleccionMadurasInstruccion.mp3
+```
+
+En PowerShell puede escribirse en una sola línea:
+
+```powershell
+edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Toca las mazorcas amarillas y anaranjadas." --write-media SeleccionMadurasInstruccion.mp3
+```
+
+### Método B: usar el sitio web
+
+Abrir [edge-tts.com](https://edge-tts.com/) y seguir estos pasos:
+
+1. Seleccionar español de Ecuador (`es-EC`) como idioma o región.
+2. Seleccionar género femenino.
+3. Elegir la voz Andrea, correspondiente a `es-EC-AndreaNeural`.
+4. Mantener la velocidad en `1x` y el tono en su valor predeterminado.
+5. Pegar exactamente el guion aprobado, incluyendo su puntuación.
+6. Seleccionar **Generate Audio**.
+7. Escuchar el resultado completo antes de descargarlo.
+8. Descargar el MP3 y renombrarlo según las convenciones del proyecto.
+
+Si el sitio no muestra `es-EC-AndreaNeural` o no permite confirmar la voz seleccionada, usar el método local. No sustituirla por una voz de otro país solo para completar la generación.
+
+No cambiar velocidad, tono o voz para un archivo aislado. Si el equipo decide modificar el perfil, debe comunicarlo, aprobarlo y evaluar si las voces anteriores también necesitan regenerarse.
+
+### Escritura del guion
+
+- Escribir primero el texto definitivo; no generar mientras el guion todavía cambia.
+- Usar puntuación natural para controlar las pausas.
+- Escribir números como palabras cuando deban pronunciarse de una forma concreta.
+- Evitar abreviaturas.
+- Probar el nombre de objetos agrícolas y corregir el texto si la pronunciación resulta ambigua.
+- El nombre del archivo describe la escena y la intención: `SeleccionMadurasTiempoAgotado.mp3`.
+
+### Revisión obligatoria de una voz
+
+1. Escuchar el archivo completo con audífonos y altavoz de celular.
+2. Confirmar pronunciación, volumen y ausencia de cortes.
+3. Revisar que no exista silencio largo al inicio o al final.
+4. Reproducirla encima de la música con los volúmenes reales del juego.
+5. Confirmar que el texto visible sigue siendo comprensible con el audio desactivado.
+6. Probar que el minijuego continúa si el navegador bloquea o no carga el audio.
+
+## 4. Uso de audio en Phaser
+
+Todos los audios se registran una sola vez en `PreloadScene`:
+
+```js
+this.load.audio(
+    "vozNombreMinijuegoInstruccion",
+    "audio/voice/NombreMinijuegoInstruccion.mp3"
+);
+```
+
+No cargar un mismo archivo otra vez desde cada escena.
+
+### Reutilizar música
+
+```js
+let music = this.sound.get("musicaFondo");
+
+if (!music) {
+    music = this.sound.add("musicaFondo", {
+        loop: true,
+        volume: 0.22
+    });
+}
+
+if (!music.isPlaying) music.play();
+```
+
+### Reproducir efectos
+
+```js
+this.sound.play("sfxSeleccionCorrecta", { volume: 0.65 });
+```
+
+### Ciclo de vida de una voz
+
+```js
+if (this.activeVoice) {
+    this.activeVoice.stop();
+    this.activeVoice.destroy();
+}
+
+const voice = this.sound.add("vozNombreMinijuegoInstruccion");
+this.activeVoice = voice;
+
+voice.once("complete", () => {
+    if (this.activeVoice === voice) {
+        voice.destroy();
+        this.activeVoice = null;
+    }
+});
+
+voice.play();
+```
+
+Además, detener y destruir la voz durante `Phaser.Scenes.Events.SHUTDOWN`. Al ocultar la aplicación o cambiar de pestaña, pausar el minijuego para evitar que el tiempo continúe sin el jugador.
+
+### Reglas móviles
+
+- El primer audio puede requerir una interacción del usuario por las restricciones de reproducción automática del navegador.
+- Un tutorial debe ofrecer texto visible y un botón para continuar.
+- Si una voz falla, nunca dejar al jugador atrapado esperando el evento `complete`.
+- Al pausar el juego, pausar también música, avisos y cronómetro.
+
+## 5. Arquitectura de imágenes
+
+```text
+public/images/
+├── achievements/  Insignias y recursos de logros
+├── background/    Fondos completos, mosaicos y escenarios
+├── buttons/       Imágenes completas de botones (prefijo btn)
+├── characters/    Personajes y sus poses
+├── decorations/   Árboles, plantas y elementos ambientales no interactivos
+├── icons/         Iconos reutilizables que no son botones completos
+├── minigames/     Composiciones exclusivas y no separables de un minijuego
+├── modules/       Botones o portadas de los módulos principales
+├── objects/       Objetos interactivos o reutilizables
+└── ui/            HUD, indicadores, estrellas, paneles, pausas y candados
+```
+
+### Regla para decidir la carpeta
+
+1. Si el recurso representa una categoría clara, usar su carpeta semántica.
+2. Si puede reutilizarse en otro nivel, nunca colocarlo dentro de `minigames/`.
+3. Solo usar `minigames/` cuando el archivo combine una secuencia o composición exclusiva que no pueda separarse razonablemente.
+4. No crear una carpeta nueva solo para evitar decidir la categoría correcta.
+
+Ejemplos:
+
+| Recurso | Ubicación correcta |
+| --- | --- |
+| Pose de Cacaíto cosechando | `images/characters/` |
+| Mazorca verde interactiva | `images/objects/` |
+| Árbol de cacao no interactivo | `images/decorations/` |
+| Fondo de finca | `images/background/` |
+| Botón completo “Mazorcas listas” | `images/buttons/` |
+| Indicador de selección correcta | `images/ui/` |
+| Spritesheet inseparable de una secuencia de corte | `images/minigames/cosechar/corte-cuidadoso/` |
+
+## 6. Uso de `images/minigames/cosechar`
+
+Esta carpeta no debe duplicar `objects`, `characters`, `buttons` o `ui`. Su propósito será almacenar recursos compuestos y exclusivos de una mecánica concreta.
+
+Estructura recomendada cuando existan esos recursos:
+
+```text
+public/images/minigames/cosechar/
+├── seleccionar-maduras/
+├── corte-cuidadoso/
+├── a-la-canasta/
+└── revision-acopio/
+```
+
+Recursos que sí podrían pertenecer allí:
+
+- `SpritesheetCorteMazorca.webp`: secuencia completa que combina herramienta, corte y reacción de la mazorca.
+- `AtlasCaidaCanasta.webp`: atlas exclusivo con cuadros de caída, rebote y entrada a la canasta.
+- `AtlasClasificacionAcopio.webp`: composición animada exclusiva de la mesa o banda de clasificación.
+- Una máscara visual propia del nivel que no sea un elemento general de interfaz.
+- Una secuencia ilustrada completa utilizada únicamente por ese minijuego.
+
+Recursos que no deben colocarse allí:
+
+- Cacaíto o cualquiera de sus poses.
+- Mazorcas individuales.
+- Fondos completos.
+- Botones, estrellas, candados o indicadores reutilizables.
+- Música, voces o efectos de sonido.
+
+Actualmente “Seleccionar maduras” no necesita guardar imágenes en esa carpeta: sus piezas están correctamente separadas entre `background`, `decorations`, `objects` y `ui`. Una carpeta vacía no necesita subirse a Git.
+
+## 7. Estética visual obligatoria
+
+- Mantener ilustración 2D infantil, colorida y de formas fáciles de reconocer.
+- Usar contornos oscuros claros y volúmenes suaves, como los assets existentes.
+- Evitar mezclar fotografías, pixel art, estilos planos sin contorno o renders realistas.
+- Usar los botones existentes como referencia de marco, tipografía, proporción y sombreado.
+- Conservar transparencia alfa real en sprites; nunca dibujar un patrón cuadriculado como fondo.
+- Evitar texto generado dentro de una imagen salvo que el asset sea un botón completo aprobado.
+- No depender únicamente del color: separar los objetos del follaje, mantener siluetas reconocibles y añadir indicadores visuales cuando sea necesario.
+- Las zonas táctiles deben ser cómodas en celular aunque el sprite visible sea pequeño.
+- Revisar cada composición en horizontal y con el escalado de Phaser, no únicamente viendo el PNG aislado.
+
+### Convenciones de nombres
+
+- Usar nombres descriptivos en `PascalCase`: `MazorcaMaduraAmarilla.webp`.
+- Los botones completos comienzan con `btn`: `btnIconoMazorcasListas.png`.
+- Evitar espacios, tildes y nombres genéricos como `imagen1.png` o `nuevoFinal.png`.
+- La clave de Phaser debe coincidir conceptualmente con el archivo y conservarse estable.
+- Los candidatos `v2`, `final` o `aprobado` pertenecen al flujo local de diseño, no a `public/`.
+
+## 8. Flujo para agregar un recurso
+
+1. Definir para qué escena, acción y estado se necesita.
+2. Buscar primero un recurso reutilizable en `public/audio` o `public/images`.
+3. Elegir la categoría semántica correcta.
+4. Crear el recurso siguiendo los assets aprobados como referencias visuales o sonoras.
+5. Validar dimensiones, transparencia, volumen, duración y nombre.
+6. Copiar únicamente la versión aprobada a `public/`.
+7. Registrarla en `PreloadScene` con una clave descriptiva.
+8. Usar esa clave desde la escena; no escribir rutas públicas directamente en la lógica del minijuego.
+9. Probar en PC y en un celular horizontal.
+10. Confirmar que no existen errores en consola, rutas faltantes ni recursos duplicados.
+
+## 9. Lista de control para revisión de PR
+
+- [ ] El recurso tiene una necesidad concreta y no duplica otro existente.
+- [ ] Está dentro de la carpeta semántica correcta.
+- [ ] El nombre cumple las convenciones.
+- [ ] Solo la versión aprobada está dentro de `public/`.
+- [ ] Las imágenes coinciden con la estética existente y tienen transparencia real cuando corresponde.
+- [ ] Las instrucciones también aparecen visualmente y no dependen solo del audio.
+- [ ] Las voces usan `es-EC-AndreaNeural` y el perfil acordado.
+- [ ] Todo sonido reemplazado fue compartido, revisado y aprobado antes de modificar `public/`.
+- [ ] El reemplazo conserva el mismo nombre, ruta, clave y significado; no dejó duplicados.
+- [ ] Se probaron todos los módulos que consumen el sonido reemplazado.
+- [ ] Música, voz y efectos mantienen un balance comprensible.
+- [ ] El recurso está registrado una sola vez en `PreloadScene`.
+- [ ] La escena limpia voces y eventos al cerrarse.
+- [ ] La interacción fue probada en celular horizontal.
+- [ ] No existen errores en consola ni archivos faltantes.
+
+## 10. Referencias técnicas
+
+- [Voces e idiomas compatibles de Microsoft Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support)
+- [Proyecto y uso de la línea de comandos de edge-tts](https://github.com/rany2/edge-tts)

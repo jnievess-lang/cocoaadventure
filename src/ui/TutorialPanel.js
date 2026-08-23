@@ -3,246 +3,213 @@ import Phaser from "phaser";
 export default class TutorialPanel extends Phaser.GameObjects.Container {
 
     constructor(scene, config) {
-
-        super(scene);
-
+        super(scene, 0, 0);
         scene.add.existing(this);
 
-        this.scene = scene;
         this.config = config;
-
         this.gameWidth = scene.scale.width;
         this.gameHeight = scene.scale.height;
+        this.closing = false;
 
-        this.initializeLayout();
-
+        this.setDepth(2500);
+        this.createBlocker();
         this.createCharacter();
         this.createBubble();
         this.createText();
-
+        this.createActions();
         this.playAnimation();
-
     }
 
-    initializeLayout() {
+    createBlocker() {
+        const blocker = this.scene.add.rectangle(
+            this.gameWidth / 2,
+            this.gameHeight / 2,
+            this.gameWidth,
+            this.gameHeight,
+            0x10220D,
+            0.30
+        ).setInteractive();
 
-        this.pos = {
-
-            character: {
-
-                x: -this.gameWidth * 0.18,
-                y: this.gameHeight * 0.98
-
-            },
-
-            bubble: {
-
-                x: this.gameWidth * 0.22,
-                y: this.gameHeight * 0.52
-
-            }
-
-        };
-
+        this.add(blocker);
     }
 
     createCharacter() {
-
         this.character = this.scene.add.image(
-
-            this.pos.character.x,
-            this.pos.character.y,
-
+            -this.gameWidth * 0.18,
+            this.gameHeight * 0.98,
             this.config.character
-
         );
 
-        this.character.setOrigin(0, 1);
+        this.character
+            .setOrigin(0, 1)
+            .setScale((this.gameHeight * 0.45) / this.character.height);
 
-        const targetHeight = this.gameHeight * 0.45;
-
-        const scale = targetHeight / this.character.height;
-
-        this.character.setScale(scale);
-
+        this.add(this.character);
     }
 
     createBubble() {
-
         this.bubble = this.scene.add.image(
-
-            this.pos.bubble.x,
-            this.pos.bubble.y,
-
+            this.gameWidth * 0.28,
+            this.gameHeight * 0.52,
             "GloboTexto"
-
         );
 
-        const targetWidth = this.gameWidth * 0.20;
-
-        const scale = targetWidth / this.bubble.width;
-
-        this.bubble.setScale(0);
-
-        this.bubble.setAlpha(0);
-
+        this.bubbleScale = (this.gameWidth * 0.30) / this.bubble.width;
+        this.bubble.setScale(0).setAlpha(0);
+        this.add(this.bubble);
     }
 
     createText() {
-
         this.text = this.scene.add.text(
-
-            this.pos.bubble.x,
-            this.pos.bubble.y,
-
+            this.gameWidth * 0.29,
+            this.gameHeight * 0.47,
             this.config.text,
-
             {
-
-                fontFamily: "Arial",
-                fontSize: `${this.gameHeight * 0.026}px`,
-                color: "#111111",
+                fontFamily: "Trebuchet MS",
+                fontSize: `${this.gameHeight * 0.025}px`,
+                color: "#3B2416",
+                fontStyle: "bold",
                 align: "center",
-                wordWrap: {
-
-                    width: this.gameWidth * 0.15
-
-                }
-
+                wordWrap: { width: this.gameWidth * 0.22 }
             }
-
         );
 
-        this.text.setOrigin(0.5);
+        this.text.setOrigin(0.5).setAlpha(0);
+        this.add(this.text);
+    }
 
-        this.text.setAlpha(0);
+    createActions() {
+        if (!this.config.confirmText) return;
 
+        const y = this.gameHeight * 0.59;
+
+        this.confirmButton = this.createButton(
+            this.gameWidth * 0.33,
+            y,
+            this.config.confirmText,
+            () => this.hideTutorial(),
+            0xE57B25
+        );
+
+        if (this.config.replayText) {
+            this.replayButton = this.createButton(
+                this.gameWidth * 0.20,
+                y,
+                this.config.replayText,
+                () => this.playVoice(),
+                0x4B9B49
+            );
+        }
+    }
+
+    createButton(x, y, label, callback, color) {
+        const container = this.scene.add.container(x, y).setAlpha(0);
+        const background = this.scene.add.rectangle(
+            0,
+            0,
+            this.gameWidth * 0.115,
+            this.gameHeight * 0.068,
+            color,
+            1
+        );
+
+        background
+            .setStrokeStyle(5, 0x6A3818, 1)
+            .setInteractive({ useHandCursor: true });
+
+        const text = this.scene.add.text(0, 0, label, {
+            fontFamily: "Trebuchet MS",
+            fontSize: `${this.gameHeight * 0.021}px`,
+            color: "#FFFFFF",
+            fontStyle: "bold"
+        }).setOrigin(0.5);
+
+        background.on("pointerdown", () => {
+            this.scene.sound.play("sfxBotonTocar", { volume: 1 });
+            container.setScale(0.96);
+        });
+        background.on("pointerout", () => container.setScale(1));
+        background.on("pointerup", () => {
+            container.setScale(1);
+            callback();
+        });
+
+        container.add([background, text]);
+        this.add(container);
+        return container;
     }
 
     playAnimation() {
-
         this.scene.tweens.add({
-
             targets: this.character,
-
             x: this.gameWidth * 0.02,
-
             duration: 500,
-
             ease: "Back.Out",
-
-            onComplete: () => {
-
-            this.scene.time.delayedCall(
-
-                200,
-
-                () => {
-
-                    this.showBubble();
-
-                }
-
-            );
-
-        }
-
+            onComplete: () => this.scene.time.delayedCall(180, () => this.showBubble())
         });
-
     }
 
     showBubble() {
+        const actionTargets = [this.text];
+        if (this.confirmButton) actionTargets.push(this.confirmButton);
+        if (this.replayButton) actionTargets.push(this.replayButton);
 
         this.scene.tweens.add({
-
             targets: this.bubble,
-
             alpha: 1,
-            scale: 0.6,
-
+            scale: this.bubbleScale,
             duration: 250,
-
             ease: "Back.Out",
-
             onComplete: () => {
-
-                this.text.setAlpha(1);
-
+                this.scene.tweens.add({ targets: actionTargets, alpha: 1, duration: 160 });
                 this.playVoice();
-
             }
-
         });
-
     }
 
     playVoice() {
+        if (this.voice) {
+            this.voice.stop();
+            this.voice.destroy();
+        }
 
-        console.log("Iniciando audio");
+        this.config.onVoiceStart?.();
+        const voice = this.scene.sound.add(this.config.audio, { volume: 1 });
+        this.voice = voice;
 
-        const voice = this.scene.sound.add(this.config.audio);
+        const finish = () => {
+            this.config.onVoiceComplete?.();
+            if (this.voice === voice) {
+                voice.destroy();
+                this.voice = null;
+            }
+            if (!this.config.confirmText) this.hideTutorial();
+        };
 
-        voice.play();
-
-        voice.once("complete", () => {
-
-            console.log("Audio terminado");
-
-            this.hideTutorial();
-
-        });
-
+        if (voice.play()) voice.once("complete", finish);
+        else this.scene.time.delayedCall(400, finish);
     }
 
     hideTutorial() {
+        if (this.closing) return;
+        this.closing = true;
 
-        // Primero desaparecen el globo y el texto
+        if (this.voice) {
+            this.voice.stop();
+            this.voice.destroy();
+            this.voice = null;
+            this.config.onVoiceComplete?.();
+        }
 
         this.scene.tweens.add({
-
-            targets: [
-
-                this.bubble,
-                this.text
-
-            ],
-
+            targets: this,
             alpha: 0,
-
-            duration: 250,
-
+            duration: 260,
             onComplete: () => {
-
-                // Luego el personaje sale de la pantalla
-
-                this.scene.tweens.add({
-
-                    targets: this.character,
-
-                    x: -this.character.displayWidth,
-
-                    duration: 500,
-
-                    ease: "Back.In",
-
-                    onComplete: () => {
-
-                        this.destroy();
-
-                        if (this.config.onComplete) {
-
-                            this.config.onComplete();
-
-                        }
-
-                    }
-
-                });
-
+                this.destroy(true);
+                this.config.onComplete?.();
             }
-
         });
-
     }
 
 }

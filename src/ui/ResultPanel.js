@@ -3,19 +3,13 @@ import Phaser from "phaser";
 export default class ResultPanel extends Phaser.GameObjects.Container {
 
     constructor(scene, config) {
-
-        super(
-            scene,
-            scene.scale.width / 2,
-            scene.scale.height / 2
-        );
-
+        super(scene, scene.scale.width / 2, scene.scale.height / 2);
         scene.add.existing(this);
 
-        this.scene = scene;
         this.config = config;
-
-        this.initializeLayout();
+        this.widthRef = scene.scale.width;
+        this.heightRef = scene.scale.height;
+        this.setDepth(2800);
 
         this.createBackground();
         this.createWindow();
@@ -23,235 +17,110 @@ export default class ResultPanel extends Phaser.GameObjects.Container {
         this.createStars();
         this.createButtons();
 
-    }
-
-    initializeLayout() {
-
-        this.pos = {
-
-            title: {
-                x: 0,
-                y: -this.scene.scale.height * 0.10
-            },
-
-            stars: {
-                y: -this.scene.scale.height * 0.02,
-                spacing: this.scene.scale.width * 0.045
-            },
-
-            buttons: {
-
-                retry: {
-                    x: -this.scene.scale.width * 0.08,
-                    y: this.scene.scale.height * 0.11
-                },
-
-                next: {
-                    x: this.scene.scale.width * 0.08,
-                    y: this.scene.scale.height * 0.11
-                }
-
-            }
-
-        };
-
-        this.uiScale = {
-
-            window: {
-                width: this.scene.scale.width * 0.42,
-                height: this.scene.scale.height * 0.42,
-                radius: 25
-            },
-
-            starWidth: this.scene.scale.width * 0.035,
-
-            titleFont: `${this.scene.scale.height * 0.04}px`
-
-        };
-
-
-    }
-
-    createButtons() {
-
-        this.createButton(
-
-            this.pos.buttons.retry.x,
-            this.pos.buttons.retry.y,
-
-            "Reintentar",
-
-            () => {
-
-                if (this.config.onRetry) {
-
-                    this.config.onRetry();
-
-                }
-
-            }
-
-        );
-
-        this.createButton(
-
-            this.pos.buttons.next.x,
-            this.pos.buttons.next.y,
-
-            "Siguiente",
-
-            () => {
-
-                if (this.config.onNext) {
-
-                    this.config.onNext();
-
-                }
-
-            }
-
-        );
-
-    }
-
-    createButton(x, y, text, callback) {
-
-        const width = this.scene.scale.width * 0.12;
-        const height = this.scene.scale.height * 0.07;
-
-        const background = this.scene.add.rectangle(
-
-            x,
-            y,
-
-            width,
-            height,
-
-            0x4A8FE7
-
-        );
-
-        background.setInteractive({ useHandCursor: true });
-
-        background.on("pointerdown", callback);
-
-        const label = this.scene.add.text(
-
-            x,
-            y,
-
-            text,
-
-            {
-
-                fontFamily: "Arial",
-                fontSize: `${this.scene.scale.height * 0.025}px`,
-                color: "#FFFFFF",
-                fontStyle: "bold"
-
-            }
-
-        );
-
-        label.setOrigin(0.5);
-
-        this.add(background);
-        this.add(label);
-
+        this.setScale(0.88).setAlpha(0);
+        scene.tweens.add({
+            targets: this,
+            scale: 1,
+            alpha: 1,
+            duration: 320,
+            ease: "Back.Out"
+        });
     }
 
     createBackground() {
-
         const overlay = this.scene.add.rectangle(
-
-            0,
-            0,
-
-            this.scene.scale.width,
-            this.scene.scale.height,
-
-            0x000000,
-            0.45
-
-        );
-
+            0, 0, this.widthRef, this.heightRef, 0x14220F, 0.62
+        ).setInteractive();
         this.add(overlay);
-
-    }
-
-    createTitle() {
-
-        const title = this.scene.add.text(
-
-            this.pos.title.x,
-            this.pos.title.y,
-
-            this.config.title,
-
-            {
-
-                fontFamily: "Arial",
-                fontSize: this.uiScale.titleFont,
-                color: "#3B2416",
-                fontStyle: "bold"
-
-            }
-
-        );
-
-        title.setOrigin(0.5);
-
-        this.add(title);
-
     }
 
     createWindow() {
-
-        const graphics = this.scene.add.graphics();
-
-        graphics.fillStyle(0xFFFFFF, 1);
-
-        graphics.fillRoundedRect(
-
-            -this.uiScale.window.width / 2,
-            -this.uiScale.window.height / 2,
-
-            this.uiScale.window.width,
-            this.uiScale.window.height,
-
-            this.uiScale.window.radius
-
+        const panel = this.scene.add.rectangle(
+            0, 0, this.widthRef * 0.43, this.heightRef * 0.43, 0xFFF3CF, 1
         );
+        panel.setStrokeStyle(9, 0x75401C, 1);
+        this.add(panel);
+    }
 
-        this.add(graphics);
-
+    createTitle() {
+        const title = this.scene.add.text(0, -this.heightRef * 0.115, this.config.title, {
+            fontFamily: "Trebuchet MS",
+            fontSize: `${this.heightRef * 0.042}px`,
+            color: "#603215",
+            fontStyle: "bold",
+            align: "center",
+            wordWrap: { width: this.widthRef * 0.36 }
+        }).setOrigin(0.5);
+        this.add(title);
     }
 
     createStars() {
-
-        for (let i = 0; i < 3; i++) {
-
-            const texture = i < this.config.stars
-                ? "EstrellaLlena"
-                : "EstrellaVacia";
-
+        for (let index = 0; index < 3; index++) {
             const star = this.scene.add.image(
-
-                (i - 1) * this.pos.stars.spacing,
-                this.pos.stars.y,
-
-                texture
-
+                (index - 1) * this.widthRef * 0.055,
+                -this.heightRef * 0.015,
+                index < this.config.stars ? "EstrellaLlena" : "EstrellaVacia"
             );
 
-            const scale = this.uiScale.starWidth / star.width;
-
-            star.setScale(scale);
-
+            star.setScale((this.widthRef * 0.043) / star.width);
             this.add(star);
 
+            if (index < this.config.stars && this.scene.cache.audio.exists("sfxEstrellaResultado")) {
+                this.scene.time.delayedCall(220 + index * 180, () => {
+                    this.scene.sound.play("sfxEstrellaResultado", { volume: 0.45 });
+                });
+            }
         }
+    }
 
+    createButtons() {
+        this.createButton(
+            -this.widthRef * 0.09,
+            this.heightRef * 0.125,
+            this.config.retryText ?? "Reintentar",
+            this.config.onRetry,
+            0x4B9B49
+        );
+        this.createButton(
+            this.widthRef * 0.09,
+            this.heightRef * 0.125,
+            this.config.nextText ?? "Siguiente",
+            this.config.onNext,
+            0xE57B25
+        );
+    }
+
+    createButton(x, y, label, callback, color) {
+        const container = this.scene.add.container(x, y);
+        const background = this.scene.add.rectangle(
+            0, 0, this.widthRef * 0.145, this.heightRef * 0.078, color, 1
+        );
+
+        background
+            .setStrokeStyle(5, 0x673716, 1)
+            .setInteractive({ useHandCursor: true });
+
+        const text = this.scene.add.text(0, 0, label, {
+            fontFamily: "Trebuchet MS",
+            fontSize: `${this.heightRef * 0.024}px`,
+            color: "#FFFFFF",
+            fontStyle: "bold"
+        }).setOrigin(0.5);
+
+        background.on("pointerdown", () => {
+            if (this.scene.cache.audio.exists("sfxBotonTocar")) {
+                this.scene.sound.play("sfxBotonTocar", { volume: 1 });
+            }
+            container.setScale(0.96);
+        });
+        background.on("pointerout", () => container.setScale(1));
+        background.on("pointerup", () => {
+            container.setScale(1);
+            callback?.();
+        });
+
+        container.add([background, text]);
+        this.add(container);
     }
 
 }

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Fuentes, candidatos y descartes generados durante el diseño local
+design/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
