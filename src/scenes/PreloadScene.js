@@ -34,6 +34,18 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("EstrellaLlena", "images/ui/EstrellaLlena.png");
         this.load.image("EstrellaVacia", "images/ui/EstrellaVacia.png");
 
+        // Módulo Cosecha y minijuego: seleccionar mazorcas maduras
+        this.load.image("FondoFincaCacao", "images/background/FondoFincaCacao.webp");
+        this.load.image("ArbolCacaoSeleccion", "images/decorations/ArbolCacaoSeleccion.webp");
+        this.load.image("CacaitoCosechando", "images/characters/CacaitoCosechando.webp");
+        this.load.image("MazorcaMaduraAmarilla", "images/objects/MazorcaMaduraAmarilla.webp");
+        this.load.image("MazorcaMaduraNaranja", "images/objects/MazorcaMaduraNaranja.webp");
+        this.load.image("MazorcaVerde", "images/objects/MazorcaVerde.webp");
+        this.load.image("IndicadorCorrecto", "images/ui/IndicadorCorrecto.webp");
+        this.load.image("IndicadorEspera", "images/ui/IndicadorEspera.webp");
+        this.load.image("CandadoNivel", "images/ui/CandadoNivel.webp");
+        this.load.image("btnIconoMazorcasListas", "images/buttons/btnIconoMazorcasListas.png");
+
         // Modulo Sembrar: Nivel 1
         this.load.image(
             "MosaicoTierra",
@@ -78,6 +90,18 @@ export default class PreloadScene extends Phaser.Scene {
             "vozLimpiarTerreno",
             "audio/voice/LimpiarTerreno.mp3"
         );
+
+        this.load.audio("musicaFondo", "audio/music/MusicaFondo.mp3");
+        this.load.audio("sfxAvisoTiempo", "audio/sfx/AvisoTiempo.mp3");
+        this.load.audio("sfxBotonTocar", "audio/sfx/BotonTocar.m4a");
+        this.load.audio("sfxContadorCompleto", "audio/sfx/ContadorCompleto.mp3");
+        this.load.audio("sfxEstrellaResultado", "audio/sfx/EstrellaResultado.mp3");
+        this.load.audio("sfxSeleccionCorrecta", "audio/sfx/SeleccionCorrecta.mp3");
+        this.load.audio("sfxSeleccionVerde", "audio/sfx/SeleccionVerde.mp3");
+        this.load.audio("vozSeleccionMadurasInstruccion", "audio/voice/SeleccionMadurasInstruccion.mp3");
+        this.load.audio("vozSeleccionMadurasVerde", "audio/voice/SeleccionMadurasVerde.mp3");
+        this.load.audio("vozSeleccionMadurasCompletado", "audio/voice/SeleccionMadurasCompletado.mp3");
+        this.load.audio("vozSeleccionMadurasTiempoAgotado", "audio/voice/SeleccionMadurasTiempoAgotado.mp3");
     }
 
     create() {

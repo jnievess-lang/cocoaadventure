@@ -6,9 +6,76 @@ body {
 
     width: 100%;
     height: 100%;
+    background: #8fd3ff;
+    overscroll-behavior: none;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #game-container {
     width: 100vw;
     height: 100vh;
+}
+
+#game-container canvas {
+    display: block;
+}
+
+#orientation-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    place-items: center;
+    padding: 24px;
+    box-sizing: border-box;
+    background: linear-gradient(160deg, #8fd3ff, #bfe9ff);
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    text-align: center;
+}
+
+.portrait-device #orientation-overlay {
+    display: grid;
+}
+
+.orientation-card {
+    width: min(82vw, 380px);
+    padding: 30px 22px;
+    border: 6px solid #75401c;
+    border-radius: 28px;
+    color: #603215;
+    background: #fff3cf;
+    box-shadow: 0 14px 0 rgb(86 47 18 / 22%);
+}
+
+.orientation-card p {
+    margin: 20px 0 8px;
+    font-size: clamp(26px, 7vw, 38px);
+    font-weight: 800;
+}
+
+.orientation-card span {
+    display: block;
+    font-size: clamp(16px, 4.5vw, 22px);
+    line-height: 1.35;
+}
+
+.phone-icon {
+    width: 54px;
+    height: 92px;
+    margin: 0 auto;
+    border: 7px solid #e57b25;
+    border-radius: 12px;
+    box-sizing: border-box;
+    animation: rotate-phone 1.8s ease-in-out infinite;
+}
+
+@keyframes rotate-phone {
+    0%, 25% { transform: rotate(0deg); }
+    65%, 100% { transform: rotate(90deg); }
+}
+
+@media (orientation: landscape) {
+    #orientation-overlay { display: none; }
 }

@@ -194,7 +194,7 @@ export default class ModulesScene extends Phaser.Scene {
 
             () => {
 
-                console.log("Cosechar");
+                this.scene.start("CosecharScene");
 
             }
 
