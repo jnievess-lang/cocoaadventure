@@ -10,11 +10,6 @@
 - [ ] Documentación
 - [ ] Otro (especifica):
 
-## Rama
-
-- Rama origen: `nombre-de-tu-rama`
-- Rama destino: `main`
-
 ## ¿Cómo se probó?
 
 <!-- Describe los tests que ejecutaste y cómo verificaste que tu cambio funciona correctamente. -->
@@ -35,6 +30,3 @@
 
 <!-- Si aplica, adjunta capturas de pantalla, gifs o videos del cambio funcionando. -->
 
-## Notas para el revisor
-
-<!-- Cualquier contexto adicional que el administrador deba saber antes de revisar y hacer el merge. -->
