@@ -4,6 +4,14 @@ import TutorialPanel from "../ui/TutorialPanel";
 import ResultPanel from "../ui/ResultPanel";
 import ProgressManager from "../managers/ProgressManager";
 
+const LEVEL_CONFIG = Object.freeze({
+    totalRipe: 5,
+    durationSeconds: 60,
+    // Cambia únicamente este número para aumentar o reducir las vidas.
+    maxLives: 3,
+    maximumStars: 3
+});
+
 export default class SeleccionarMadurasScene extends Phaser.Scene {
 
     constructor() {
@@ -16,12 +24,15 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.width = width;
         this.height = height;
-        this.totalRipe = 5;
+        this.totalRipe = LEVEL_CONFIG.totalRipe;
         this.selectedRipe = 0;
-        this.remainingTime = 60;
+        this.maxLives = LEVEL_CONFIG.maxLives;
+        this.lives = this.maxLives;
+        this.remainingTime = LEVEL_CONFIG.durationSeconds;
         this.levelState = "tutorial";
         this.pods = [];
         this.indicators = [];
+        this.lifeIcons = [];
         this.firstWrongVoicePlayed = false;
         this.lastInteractionAt = 0;
 
@@ -112,21 +123,22 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.progressText.setOrigin(0.5).setDepth(51);
 
-        this.timerPanel = this.add.rectangle(
+        this.createLivesHud();
+
+        this.timerPanel = this.add.image(
             this.width * 0.5,
             this.height * 0.085,
-            this.width * 0.15,
-            this.height * 0.09,
-            0x3E8FD8,
-            0.96
-        ).setDepth(50);
+            "PanelTemporizador"
+        );
 
-        this.timerPanel.setStrokeStyle(6, 0xFFFFFF, 0.75);
+        this.timerPanel
+            .setScale((this.width * 0.23) / this.timerPanel.width)
+            .setDepth(50);
 
         this.timerText = this.add.text(
-            this.width * 0.5,
+            this.width * 0.535,
             this.height * 0.085,
-            "01:00",
+            this.formatTime(this.remainingTime),
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.height * 0.041}px`,
@@ -139,6 +151,34 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
     }
 
+    createLivesHud() {
+
+        const availableWidth = this.width * 0.115;
+        const heartWidth = Math.min(
+            this.width * 0.042,
+            (availableWidth / this.maxLives) * 0.84
+        );
+        const spacing = heartWidth * 1.12;
+        const startX = this.width * 0.335 - spacing * (this.maxLives - 1) / 2;
+
+        for (let index = 0; index < this.maxLives; index++) {
+
+            const heart = this.add.image(
+                startX + spacing * index,
+                this.height * 0.085,
+                "CorazonLleno"
+            );
+
+            heart
+                .setScale(heartWidth / heart.width)
+                .setDepth(51);
+
+            this.lifeIcons.push(heart);
+
+        }
+
+    }
+
     createPauseButton() {
 
         this.pauseButton = this.add.image(
@@ -147,7 +187,12 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
             "btnPausa"
         );
 
-        this.pauseButtonScale = (this.width * 0.078) / this.pauseButton.width;
+        const pauseButtonWidth = Math.min(
+            this.width * 0.055,
+            this.height * 0.09
+        );
+
+        this.pauseButtonScale = pauseButtonWidth / this.pauseButton.width;
 
         this.pauseButton
             .setScale(this.pauseButtonScale)
@@ -187,7 +232,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         new TutorialPanel(this, {
             character: "CacaitoIndicaciones",
-            text: "Toca las 5 mazorcas amarillas y anaranjadas. Esas ya están maduras.",
+            text: "Toca las 5 mazorcas amarillas y anaranjadas. Evita las verdes y las dañadas: perderás un corazón.",
             audio: "vozSeleccionMadurasInstruccion",
             confirmText: "Jugar",
             replayText: "Repetir audio",
@@ -300,8 +345,8 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
             { state: "ripe", texture: "MazorcaMaduraNaranja" },
             { state: "ripe", texture: "MazorcaMaduraAmarilla" },
             { state: "unripe", texture: "MazorcaVerde" },
-            { state: "unripe", texture: "MazorcaVerde" },
-            { state: "unripe", texture: "MazorcaVerde" }
+            { state: "damaged", texture: "MazorcaDanada" },
+            { state: "damaged", texture: "MazorcaDanada" }
         ]);
 
         attachmentPoints.forEach((point, index) => {
@@ -460,14 +505,51 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         }
 
-        this.sound.play("sfxSeleccionVerde", { volume: 0.45 });
-        this.indicators.push(pod.showNotReady("IndicadorEspera"));
+        this.sound.play("sfxSeleccionIncorrecta", { volume: 0.45 });
 
-        if (!this.firstWrongVoicePlayed) {
+        if (pod.podState === "damaged") {
+            pod.showDamaged();
+        }
+        else {
+            this.indicators.push(pod.showNotReady("IndicadorEspera"));
+        }
+
+        if (
+            pod.podState === "unripe" &&
+            !this.firstWrongVoicePlayed &&
+            this.lives > 1
+        ) {
 
             this.firstWrongVoicePlayed = true;
             this.playVoice("vozSeleccionMadurasVerde");
 
+        }
+
+        this.loseLife();
+
+    }
+
+    loseLife() {
+
+        if (this.lives <= 0) return;
+
+        this.lives--;
+        const lostHeart = this.lifeIcons[this.lives];
+
+        if (lostHeart) {
+            lostHeart.setTexture("CorazonVacio");
+            lostHeart.setScale(lostHeart.scaleX * 1.12);
+
+            this.tweens.add({
+                targets: lostHeart,
+                scale: lostHeart.scaleX / 1.12,
+                duration: 260,
+                ease: "Bounce.Out"
+            });
+        }
+
+        if (this.lives <= 0) {
+            this.failLevel("lives");
         }
 
     }
@@ -483,6 +565,15 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
     }
 
+    formatTime(totalSeconds) {
+
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+    }
+
     updateTimer() {
 
         if (this.levelState !== "playing") {
@@ -495,7 +586,8 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         if (this.remainingTime === 10) {
 
-            this.timerPanel.setFillStyle(0xE46635, 0.98);
+            this.timerPanel.setTint(0xFFB06A);
+            this.timerText.setColor("#FFF2C2");
             this.timerText.setScale(1.08);
             this.timeWarning = this.sound.add("sfxAvisoTiempo", { volume: 0.6 });
             this.timeWarning.play();
@@ -506,17 +598,12 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
             this.remainingTime = 0;
             this.timerText.setText("00:00");
-            this.failLevel();
+            this.failLevel("time");
             return;
 
         }
 
-        const minutes = Math.floor(this.remainingTime / 60);
-        const seconds = this.remainingTime % 60;
-
-        this.timerText.setText(
-            `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-        );
+        this.timerText.setText(this.formatTime(this.remainingTime));
 
     }
 
@@ -550,9 +637,13 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
     calculateStars() {
 
-        if (this.remainingTime >= 40) return 3;
-        if (this.remainingTime >= 20) return 2;
-        return 1;
+        const lifeRatio = this.lives / this.maxLives;
+
+        return Phaser.Math.Clamp(
+            Math.round(lifeRatio * LEVEL_CONFIG.maximumStars),
+            1,
+            LEVEL_CONFIG.maximumStars
+        );
 
     }
 
@@ -581,17 +672,21 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
     }
 
-    failLevel() {
+    failLevel(reason = "time") {
 
         if (this.levelState !== "playing") return;
 
         this.levelState = "failed";
         this.stopGameplayEvents();
         this.disablePods();
-        this.playVoice("vozSeleccionMadurasTiempoAgotado");
+        if (reason === "time") {
+            this.playVoice("vozSeleccionMadurasTiempoAgotado");
+        }
 
         new ResultPanel(this, {
-            title: "¡Intentémoslo otra vez!",
+            title: reason === "lives"
+                ? "¡Cuida tu cosecha!"
+                : "¡Intentémoslo otra vez!",
             stars: 0,
             retryText: "Reintentar",
             nextText: "Niveles",

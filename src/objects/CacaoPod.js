@@ -109,6 +109,25 @@ export default class CacaoPod extends Phaser.GameObjects.Image {
 
     }
 
+    showDamaged() {
+
+        this.scene.tweens.add({
+            targets: this,
+            angle: { from: -6, to: 6 },
+            scale: this.baseScale * 0.94,
+            duration: 85,
+            ease: "Sine.InOut",
+            yoyo: true,
+            repeat: 2,
+            onComplete: () => {
+                this.setAngle(0);
+                this.setScale(this.baseScale);
+                this.setAlpha(0.78);
+            }
+        });
+
+    }
+
     createIndicator(texture) {
 
         const indicator = this.scene.add.image(
