@@ -7,6 +7,7 @@ import SembrarScene from "./scenes/SembrarScene";
 import LimpiarTerrenoScene from "./scenes/LimpiarTerrenoScene";
 import CosecharScene from "./scenes/CosecharScene";
 import SeleccionarMadurasScene from "./scenes/SeleccionarMadurasScene";
+import CorteCuidadosoScene from "./scenes/CorteCuidadosoScene";
 
 const config = {
     type: Phaser.AUTO,
@@ -31,7 +32,8 @@ const config = {
         SembrarScene,
         LimpiarTerrenoScene,
         CosecharScene,
-        SeleccionarMadurasScene
+        SeleccionarMadurasScene,
+        CorteCuidadosoScene
         ]
 };
 

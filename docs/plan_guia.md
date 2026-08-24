@@ -52,6 +52,7 @@ Recurso disponible:
 | `sfxEstrellaResultado` | `sfx/EstrellaResultado.mp3` | Aparición de cada estrella en resultados. Debe sonar una vez por cada estrella obtenida y acompañar su animación individual. |
 | `sfxSeleccionCorrecta` | `sfx/SeleccionCorrecta.mp3` | Selección correcta de un objeto. |
 | `sfxSeleccionIncorrecta` | `sfx/SeleccionIncorrecta.mp3` | Selección incorrecta amable y reutilizable, por ejemplo una mazorca verde o dañada. No debe asociarse exclusivamente con un color. |
+| `sfxCorteTijera` | `sfx/CorteTijera.mp3` | Corte correcto del pedúnculo en “Corte cuidadoso”. Se reproduce una sola vez por mazorca cortada. |
 
 Para recursos nuevos, el formato estándar será MP3. No se debe convertir `BotonTocar.m4a` sin comparar antes que la conversión conserve el ataque corto del sonido.
 
@@ -412,6 +413,8 @@ Recursos que no deben colocarse allí:
 - Música, voces o efectos de sonido.
 
 Actualmente “Seleccionar maduras” no necesita guardar imágenes en esa carpeta: sus piezas están correctamente separadas entre `background`, `decorations`, `objects` y `ui`. Una carpeta vacía no necesita subirse a Git.
+
+“Corte cuidadoso” sí utiliza `minigames/cosechar/corte-cuidadoso/` para tres capas inseparables y perfectamente alineadas: `RamaMazorcaCorte`, `RamaCortadaCorte` y `MazorcaDesprendidaCorte`. La unión botánica entre rama, pedúnculo y fruto no debe reconstruirse combinando sprites independientes, porque cualquier diferencia de escala o pivote deja huecos visibles. Las tres capas deben conservar el mismo estilo y punto de corte. Las tijeras permanecen en `objects/` y `btnMantenerCorte` en `buttons/` porque sí son piezas independientes.
 
 ## 7. Estética visual obligatoria
 

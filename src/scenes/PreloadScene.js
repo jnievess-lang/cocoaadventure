@@ -51,6 +51,15 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("btnRepetirAudio", "images/ui/btnRepetirAudio.png");
         this.load.image("btnIconoMazorcasListas", "images/buttons/btnIconoMazorcasListas.png");
 
+        // Módulo Cosecha: Nivel 2, corte cuidadoso
+        this.load.image("btnIconoCorteCuidadoso", "images/buttons/btnIconoCorteCuidadoso.png");
+        this.load.image("RamaMazorcaCorte", "images/minigames/cosechar/corte-cuidadoso/RamaMazorcaCorte.webp");
+        this.load.image("RamaCortadaCorte", "images/minigames/cosechar/corte-cuidadoso/RamaCortadaCorte.webp");
+        this.load.image("MazorcaDesprendidaCorte", "images/minigames/cosechar/corte-cuidadoso/MazorcaDesprendidaCorte.webp");
+        this.load.image("TijeraPodaAbierta", "images/objects/TijeraPodaAbierta.webp");
+        this.load.image("TijeraPodaCerrada", "images/objects/TijeraPodaCerrada.webp");
+        this.load.image("btnMantenerCorte", "images/buttons/btnMantenerCorte.png");
+
         // Modulo Sembrar: Nivel 1
         this.load.image(
             "MosaicoTierra",
@@ -108,6 +117,13 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("vozSeleccionMazorcaDaniada", "audio/voice/SeleccionMazorcaDaniada.mp3");
         this.load.audio("vozSeleccionMadurasCompletado", "audio/voice/SeleccionMadurasCompletado.mp3");
         this.load.audio("vozSeleccionMadurasTiempoAgotado", "audio/voice/SeleccionMadurasTiempoAgotado.mp3");
+        this.load.audio("sfxCorteTijera", "audio/sfx/CorteTijera.mp3");
+        this.load.audio("vozCorteCuidadosoInstruccion", "audio/voice/CorteCuidadosoInstruccion.mp3");
+        this.load.audio("vozCorteCuidadosoPuntoIncorrecto", "audio/voice/CorteCuidadosoPuntoIncorrecto.mp3");
+        this.load.audio("vozCorteCuidadosoFuerzaBaja", "audio/voice/CorteCuidadosoFuerzaBaja.mp3");
+        this.load.audio("vozCorteCuidadosoFuerzaAlta", "audio/voice/CorteCuidadosoFuerzaAlta.mp3");
+        this.load.audio("vozCorteCuidadosoCompletado", "audio/voice/CorteCuidadosoCompletado.mp3");
+        this.load.audio("vozCorteCuidadosoTiempoAgotado", "audio/voice/CorteCuidadosoTiempoAgotado.mp3");
     }
 
     create() {
