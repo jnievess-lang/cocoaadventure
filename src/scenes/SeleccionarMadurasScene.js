@@ -34,6 +34,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         this.indicators = [];
         this.lifeIcons = [];
         this.firstWrongVoicePlayed = false;
+        this.firstDamagedVoicePlayed = false;
         this.lastInteractionAt = 0;
 
         this.createBackground();
@@ -90,32 +91,36 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.progressPanel = this.add.rectangle(
             this.width * 0.16,
-            this.height * 0.085,
-            this.width * 0.22,
-            this.height * 0.095,
+            this.height * 0.155,
+            this.width * 0.15,
+            this.height * 0.06,
             0xFFF1C6,
             0.96
         ).setDepth(50);
 
-        this.progressPanel.setStrokeStyle(6, 0x7C431B, 1);
+        this.progressPanel.setStrokeStyle(
+            Math.max(3, this.height * 0.004),
+            0x7C431B,
+            1
+        );
 
         const podIcon = this.add.image(
-            this.width * 0.085,
-            this.height * 0.085,
+            this.width * 0.125,
+            this.height * 0.155,
             "MazorcaMaduraAmarilla"
         );
 
         podIcon
-            .setScale((this.height * 0.068) / podIcon.height)
+            .setScale((this.height * 0.044) / podIcon.height)
             .setDepth(51);
 
         this.progressText = this.add.text(
             this.width * 0.175,
-            this.height * 0.085,
+            this.height * 0.155,
             `0 / ${this.totalRipe}`,
             {
                 fontFamily: "Trebuchet MS",
-                fontSize: `${this.height * 0.044}px`,
+                fontSize: `${this.height * 0.03}px`,
                 color: "#5F3215",
                 fontStyle: "bold"
             }
@@ -127,21 +132,21 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.timerPanel = this.add.image(
             this.width * 0.5,
-            this.height * 0.085,
+            this.height * 0.075,
             "PanelTemporizador"
         );
 
         this.timerPanel
-            .setScale((this.width * 0.23) / this.timerPanel.width)
+            .setScale((this.width * 0.18) / this.timerPanel.width)
             .setDepth(50);
 
         this.timerText = this.add.text(
-            this.width * 0.535,
-            this.height * 0.085,
+            this.width * 0.527,
+            this.height * 0.075,
             this.formatTime(this.remainingTime),
             {
                 fontFamily: "Trebuchet MS",
-                fontSize: `${this.height * 0.041}px`,
+                fontSize: `${this.height * 0.034}px`,
                 color: "#FFFFFF",
                 fontStyle: "bold"
             }
@@ -153,19 +158,20 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
     createLivesHud() {
 
-        const availableWidth = this.width * 0.115;
+        const availableWidth = this.width * 0.18;
         const heartWidth = Math.min(
-            this.width * 0.042,
+            this.width * 0.05,
+            this.height * 0.09,
             (availableWidth / this.maxLives) * 0.84
         );
         const spacing = heartWidth * 1.12;
-        const startX = this.width * 0.335 - spacing * (this.maxLives - 1) / 2;
+        const startX = this.width * 0.16 - spacing * (this.maxLives - 1) / 2;
 
         for (let index = 0; index < this.maxLives; index++) {
 
             const heart = this.add.image(
                 startX + spacing * index,
-                this.height * 0.085,
+                this.height * 0.065,
                 "CorazonLleno"
             );
 
@@ -232,10 +238,8 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         new TutorialPanel(this, {
             character: "CacaitoIndicaciones",
-            text: "Toca las 5 mazorcas amarillas y anaranjadas. Evita las verdes y las dañadas: perderás un corazón.",
+            text: "Toca las cinco mazorcas amarillas y anaranjadas. Esas ya están maduras.",
             audio: "vozSeleccionMadurasInstruccion",
-            confirmText: "Jugar",
-            replayText: "Repetir audio",
             onVoiceStart: () => this.duckMusic(),
             onVoiceComplete: () => {},
             onComplete: () => {
@@ -253,6 +257,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.createPods();
         this.createTimer();
+        this.createReplayAudioButton();
 
         this.pauseButton.setAlpha(1);
         this.pauseHitTarget.setInteractive({ useHandCursor: true });
@@ -265,6 +270,93 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         });
 
         this.time.delayedCall(900, () => this.showHint());
+
+    }
+
+    createReplayAudioButton() {
+
+        this.replayAudioButton = this.add.image(
+            this.width * 0.94,
+            this.height * 0.90,
+            "btnRepetirAudio"
+        );
+
+        const buttonWidth = Math.min(
+            this.width * 0.055,
+            this.height * 0.09
+        );
+
+        this.replayAudioButtonScale = buttonWidth / this.replayAudioButton.width;
+
+        this.replayAudioButton
+            .setScale(this.replayAudioButtonScale)
+            .setDepth(51);
+
+        this.replayAudioHitTarget = this.add.rectangle(
+            this.replayAudioButton.x,
+            this.replayAudioButton.y,
+            this.width * 0.085,
+            this.height * 0.12,
+            0xFFFFFF,
+            0.001
+        )
+            .setDepth(52)
+            .setInteractive({ useHandCursor: true });
+
+        this.replayAudioHitTarget.on("pointerdown", () => {
+            if (this.levelState !== "playing") return;
+
+            this.sound.play("sfxBotonTocar", { volume: 1 });
+            this.replayAudioButton.setScale(this.replayAudioButtonScale * 0.95);
+        });
+
+        this.replayAudioHitTarget.on("pointerout", () => {
+            this.replayAudioButton.setScale(this.replayAudioButtonScale);
+        });
+
+        this.replayAudioHitTarget.on("pointerup", () => {
+            this.replayAudioButton.setScale(this.replayAudioButtonScale);
+            this.replayInstruction();
+        });
+
+    }
+
+    replayInstruction() {
+
+        if (this.levelState !== "playing") return;
+
+        this.levelState = "replayingInstruction";
+
+        if (this.timerEvent) this.timerEvent.paused = true;
+        if (this.hintEvent) this.hintEvent.paused = true;
+        if (this.timeWarning?.isPlaying) this.timeWarning.pause();
+
+        this.tweens.pauseAll();
+        this.disablePods();
+        this.replayAudioHitTarget.disableInteractive();
+
+        this.playVoice(
+            "vozSeleccionMadurasInstruccion",
+            () => this.finishInstructionReplay()
+        );
+
+    }
+
+    finishInstructionReplay() {
+
+        if (this.levelState !== "replayingInstruction") return;
+
+        this.tweens.resumeAll();
+        this.levelState = "playing";
+        this.lastInteractionAt = this.time.now;
+
+        if (this.timerEvent) this.timerEvent.paused = false;
+        if (this.hintEvent) this.hintEvent.paused = false;
+        if (this.timeWarning?.isPaused) this.timeWarning.resume();
+
+        this.pods.forEach(pod => pod.restoreInteraction());
+        this.pauseHitTarget.setInteractive({ useHandCursor: true });
+        this.replayAudioHitTarget.setInteractive({ useHandCursor: true });
 
     }
 
@@ -509,6 +601,11 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         if (pod.podState === "damaged") {
             pod.showDamaged();
+
+            if (!this.firstDamagedVoicePlayed) {
+                this.firstDamagedVoicePlayed = true;
+                this.playVoice("vozSeleccionMazorcaDaniada");
+            }
         }
         else {
             this.indicators.push(pod.showNotReady("IndicadorEspera"));
@@ -828,6 +925,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.pods.forEach(pod => pod.restoreInteraction());
         this.pauseHitTarget.setInteractive({ useHandCursor: true });
+        this.replayAudioHitTarget?.setInteractive({ useHandCursor: true });
         this.resumeMusicOnly();
 
     }
@@ -836,6 +934,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.pods.forEach(pod => pod.disableInteractive());
         this.pauseHitTarget.disableInteractive();
+        this.replayAudioHitTarget?.disableInteractive();
 
     }
 
@@ -881,7 +980,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         if (music) music.setVolume(0.22);
     }
 
-    playVoice(key) {
+    playVoice(key, onComplete) {
 
         if (this.activeVoice) {
             this.activeVoice.stop();
@@ -899,6 +998,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
                 voice.destroy();
                 this.activeVoice = null;
             }
+            onComplete?.();
         };
 
         if (voice.play()) {
