@@ -3,6 +3,14 @@ import TrashItem from "../objects/TrashItem";
 import ResultPanel from "../ui/ResultPanel";
 import ProgressManager from "../managers/ProgressManager";
 import TutorialPanel from "../ui/TutorialPanel";
+import HudMinijuego from "../ui/HudMinijuego";
+import GestorAudioMinijuego from "../managers/GestorAudioMinijuego";
+
+const LEVEL_CONFIG = Object.freeze({
+    totalTrash: 20,
+    durationSeconds: 60,
+    maximumStars: 3
+});
 
 export default class LimpiarTerrenoScene extends Phaser.Scene {
 
@@ -16,37 +24,20 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
         this.width = width;
         this.height = height;
 
-        // Inicializar primero
-        this.totalTrash = 20;
+        this.totalTrash = LEVEL_CONFIG.totalTrash;
         this.cleanedTrash = 0;
-
-        this.initializeLayout();
+        this.levelState = "tutorial";
+        this.trashItems = [];
+        this.audio = new GestorAudioMinijuego(this);
 
         this.createBackground();
         this.createTerrain();
-        this.createPauseButton();
-
+        this.crearHudMinijuego();
+        this.audio.ensureMusic();
         this.showTutorial();
+        this.setupLifecycleEvents();
 
         console.log("LimpiarTerrenoScene iniciada");
-    }
-
-    initializeLayout() {
-
-        this.pos = {
-
-            timer: {
-                x: this.width * 0.50,
-                y: this.height * 0.07
-            },
-
-            pause: {
-                x: this.width * 0.95,
-                y: this.height * 0.07
-            }
-
-        };
-
     }
 
     createBackground() {
@@ -109,136 +100,29 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
     }
 
-    createTimer() {
+    crearHudMinijuego() {
 
-        // Panel del temporizador
-
-        const timerWidth = this.width * 0.13;
-        const timerHeight = this.height * 0.075;
-
-        const graphics = this.add.graphics();
-
-        graphics.fillStyle(0x4A8FE7, 1);
-
-        graphics.fillRoundedRect(
-
-            this.pos.timer.x - timerWidth / 2,
-            this.pos.timer.y - timerHeight / 2,
-
-            timerWidth,
-            timerHeight,
-
-            18
-
-        );
-
-        // Tiempo inicial
-
-        this.remainingTime = 60;
-
-        this.timerText = this.add.text(
-
-            this.pos.timer.x,
-            this.pos.timer.y,
-
-            "01:00",
-
-            {
-
-                fontFamily: "Arial",
-                fontSize: `${this.height * 0.035}px`,
-                color: "#FFFFFF",
-                fontStyle: "bold"
-
-            }
-
-        );
-
-        this.timerText.setOrigin(0.5);
-
-        // Cuenta regresiva
-
-        this.timerEvent = this.time.addEvent({
-
-            delay: 1000,
-
-            callback: this.updateTimer,
-
-            callbackScope: this,
-
-            loop: true
-
-        });
-
-    }
-
-    updateTimer() {
-
-        this.remainingTime--;
-
-        if (this.remainingTime <= 0) {
-
-            this.remainingTime = 0;
-
-            this.timerText.setText("00:00");
-
-            this.failLevel();
-
-            return;
-
-        }
-
-        const minutes = Math.floor(this.remainingTime / 60);
-        const seconds = this.remainingTime % 60;
-
-        this.timerText.setText(
-
-            `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-
-        );
-
-    }
-
-    createPauseButton() {
-
-        this.btnPause = this.add.image(
-
-            this.pos.pause.x,
-            this.pos.pause.y,
-            "btnPausa"
-
-        );
-
-        // Tamaño responsive
-        const pauseWidth = this.width * 0.055;
-
-        this.pauseScale = pauseWidth / this.btnPause.width;
-
-        this.btnPause.setScale(this.pauseScale);
-
-        this.btnPause.disableInteractive();
-
-        // Al presionar
-
-        this.btnPause.on("pointerdown", () => {
-
-            this.btnPause.setScale(this.pauseScale * 0.95);
-
-        });
-
-        // Al soltar
-
-        this.btnPause.on("pointerup", () => {
-
-            this.btnPause.setScale(this.pauseScale);
-
-            console.log("Pausa");
-
+        this.hud = new HudMinijuego(this, {
+            lives: {
+                enabled: false
+            },
+            timer: {
+                durationSeconds: LEVEL_CONFIG.durationSeconds
+            },
+            controls: {},
+            instructionAudio: "vozLimpiarTerreno",
+            audioManager: this.audio,
+            onTimeUp: () => this.failLevel(),
+            onGameplaySuspended: () => this.suspendGameplay(),
+            onGameplayResumed: () => this.resumeGameplay(),
+            onExit: () => this.scene.start("SembrarScene")
         });
 
     }
 
     showTutorial() {
+
+        this.audio.duckMusic();
 
         new TutorialPanel(this, {
 
@@ -248,8 +132,11 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
             audio: "vozLimpiarTerreno",
 
+            onVoiceStart: () => this.audio.duckMusic(),
+
             onComplete: () => {
 
+                this.audio.restoreMusic();
                 this.startLevel();
 
             }
@@ -260,15 +147,9 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
     startLevel() {
 
+        this.levelState = "playing";
         this.createTrash();
-
-        this.createTimer();
-
-        this.btnPause.setInteractive({
-
-            useHandCursor: true
-
-        });
+        this.hud.start();
 
     }
 
@@ -354,6 +235,7 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
             const targetWidth = this.width * 0.045;
 
             trash.setScale(targetWidth / trash.width);
+            this.trashItems.push(trash);
 
         }
 
@@ -362,11 +244,11 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
     completeLevel() {
 
-        if (this.timerEvent) {
+        if (this.levelState !== "playing") return;
 
-            this.timerEvent.remove();
-
-        }
+        this.levelState = "complete";
+        this.hud.stop();
+        this.disableTrash();
 
         const stars = this.calculateStars();
 
@@ -397,11 +279,12 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
     failLevel() {
 
-        if (this.timerEvent) {
+        if (this.levelState !== "playing") return;
 
-            this.timerEvent.remove();
-
-        }
+        this.levelState = "failed";
+        this.hud.stop();
+        this.disableTrash();
+        this.sound.play("sfxDerrota", { volume: 0.65 });
 
             new ResultPanel(this, {
 
@@ -426,19 +309,59 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
     calculateStars() {
 
-        if (this.remainingTime >= 50) {
+        if (this.hud.getRemainingTime() >= 50) {
 
             return 3;
 
         }
 
-        if (this.remainingTime >= 40) {
+        if (this.hud.getRemainingTime() >= 40) {
 
             return 2;
 
         }
 
         return 1;
+
+    }
+
+    suspendGameplay(reason) {
+
+        this.levelState = reason;
+        this.disableTrash();
+
+    }
+
+    resumeGameplay() {
+
+        this.levelState = "playing";
+        this.trashItems.forEach(item => item.restoreInteraction());
+
+    }
+
+    disableTrash() {
+
+        this.trashItems.forEach(item => {
+            if (item.active) item.disableInteractive();
+        });
+
+    }
+
+    setupLifecycleEvents() {
+
+        this.handleVisibilityChange = () => {
+            if (document.hidden && this.levelState === "playing") {
+                this.hud.pause();
+            }
+        };
+
+        document.addEventListener("visibilitychange", this.handleVisibilityChange);
+
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+            this.hud.destroy();
+            this.audio.destroy();
+        });
 
     }
 

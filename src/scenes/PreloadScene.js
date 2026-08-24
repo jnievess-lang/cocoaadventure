@@ -99,7 +99,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("musicaFondo", "audio/music/MusicaFondo.mp3");
         this.load.audio("sfxAvisoTiempo", "audio/sfx/AvisoTiempo.mp3");
         this.load.audio("sfxBotonTocar", "audio/sfx/BotonTocar.m4a");
-        this.load.audio("sfxContadorCompleto", "audio/sfx/ContadorCompleto.mp3");
+        this.load.audio("sfxDerrota", "audio/sfx/Derrota.mp3");
         this.load.audio("sfxEstrellaResultado", "audio/sfx/EstrellaResultado.mp3");
         this.load.audio("sfxSeleccionCorrecta", "audio/sfx/SeleccionCorrecta.mp3");
         this.load.audio("sfxSeleccionIncorrecta", "audio/sfx/SeleccionIncorrecta.mp3");
