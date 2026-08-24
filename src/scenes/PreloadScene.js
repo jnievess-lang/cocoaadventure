@@ -41,9 +41,13 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("MazorcaMaduraAmarilla", "images/objects/MazorcaMaduraAmarilla.webp");
         this.load.image("MazorcaMaduraNaranja", "images/objects/MazorcaMaduraNaranja.webp");
         this.load.image("MazorcaVerde", "images/objects/MazorcaVerde.webp");
+        this.load.image("MazorcaDanada", "images/objects/MazorcaDanada.webp");
         this.load.image("IndicadorCorrecto", "images/ui/IndicadorCorrecto.webp");
         this.load.image("IndicadorEspera", "images/ui/IndicadorEspera.webp");
         this.load.image("CandadoNivel", "images/ui/CandadoNivel.webp");
+        this.load.image("CorazonLleno", "images/ui/CorazonLleno.png");
+        this.load.image("CorazonVacio", "images/ui/CorazonVacio.png");
+        this.load.image("PanelTemporizador", "images/ui/PanelTemporizador.png");
         this.load.image("btnIconoMazorcasListas", "images/buttons/btnIconoMazorcasListas.png");
 
         // Modulo Sembrar: Nivel 1
@@ -97,7 +101,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("sfxContadorCompleto", "audio/sfx/ContadorCompleto.mp3");
         this.load.audio("sfxEstrellaResultado", "audio/sfx/EstrellaResultado.mp3");
         this.load.audio("sfxSeleccionCorrecta", "audio/sfx/SeleccionCorrecta.mp3");
-        this.load.audio("sfxSeleccionVerde", "audio/sfx/SeleccionVerde.mp3");
+        this.load.audio("sfxSeleccionIncorrecta", "audio/sfx/SeleccionIncorrecta.mp3");
         this.load.audio("vozSeleccionMadurasInstruccion", "audio/voice/SeleccionMadurasInstruccion.mp3");
         this.load.audio("vozSeleccionMadurasVerde", "audio/voice/SeleccionMadurasVerde.mp3");
         this.load.audio("vozSeleccionMadurasCompletado", "audio/voice/SeleccionMadurasCompletado.mp3");

@@ -51,7 +51,7 @@ Recurso disponible:
 | `sfxContadorCompleto` | `sfx/ContadorCompleto.mp3` | Objetivo o contador completado. |
 | `sfxEstrellaResultado` | `sfx/EstrellaResultado.mp3` | Aparición de cada estrella en resultados. |
 | `sfxSeleccionCorrecta` | `sfx/SeleccionCorrecta.mp3` | Selección correcta de un objeto. |
-| `sfxSeleccionVerde` | `sfx/SeleccionVerde.mp3` | Objeto todavía no listo o selección que requiere esperar. |
+| `sfxSeleccionIncorrecta` | `sfx/SeleccionIncorrecta.mp3` | Selección incorrecta amable y reutilizable, por ejemplo una mazorca verde o dañada. No debe asociarse exclusivamente con un color. |
 
 Para recursos nuevos, el formato estándar será MP3. No se debe convertir `BotonTocar.m4a` sin comparar antes que la conversión conserve el ataque corto del sonido.
 
@@ -276,6 +276,29 @@ Ejemplos:
 | Indicador de selección correcta | `images/ui/` |
 | Spritesheet inseparable de una secuencia de corte | `images/minigames/cosechar/corte-cuidadoso/` |
 
+### HUD común obligatorio para todos los minijuegos
+
+Todos los minijuegos deben reutilizar los mismos assets aprobados para vidas, tiempo y pausa. No se deben crear corazones, relojes o botones de pausa diferentes para cada módulo.
+
+| Clave Phaser | Archivo | Uso obligatorio |
+| --- | --- | --- |
+| `CorazonLleno` | `images/ui/CorazonLleno.png` | Vida disponible. Mostrar una instancia por cada vida configurada. |
+| `CorazonVacio` | `images/ui/CorazonVacio.png` | Vida perdida. Debe sustituir al corazón lleno en la misma posición. |
+| `PanelTemporizador` | `images/ui/PanelTemporizador.png` | Marco común del cronómetro de todos los minijuegos. |
+| `btnPausa` | `images/ui/btnPausa.png` | Botón común para abrir la pausa. |
+
+Reglas de implementación:
+
+1. Registrar estos assets una sola vez en `PreloadScene` y reutilizar sus claves en todas las escenas.
+2. Mantener configurable la cantidad máxima de vidas. Cambiar ese único valor debe crear automáticamente la cantidad correspondiente de corazones y conservar la lógica de pérdida y derrota.
+3. Construir el contador de vidas con código. No crear una imagen diferente con tres, cuatro o más corazones ya dibujados.
+4. Mostrar `CorazonLleno` mientras la vida esté disponible y cambiarlo por `CorazonVacio` al perderla. Ambos estados deben conservar posición y tamaño para evitar saltos visuales.
+5. Dibujar el tiempo dinámicamente con texto de Phaser en formato `MM:SS` sobre `PanelTemporizador`. Nunca incluir números fijos dentro del PNG.
+6. Escalar y posicionar el HUD usando las dimensiones del lienzo; no usar coordenadas pensadas únicamente para PC.
+7. Mantener una zona táctil cómoda alrededor de `btnPausa`, aunque el círculo visible sea más pequeño.
+8. Al pausar, detener cronómetro, eventos, animaciones e interacción, y pausar también música, voces o avisos que estén reproduciéndose. Al continuar, restaurar el estado sin reiniciar el nivel.
+9. No recolorear, duplicar, renombrar ni sustituir estos cuatro assets desde un minijuego individual. Cualquier cambio visual debe revisarse como una modificación global porque afecta a todos los módulos.
+
 ## 6. Uso de `images/minigames/cosechar`
 
 Esta carpeta no debe duplicar `objects`, `characters`, `buttons` o `ui`. Su propósito será almacenar recursos compuestos y exclusivos de una mecánica concreta.
@@ -355,6 +378,10 @@ Actualmente “Seleccionar maduras” no necesita guardar imágenes en esa carpe
 - [ ] Se probaron todos los módulos que consumen el sonido reemplazado.
 - [ ] Música, voz y efectos mantienen un balance comprensible.
 - [ ] El recurso está registrado una sola vez en `PreloadScene`.
+- [ ] El minijuego reutiliza `CorazonLleno`, `CorazonVacio`, `PanelTemporizador` y `btnPausa` para su HUD.
+- [ ] La cantidad de vidas se controla mediante un único valor configurable y los corazones se generan dinámicamente.
+- [ ] El tiempo se dibuja dinámicamente sobre el panel; el PNG no contiene números fijos.
+- [ ] La pausa detiene y restaura correctamente todos los sistemas activos del minijuego.
 - [ ] La escena limpia voces y eventos al cerrarse.
 - [ ] La interacción fue probada en celular horizontal.
 - [ ] No existen errores en consola ni archivos faltantes.
