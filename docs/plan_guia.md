@@ -286,6 +286,7 @@ Todos los minijuegos deben reutilizar los mismos assets aprobados para vidas, ti
 | `CorazonVacio` | `images/ui/CorazonVacio.png` | Vida perdida. Debe sustituir al corazón lleno en la misma posición. |
 | `PanelTemporizador` | `images/ui/PanelTemporizador.png` | Marco común del cronómetro de todos los minijuegos. |
 | `btnPausa` | `images/ui/btnPausa.png` | Botón común para abrir la pausa. |
+| `btnRepetirAudio` | `images/ui/btnRepetirAudio.png` | Repetir la instrucción hablada después de cerrar el tutorial. |
 
 Reglas de implementación:
 
@@ -297,7 +298,8 @@ Reglas de implementación:
 6. Escalar y posicionar el HUD usando las dimensiones del lienzo; no usar coordenadas pensadas únicamente para PC.
 7. Mantener una zona táctil cómoda alrededor de `btnPausa`, aunque el círculo visible sea más pequeño.
 8. Al pausar, detener cronómetro, eventos, animaciones e interacción, y pausar también música, voces o avisos que estén reproduciéndose. Al continuar, restaurar el estado sin reiniciar el nivel.
-9. No recolorear, duplicar, renombrar ni sustituir estos cuatro assets desde un minijuego individual. Cualquier cambio visual debe revisarse como una modificación global porque afecta a todos los módulos.
+9. No recolorear, duplicar, renombrar ni sustituir estos assets desde un minijuego individual. Cualquier cambio visual debe revisarse como una modificación global porque afecta a todos los módulos.
+10. Después de cerrar el tutorial, mostrar `btnRepetirAudio` en una esquina segura. Al tocarlo, reproducir nuevamente la voz de instrucción y pausar temporalmente el cronómetro y la interacción para no penalizar al niño.
 
 ## 6. Uso de `images/minigames/cosechar`
 
@@ -382,6 +384,7 @@ Actualmente “Seleccionar maduras” no necesita guardar imágenes en esa carpe
 - [ ] La cantidad de vidas se controla mediante un único valor configurable y los corazones se generan dinámicamente.
 - [ ] El tiempo se dibuja dinámicamente sobre el panel; el PNG no contiene números fijos.
 - [ ] La pausa detiene y restaura correctamente todos los sistemas activos del minijuego.
+- [ ] El botón `btnRepetirAudio` permite volver a escuchar la instrucción sin consumir tiempo de juego.
 - [ ] La escena limpia voces y eventos al cerrarse.
 - [ ] La interacción fue probada en celular horizontal.
 - [ ] No existen errores en consola ni archivos faltantes.

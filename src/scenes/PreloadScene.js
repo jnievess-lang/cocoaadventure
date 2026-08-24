@@ -48,6 +48,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("CorazonLleno", "images/ui/CorazonLleno.png");
         this.load.image("CorazonVacio", "images/ui/CorazonVacio.png");
         this.load.image("PanelTemporizador", "images/ui/PanelTemporizador.png");
+        this.load.image("btnRepetirAudio", "images/ui/btnRepetirAudio.png");
         this.load.image("btnIconoMazorcasListas", "images/buttons/btnIconoMazorcasListas.png");
 
         // Modulo Sembrar: Nivel 1
@@ -104,6 +105,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("sfxSeleccionIncorrecta", "audio/sfx/SeleccionIncorrecta.mp3");
         this.load.audio("vozSeleccionMadurasInstruccion", "audio/voice/SeleccionMadurasInstruccion.mp3");
         this.load.audio("vozSeleccionMadurasVerde", "audio/voice/SeleccionMadurasVerde.mp3");
+        this.load.audio("vozSeleccionMazorcaDaniada", "audio/voice/SeleccionMazorcaDaniada.mp3");
         this.load.audio("vozSeleccionMadurasCompletado", "audio/voice/SeleccionMadurasCompletado.mp3");
         this.load.audio("vozSeleccionMadurasTiempoAgotado", "audio/voice/SeleccionMadurasTiempoAgotado.mp3");
     }
