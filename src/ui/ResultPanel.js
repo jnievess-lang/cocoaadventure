@@ -55,19 +55,47 @@ export default class ResultPanel extends Phaser.GameObjects.Container {
     }
 
     createStars() {
+        const earnedStars = Phaser.Math.Clamp(
+            Math.floor(this.config.stars ?? 0),
+            0,
+            3
+        );
+
         for (let index = 0; index < 3; index++) {
-            const star = this.scene.add.image(
-                (index - 1) * this.widthRef * 0.055,
-                -this.heightRef * 0.015,
-                index < this.config.stars ? "EstrellaLlena" : "EstrellaVacia"
-            );
+            const x = (index - 1) * this.widthRef * 0.055;
+            const y = -this.heightRef * 0.015;
+            const emptyStar = this.scene.add.image(x, y, "EstrellaVacia");
+            const baseScale = (this.widthRef * 0.043) / emptyStar.width;
 
-            star.setScale((this.widthRef * 0.043) / star.width);
-            this.add(star);
+            emptyStar.setScale(baseScale);
+            this.add(emptyStar);
 
-            if (index < this.config.stars && this.scene.cache.audio.exists("sfxEstrellaResultado")) {
-                this.scene.time.delayedCall(220 + index * 180, () => {
-                    this.scene.sound.play("sfxEstrellaResultado", { volume: 0.45 });
+            if (index < earnedStars) {
+                const fullStar = this.scene.add.image(x, y, "EstrellaLlena");
+                const fullScale = (this.widthRef * 0.043) / fullStar.width;
+
+                fullStar
+                    .setScale(fullScale * 0.15)
+                    .setAlpha(0)
+                    .setAngle(-18);
+
+                this.add(fullStar);
+
+                this.scene.time.delayedCall(420 + index * 380, () => {
+                    if (!this.scene || !fullStar.active) return;
+
+                    if (this.scene.cache.audio.exists("sfxEstrellaResultado")) {
+                        this.scene.sound.play("sfxEstrellaResultado", { volume: 0.45 });
+                    }
+
+                    this.scene.tweens.add({
+                        targets: fullStar,
+                        scale: fullScale,
+                        alpha: 1,
+                        angle: 0,
+                        duration: 420,
+                        ease: "Back.Out"
+                    });
                 });
             }
         }

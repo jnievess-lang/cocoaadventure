@@ -48,8 +48,8 @@ Recurso disponible:
 | --- | --- | --- |
 | `sfxBotonTocar` | `sfx/BotonTocar.m4a` | Pulsación de botones interactivos. Es la única excepción actual al estándar MP3. |
 | `sfxAvisoTiempo` | `sfx/AvisoTiempo.mp3` | Aviso cuando quedan pocos segundos. No repetir cada segundo. |
-| `sfxContadorCompleto` | `sfx/ContadorCompleto.mp3` | Objetivo o contador completado. |
-| `sfxEstrellaResultado` | `sfx/EstrellaResultado.mp3` | Aparición de cada estrella en resultados. |
+| `sfxDerrota` | `sfx/Derrota.mp3` | Derrota por tiempo agotado o por perder todas las vidas. Nunca debe reproducirse al completar un nivel. |
+| `sfxEstrellaResultado` | `sfx/EstrellaResultado.mp3` | Aparición de cada estrella en resultados. Debe sonar una vez por cada estrella obtenida y acompañar su animación individual. |
 | `sfxSeleccionCorrecta` | `sfx/SeleccionCorrecta.mp3` | Selección correcta de un objeto. |
 | `sfxSeleccionIncorrecta` | `sfx/SeleccionIncorrecta.mp3` | Selección incorrecta amable y reutilizable, por ejemplo una mazorca verde o dañada. No debe asociarse exclusivamente con un color. |
 
@@ -300,6 +300,86 @@ Reglas de implementación:
 8. Al pausar, detener cronómetro, eventos, animaciones e interacción, y pausar también música, voces o avisos que estén reproduciéndose. Al continuar, restaurar el estado sin reiniciar el nivel.
 9. No recolorear, duplicar, renombrar ni sustituir estos assets desde un minijuego individual. Cualquier cambio visual debe revisarse como una modificación global porque afecta a todos los módulos.
 10. Después de cerrar el tutorial, mostrar `btnRepetirAudio` en una esquina segura. Al tocarlo, reproducir nuevamente la voz de instrucción y pausar temporalmente el cronómetro y la interacción para no penalizar al niño.
+
+### Implementación reutilizable del HUD
+
+No copiar los métodos de vidas, cronómetro, pausa o repetición dentro de una escena. El componente `src/ui/HudMinijuego.js` compone y coordina los elementos comunes. La escena solamente entrega configuración y callbacks para sus objetos particulares.
+
+```js
+import HudMinijuego from "../ui/HudMinijuego";
+import GestorAudioMinijuego from "../managers/GestorAudioMinijuego";
+
+this.audio = new GestorAudioMinijuego(this);
+
+this.hud = new HudMinijuego(this, {
+    lives: {
+        maxLives: 3
+    },
+    timer: {
+        durationSeconds: 60
+    },
+    controls: {},
+    instructionAudio: "vozNombreMinijuegoInstruccion",
+    audioManager: this.audio,
+    onTimeUp: () => this.failLevel("time"),
+    onLivesEmpty: () => this.failLevel("lives"),
+    onGameplaySuspended: reason => this.disableGameplay(reason),
+    onGameplayResumed: reason => this.enableGameplay(reason),
+    onExit: () => this.scene.start("NombreEscenaNiveles")
+});
+```
+
+Después del tutorial, iniciar todos los sistemas comunes con una sola llamada:
+
+```js
+this.hud.start();
+```
+
+Cuando una acción quite una vida:
+
+```js
+this.hud.loseLife();
+```
+
+Para calcular estrellas a partir de las vidas restantes:
+
+```js
+const stars = this.hud.calculateStars(3);
+```
+
+Al completar o fallar el nivel:
+
+```js
+this.hud.stop();
+```
+
+Para consultar estado sin acceder a componentes internos:
+
+```js
+const remainingLives = this.hud.getRemainingLives();
+const remainingTime = this.hud.getRemainingTime();
+```
+
+Si un minijuego no tiene errores que consuman vidas, ocultarlas explícitamente sin crear otra versión del HUD:
+
+```js
+lives: {
+    enabled: false
+}
+```
+
+Responsabilidades separadas:
+
+| Archivo | Responsabilidad |
+| --- | --- |
+| `ui/HudMinijuego.js` | Coordina inicio, detención, pausa, reanudación, vidas, tiempo y repetición. |
+| `ui/IndicadorVidas.js` | Construye corazones dinámicos, pierde vidas y calcula estrellas. |
+| `ui/TemporizadorRegresivo.js` | Cuenta el tiempo, dibuja `MM:SS` y reproduce el aviso final. |
+| `ui/BotonIconoHud.js` | Proporciona botones táctiles responsive sin duplicar eventos de puntero. |
+| `ui/PanelPausa.js` | Construye la ventana común de pausa. |
+| `managers/GestorAudioMinijuego.js` | Controla música, atenuación, voces, pausa y restauración de audio. |
+
+La escena mantiene únicamente la mecánica propia: creación de objetos, validación de acciones, progreso y navegación específica. Durante `Phaser.Scenes.Events.SHUTDOWN`, debe destruir `hud` y `audio` para eliminar eventos y voces activas.
 
 ## 6. Uso de `images/minigames/cosechar`
 

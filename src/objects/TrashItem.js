@@ -9,6 +9,7 @@ export default class TrashItem extends Phaser.GameObjects.Image {
         scene.add.existing(this);
 
         this.onRemove = onRemove;
+        this.removing = false;
 
         this.setInteractive({ useHandCursor: true });
 
@@ -21,6 +22,9 @@ export default class TrashItem extends Phaser.GameObjects.Image {
     }
 
     removeTrash() {
+
+        if (this.removing) return;
+        this.removing = true;
 
         this.disableInteractive();
 
@@ -47,6 +51,14 @@ export default class TrashItem extends Phaser.GameObjects.Image {
             }
 
         });
+
+    }
+
+    restoreInteraction() {
+
+        if (this.active && !this.removing) {
+            this.setInteractive({ useHandCursor: true });
+        }
 
     }
 
