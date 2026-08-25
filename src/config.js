@@ -17,6 +17,8 @@ import RegarScene from "./scenes/RegarScene";
 import MalezasScene from "./scenes/MalezasScene";
 import PlagasScene from "./scenes/PlagasScene";
 import CuidadoCorrectoScene from "./scenes/CuidadoCorrectoScene";
+import LogrosScene from "./scenes/LogrosScene";
+import ConfiguracionScene from "./scenes/ConfiguracionScene";
 
 const config = {
     type: Phaser.AUTO,
@@ -37,6 +39,8 @@ const config = {
         BootScene,
         PreloadScene,
         MainMenuScene,
+        LogrosScene,
+        ConfiguracionScene,
         ModulesScene,
         SembrarScene,
         LimpiarTerrenoScene,

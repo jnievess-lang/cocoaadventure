@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import HarvestLevelCard from "../ui/HarvestLevelCard";
 import ProgressManager from "../managers/ProgressManager";
+import AudioSettingsManager from "../managers/AudioSettingsManager";
 
 export default class CosecharScene extends Phaser.Scene {
 
@@ -216,6 +217,7 @@ export default class CosecharScene extends Phaser.Scene {
         }
 
         music.setVolume(0.22);
+        AudioSettingsManager.applyToMusic(music);
 
     }
 

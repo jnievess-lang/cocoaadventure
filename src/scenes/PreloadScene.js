@@ -16,6 +16,18 @@ export default class PreloadScene extends Phaser.Scene {
         // Pantalla de módulos
         this.load.image("btnRegresar", "images/buttons/btnRegresar.png");
 
+        // Pantalla de configuración
+        this.load.image("fondoConfiguracion", "images/background/fondoConfiguracion.png");
+        this.load.image("TableroConfiguracion", "images/ui/TableroConfiguracion.png");
+
+        // Pantalla de logros
+        this.load.image("FondoTrofeos", "images/background/FondoTrofeos.png");
+        this.load.image("StandTrofeos", "images/achievements/StandTrofeos.png");
+        this.load.image("trofeoSembrar", "images/achievements/trofeosembrar.png");
+        this.load.image("trofeoMantener", "images/achievements/trofeomantener.png");
+        this.load.image("trofeoCosechar", "images/achievements/trofeocosechar.png");
+        this.load.image("trofeoProcesar", "images/achievements/trofeoprocesar.png");
+
         this.load.image("btnSembrarModulo", "images/modules/btnSembrarModulo.png");
         this.load.image("btnMantenerModulo", "images/modules/btnMantenerModulo.png");
         this.load.image("btnCosecharModulo", "images/modules/btnCosecharModulo.png");

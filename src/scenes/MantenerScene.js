@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import HarvestLevelCard from "../ui/HarvestLevelCard";
 import ProgressManager from "../managers/ProgressManager";
+import AudioSettingsManager from "../managers/AudioSettingsManager";
 
 export default class MantenerScene extends Phaser.Scene {
 
@@ -216,6 +217,7 @@ export default class MantenerScene extends Phaser.Scene {
         if (!musica.isPlaying) musica.play();
 
         musica.setVolume(0.22);
+        AudioSettingsManager.applyToMusic(musica);
 
     }
 
