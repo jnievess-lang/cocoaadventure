@@ -113,6 +113,35 @@ export default class HarvestLevelCard extends Phaser.GameObjects.Container {
         icon.setScale(iconWidth / icon.width);
 
         this.add(icon);
+
+        // Opcional: los módulos cuyos niveles se distinguen por su nombre y no
+        // solo por el icono pueden mostrar también la etiqueta.
+        if (this.config.showLabel) {
+
+            icon.y = -this.cardHeight * 0.14;
+            icon.setScale((this.cardHeight * 0.38) / icon.height);
+
+            const label = this.scene.add.text(
+                0,
+                this.cardHeight * 0.16,
+                this.config.label,
+                {
+                    fontFamily: "Trebuchet MS",
+                    fontSize: `${this.scene.scale.height * 0.021}px`,
+                    color: "#FFF4D6",
+                    fontStyle: "bold",
+                    stroke: "#6B3412",
+                    strokeThickness: 4,
+                    align: "center",
+                    wordWrap: { width: this.cardWidth * 0.86 }
+                }
+            );
+
+            label.setOrigin(0.5);
+            this.add(label);
+
+        }
+
         this.createStars();
 
     }
@@ -148,7 +177,9 @@ export default class HarvestLevelCard extends Phaser.GameObjects.Container {
         const soon = this.scene.add.text(
             0,
             this.cardHeight * 0.34,
-            "PRÓXIMAMENTE",
+            // Un nivel puede estar bloqueado porque aún no se construye o
+            // porque falta completar el anterior: el mensaje lo aclara.
+            this.config.lockedMessage ?? "PRÓXIMAMENTE",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.scene.scale.height * 0.015}px`,

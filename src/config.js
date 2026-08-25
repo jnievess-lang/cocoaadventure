@@ -12,6 +12,11 @@ import SeleccionarMadurasScene from "./scenes/SeleccionarMadurasScene";
 import CorteCuidadosoScene from "./scenes/CorteCuidadosoScene";
 import AbrirMazorcasScene from "./scenes/AbrirMazorcasScene";
 import ClasificarSemillasScene from "./scenes/ClasificarSemillasScene";
+import MantenerScene from "./scenes/MantenerScene";
+import RegarScene from "./scenes/RegarScene";
+import MalezasScene from "./scenes/MalezasScene";
+import PlagasScene from "./scenes/PlagasScene";
+import CuidadoCorrectoScene from "./scenes/CuidadoCorrectoScene";
 
 const config = {
     type: Phaser.AUTO,
@@ -41,7 +46,12 @@ const config = {
         SeleccionarMadurasScene,
         CorteCuidadosoScene,
         AbrirMazorcasScene,
-        ClasificarSemillasScene
+        ClasificarSemillasScene,
+        MantenerScene,
+        RegarScene,
+        MalezasScene,
+        PlagasScene,
+        CuidadoCorrectoScene
         ]
 };
 
