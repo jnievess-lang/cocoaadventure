@@ -136,6 +136,19 @@ export default class ProgressManager {
 
     }
 
+    static completePlantarPlantula(stars) {
+
+        const progress = this.load();
+
+        progress.sembrar.plantarPlantula.stars = Math.max(
+            progress.sembrar.plantarPlantula.stars,
+            stars
+        );
+
+        this.save(progress);
+
+    }
+
     static completeSeleccionarMaduras(stars) {
 
         const progress = this.load();

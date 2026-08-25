@@ -40,7 +40,7 @@ export default class PrepararTierraScene extends Phaser.Scene {
     }
 
     createBackground() {
-        this.cameras.main.setBackgroundColor("#7CCBE8");
+        this.cameras.main.setBackgroundColor("#8FD3FF");
 
         const groundHeight = this.height * 0.19;
         this.add.tileSprite(
@@ -85,7 +85,8 @@ export default class PrepararTierraScene extends Phaser.Scene {
             timer: {
                 durationSeconds: LEVEL_CONFIG.durationSeconds,
                 centerX: 0.43,
-                textX: 0.43
+                // El reloj ocupa el lado izquierdo del panel.
+                textX: 0.457
             },
             controls: {},
             instructionAudio: "vozPrepararTierra",
