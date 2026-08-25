@@ -9,7 +9,12 @@ export default class HarvestLevelCard extends Phaser.GameObjects.Container {
         scene.add.existing(this);
 
         this.config = config;
-        this.unlocked = config.unlocked ?? false;
+        // Un nivel puede estar desbloqueado en progreso antes de que su escena
+        // y su icono estén disponibles. En ese caso conserva la tarjeta segura
+        // de "próximamente" en lugar de intentar crear una textura inexistente.
+        this.unlocked = Boolean(
+            config.unlocked && config.iconTexture && config.onClick
+        );
         this.cardWidth = scene.scale.width * 0.18;
         this.cardHeight = scene.scale.height * 0.27;
 

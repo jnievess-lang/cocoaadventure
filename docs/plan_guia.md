@@ -53,8 +53,9 @@ Recurso disponible:
 | `sfxSeleccionCorrecta` | `sfx/SeleccionCorrecta.mp3` | Selección correcta de un objeto. |
 | `sfxSeleccionIncorrecta` | `sfx/SeleccionIncorrecta.mp3` | Selección incorrecta amable y reutilizable, por ejemplo una mazorca verde o dañada. No debe asociarse exclusivamente con un color. |
 | `sfxCorteTijera` | `sfx/CorteTijera.mp3` | Corte correcto del pedúnculo en “Corte cuidadoso”. Se reproduce una sola vez por mazorca cortada. |
+| `sfxAperturaMazorca` | `sfx/AperturaMazorca.m4a` | Apertura gestual de una mazorca madura en “Abrir mazorcas”. No debe mezclarse con `sfxSeleccionCorrecta`. |
 
-Para recursos nuevos, el formato estándar será MP3. No se debe convertir `BotonTocar.m4a` sin comparar antes que la conversión conserve el ataque corto del sonido.
+Para recursos nuevos, el formato estándar será MP3. `BotonTocar.m4a` y `AperturaMazorca.m4a` son excepciones ya aprobadas; no deben convertirse sin comparar antes que la conversión conserve el ataque corto del sonido.
 
 ### Cambio o reemplazo de un sonido compartido
 
@@ -100,6 +101,8 @@ Cada minijuego debería considerar estas cuatro voces:
 | Ayuda | Primer error o inactividad | Da una pista corta sin penalizar. |
 | Éxito | Al completar | Reconoce la acción realizada. |
 | Tiempo agotado | Al terminar el tiempo | Invita a intentarlo nuevamente. |
+
+En mecánicas rápidas con varios objetos simultáneos, una voz de ayuda puede omitirse si interrumpiría el ritmo o provocaría nuevos errores. “Abrir mazorcas” solo utiliza instrucción, éxito y tiempo agotado; sus errores durante la partida se comunican mediante SFX y animaciones breves sin pausar la acción.
 
 ## 3. Generación de voces con Edge TTS
 
@@ -392,14 +395,14 @@ Estructura recomendada cuando existan esos recursos:
 public/images/minigames/cosechar/
 ├── seleccionar-maduras/
 ├── corte-cuidadoso/
-├── a-la-canasta/
+├── abrir-mazorcas/
 └── revision-acopio/
 ```
 
 Recursos que sí podrían pertenecer allí:
 
 - `SpritesheetCorteMazorca.webp`: secuencia completa que combina herramienta, corte y reacción de la mazorca.
-- `AtlasCaidaCanasta.webp`: atlas exclusivo con cuadros de caída, rebote y entrada a la canasta.
+- Mitades alineadas de una mazorca que solo se combinan durante la animación de apertura.
 - `AtlasClasificacionAcopio.webp`: composición animada exclusiva de la mesa o banda de clasificación.
 - Una máscara visual propia del nivel que no sea un elemento general de interfaz.
 - Una secuencia ilustrada completa utilizada únicamente por ese minijuego.
@@ -415,6 +418,10 @@ Recursos que no deben colocarse allí:
 Actualmente “Seleccionar maduras” no necesita guardar imágenes en esa carpeta: sus piezas están correctamente separadas entre `background`, `decorations`, `objects` y `ui`. Una carpeta vacía no necesita subirse a Git.
 
 “Corte cuidadoso” sí utiliza `minigames/cosechar/corte-cuidadoso/` para tres capas inseparables y perfectamente alineadas: `RamaMazorcaCorte`, `RamaCortadaCorte` y `MazorcaDesprendidaCorte`. La unión botánica entre rama, pedúnculo y fruto no debe reconstruirse combinando sprites independientes, porque cualquier diferencia de escala o pivote deja huecos visibles. Las tres capas deben conservar el mismo estilo y punto de corte. Las tijeras permanecen en `objects/` y `btnMantenerCorte` en `buttons/` porque sí son piezas independientes.
+
+“Abrir mazorcas” utiliza `minigames/cosechar/abrir-mazorcas/` para las mitades amarillas y anaranjadas que forman su animación exclusiva. Las mazorcas completas permanecen en `objects/` porque se reutilizan en distintos niveles. La estela, destellos, indicadores `+1` y `−1` y partículas se dibujan con Phaser; no deben convertirse en imágenes duplicadas.
+
+Durante “Abrir mazorcas” no se reproducen voces en medio de la acción. Una apertura madura usa `AperturaMazorca.m4a`, cortar una verde o dañada usa `SeleccionIncorrecta.mp3` y dejar caer una madura solo muestra la pérdida visual de vida, sin SFX. Esto evita detener o saturar un juego con varios objetos simultáneos.
 
 ## 7. Estética visual obligatoria
 

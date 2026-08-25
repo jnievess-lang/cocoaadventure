@@ -26,7 +26,16 @@ test("completar Corte cuidadoso conserva la mejor puntuación", () => {
 
     const progress = ProgressManager.load();
     assert.equal(progress.cosechar.corteCuidadoso.stars, 3);
-    assert.equal(progress.cosechar.aLaCanasta.unlocked, true);
+    assert.equal(progress.cosechar.abrirMazorcas.unlocked, true);
+});
+
+test("completar Abrir mazorcas desbloquea Revisión y acopio", () => {
+    ProgressManager.completeAbrirMazorcas(2);
+    ProgressManager.completeAbrirMazorcas(1);
+
+    const progress = ProgressManager.load();
+    assert.equal(progress.cosechar.abrirMazorcas.stars, 2);
+    assert.equal(progress.cosechar.revisionAcopio.unlocked, true);
 });
 
 test("normaliza un guardado anterior que ya tenía estrellas", () => {
@@ -37,4 +46,20 @@ test("normaliza un guardado anterior que ya tenía estrellas", () => {
 
     const progress = ProgressManager.load();
     assert.equal(progress.cosechar.corteCuidadoso.unlocked, true);
+});
+
+test("migra aLaCanasta y elimina la clave antigua en el siguiente guardado", () => {
+    const oldProgress = ProgressManager.getDefaultProgress();
+    delete oldProgress.cosechar.abrirMazorcas;
+    oldProgress.cosechar.aLaCanasta = { unlocked: true, stars: 2 };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(oldProgress));
+
+    const migrated = ProgressManager.load();
+    assert.equal(migrated.cosechar.abrirMazorcas.unlocked, true);
+    assert.equal(migrated.cosechar.abrirMazorcas.stars, 2);
+    assert.equal("aLaCanasta" in migrated.cosechar, false);
+
+    ProgressManager.save(migrated);
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    assert.equal("aLaCanasta" in saved.cosechar, false);
 });

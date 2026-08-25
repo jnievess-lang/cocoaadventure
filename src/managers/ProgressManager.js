@@ -35,7 +35,7 @@ export default class ProgressManager {
 
                 seleccionarMaduras: { unlocked: true, stars: 0 },
                 corteCuidadoso: { unlocked: false, stars: 0 },
-                aLaCanasta: { unlocked: false, stars: 0 },
+                abrirMazorcas: { unlocked: false, stars: 0 },
                 revisionAcopio: { unlocked: false, stars: 0 }
 
             }
@@ -56,6 +56,12 @@ export default class ProgressManager {
 
             const saved = JSON.parse(data);
 
+            const cosecharGuardado = saved.cosechar ?? {};
+            const {
+                aLaCanasta: progresoAnterior,
+                ...cosecharSinClaveAnterior
+            } = cosecharGuardado;
+
             const progress = {
                 ...defaults,
                 ...saved,
@@ -65,16 +71,30 @@ export default class ProgressManager {
                 },
                 cosechar: {
                     ...defaults.cosechar,
-                    ...(saved.cosechar ?? {})
+                    ...cosecharSinClaveAnterior
                 }
             };
+
+            if (progresoAnterior) {
+                progress.cosechar.abrirMazorcas.stars = Math.max(
+                    progress.cosechar.abrirMazorcas.stars,
+                    progresoAnterior.stars ?? 0
+                );
+                progress.cosechar.abrirMazorcas.unlocked =
+                    progress.cosechar.abrirMazorcas.unlocked ||
+                    Boolean(progresoAnterior.unlocked);
+            }
 
             if (progress.cosechar.seleccionarMaduras.stars > 0) {
                 progress.cosechar.corteCuidadoso.unlocked = true;
             }
 
             if (progress.cosechar.corteCuidadoso.stars > 0) {
-                progress.cosechar.aLaCanasta.unlocked = true;
+                progress.cosechar.abrirMazorcas.unlocked = true;
+            }
+
+            if (progress.cosechar.abrirMazorcas.stars > 0) {
+                progress.cosechar.revisionAcopio.unlocked = true;
             }
 
             return progress;
@@ -145,7 +165,22 @@ export default class ProgressManager {
             stars
         );
 
-        progress.cosechar.aLaCanasta.unlocked = true;
+        progress.cosechar.abrirMazorcas.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeAbrirMazorcas(stars) {
+
+        const progress = this.load();
+
+        progress.cosechar.abrirMazorcas.stars = Math.max(
+            progress.cosechar.abrirMazorcas.stars,
+            stars
+        );
+
+        progress.cosechar.revisionAcopio.unlocked = true;
 
         this.save(progress);
 
