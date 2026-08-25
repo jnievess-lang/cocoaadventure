@@ -11,6 +11,7 @@ import CosecharScene from "./scenes/CosecharScene";
 import SeleccionarMadurasScene from "./scenes/SeleccionarMadurasScene";
 import CorteCuidadosoScene from "./scenes/CorteCuidadosoScene";
 import AbrirMazorcasScene from "./scenes/AbrirMazorcasScene";
+import ClasificarSemillasScene from "./scenes/ClasificarSemillasScene";
 
 const config = {
     type: Phaser.AUTO,
@@ -39,7 +40,8 @@ const config = {
         CosecharScene,
         SeleccionarMadurasScene,
         CorteCuidadosoScene,
-        AbrirMazorcasScene
+        AbrirMazorcasScene,
+        ClasificarSemillasScene
         ]
 };
 

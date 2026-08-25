@@ -396,7 +396,7 @@ public/images/minigames/cosechar/
 ├── seleccionar-maduras/
 ├── corte-cuidadoso/
 ├── abrir-mazorcas/
-└── revision-acopio/
+└── clasificar-semillas/
 ```
 
 Recursos que sí podrían pertenecer allí:
@@ -420,6 +420,12 @@ Actualmente “Seleccionar maduras” no necesita guardar imágenes en esa carpe
 “Corte cuidadoso” sí utiliza `minigames/cosechar/corte-cuidadoso/` para tres capas inseparables y perfectamente alineadas: `RamaMazorcaCorte`, `RamaCortadaCorte` y `MazorcaDesprendidaCorte`. La unión botánica entre rama, pedúnculo y fruto no debe reconstruirse combinando sprites independientes, porque cualquier diferencia de escala o pivote deja huecos visibles. Las tres capas deben conservar el mismo estilo y punto de corte. Las tijeras permanecen en `objects/` y `btnMantenerCorte` en `buttons/` porque sí son piezas independientes.
 
 “Abrir mazorcas” utiliza `minigames/cosechar/abrir-mazorcas/` para las mitades amarillas y anaranjadas que forman su animación exclusiva. Las mazorcas completas permanecen en `objects/` porque se reutilizan en distintos niveles. La estela, destellos, indicadores `+1` y `−1` y partículas se dibujan con Phaser; no deben convertirse en imágenes duplicadas.
+
+“Clasificar semillas” guarda únicamente `MarcoTableroSemillas.webp` en `minigames/cosechar/clasificar-semillas/`, porque es una composición propia de ese tablero. `SemillaCacaoBuena`, `SemillaCacaoDanada`, `BombaSemillas` y `CanastaSemillas` pertenecen a `objects/`; el botón completo pertenece a `buttons/`. Las líneas de trayectoria, celdas, X, humo, destellos, contadores y textos se dibujan con Phaser.
+
+En esta mecánica las semillas representan cacao fresco recién extraído: la semilla buena debe conservar su pulpa o mucílago blanco, húmedo y carnoso. Una semilla marrón, seca o arrugada no debe usarse como símbolo de daño, porque puede representar cacao fermentado y secado correctamente. La semilla dañada debe partir de la misma apariencia fresca y diferenciarse mediante manchas oscuras localizadas, zonas hundidas, cambio grisáceo de la pulpa o una grieta claramente anormal. Esta diferencia también debe entenderse sin depender únicamente del color.
+
+Sus efectos nuevos respetan sus formatos reales: `ConectarSemilla.mp3`, `RecolectarSemillas.m4a` y `BombaSemillas.m4a`. No se deben duplicar en MP3 solo para igualar extensiones.
 
 Durante “Abrir mazorcas” no se reproducen voces en medio de la acción. Una apertura madura usa `AperturaMazorca.m4a`, cortar una verde o dañada usa `SeleccionIncorrecta.mp3` y dejar caer una madura solo muestra la pérdida visual de vida, sin SFX. Esto evita detener o saturar un juego con varios objetos simultáneos.
 

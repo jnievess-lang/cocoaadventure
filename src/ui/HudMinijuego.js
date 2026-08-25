@@ -12,6 +12,7 @@ export default class HudMinijuego {
         this.state = "idle";
         this.visible = true;
         this.pauseOverlay = null;
+        this.temporizadorPausadoPorEscena = false;
 
         this.createLives(config.lives);
         this.createTimer(config.timer);
@@ -127,6 +128,20 @@ export default class HudMinijuego {
         return this.timer.remainingTime;
     }
 
+    pausarTemporizador() {
+        if (this.state !== "running" || this.temporizadorPausadoPorEscena) return false;
+        this.temporizadorPausadoPorEscena = true;
+        this.timer.pause();
+        return true;
+    }
+
+    reanudarTemporizador() {
+        if (this.state !== "running" || !this.temporizadorPausadoPorEscena) return false;
+        this.temporizadorPausadoPorEscena = false;
+        this.timer.resume();
+        return true;
+    }
+
     pause() {
         if (this.state !== "running") return;
 
@@ -191,7 +206,7 @@ export default class HudMinijuego {
     restoreRunningState(reason) {
         this.scene.tweens.resumeAll();
         this.state = "running";
-        this.timer.resume();
+        if (!this.temporizadorPausadoPorEscena) this.timer.resume();
         this.setControlsEnabled(true);
         this.config.onGameplayResumed?.(reason);
     }
@@ -228,6 +243,7 @@ export default class HudMinijuego {
         }
 
         this.state = "stopped";
+        this.temporizadorPausadoPorEscena = false;
         this.timer.stop();
         this.setControlsEnabled(false);
         this.pauseOverlay?.destroy(true);
