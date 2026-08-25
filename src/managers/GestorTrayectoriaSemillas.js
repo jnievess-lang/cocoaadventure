@@ -12,7 +12,15 @@ export default class GestorTrayectoriaSemillas {
         this.bloqueadoHastaSoltar = false;
         this.seleccion = [];
         this.ultimoPunto = null;
-        this.grafico = scene.add.graphics().setDepth(config.depth ?? 70);
+        this.tablero = config.obtenerTablero?.() ?? null;
+        this.grafico = scene.add.graphics();
+        if (this.tablero) {
+            // El trazo queda sobre las celdas, pero detrás de las fichas.
+            this.tablero.addAt(this.grafico, Math.min(2, this.tablero.length));
+        }
+        else {
+            this.grafico.setDepth(config.depth ?? 70);
+        }
         this.ultimaConexionMs = -Infinity;
 
         this.alPresionar = pointer => this.iniciar(pointer);
@@ -134,20 +142,28 @@ export default class GestorTrayectoriaSemillas {
     dibujar(pointer = null) {
         this.grafico.clear();
         if (!this.seleccion.length) return;
-        const tablero = this.config.obtenerTablero?.();
+        const tablero = this.tablero ?? this.config.obtenerTablero?.();
         const tipo = this.seleccion[0].tipo;
-        const colorExterior = tipo === "buena" ? 0xFFF09A : 0xB96B3D;
+        const colorHalo = tipo === "buena" ? 0xFFC928 : 0xA94F2B;
+        const colorExterior = tipo === "buena" ? 0xFFE36B : 0xD98250;
         const colorInterior = tipo === "buena" ? 0xFFFFFF : 0xFFD0A8;
         const puntos = this.seleccion.map(ficha => ({
-            x: tablero.x + ficha.x,
-            y: tablero.y + ficha.y
+            x: this.tablero ? ficha.x : tablero.x + ficha.x,
+            y: this.tablero ? ficha.y : tablero.y + ficha.y
         }));
-        if (pointer && this.activo) puntos.push({ x: pointer.x, y: pointer.y });
+        if (pointer && this.activo) {
+            puntos.push({
+                x: this.tablero ? pointer.x - tablero.x : pointer.x,
+                y: this.tablero ? pointer.y - tablero.y : pointer.y
+            });
+        }
 
         for (let indice = 1; indice < puntos.length; indice++) {
-            this.grafico.lineStyle(Math.max(10, this.scene.scale.height * 0.014), colorExterior, 0.75);
+            this.grafico.lineStyle(Math.max(14, this.scene.scale.height * 0.019), colorHalo, 0.22);
             this.grafico.lineBetween(puntos[indice - 1].x, puntos[indice - 1].y, puntos[indice].x, puntos[indice].y);
-            this.grafico.lineStyle(Math.max(4, this.scene.scale.height * 0.006), colorInterior, 0.96);
+            this.grafico.lineStyle(Math.max(9, this.scene.scale.height * 0.012), colorExterior, 0.72);
+            this.grafico.lineBetween(puntos[indice - 1].x, puntos[indice - 1].y, puntos[indice].x, puntos[indice].y);
+            this.grafico.lineStyle(Math.max(3, this.scene.scale.height * 0.0045), colorInterior, 0.90);
             this.grafico.lineBetween(puntos[indice - 1].x, puntos[indice - 1].y, puntos[indice].x, puntos[indice].y);
         }
 
@@ -187,6 +203,7 @@ export default class GestorTrayectoriaSemillas {
         this.scene.game.canvas?.removeEventListener("pointercancel", this.alCancelarDom);
         this.grafico?.destroy();
         this.grafico = null;
+        this.tablero = null;
         this.scene = null;
     }
 }

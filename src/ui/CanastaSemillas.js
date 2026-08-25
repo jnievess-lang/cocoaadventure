@@ -14,9 +14,14 @@ export default class CanastaSemillas extends Phaser.GameObjects.Container {
 
         const ancho = config.ancho;
         const alto = config.alto;
-        this.etiqueta = scene.add.rectangle(0, -alto * 0.42, ancho * 0.84, alto * 0.22, this.color, 0.98)
+        const yEtiqueta = -alto * 0.49;
+
+        this.imagen = scene.add.image(0, alto * 0.04, "CanastaSemillas");
+        this.imagen.setScale(ancho / this.imagen.width);
+
+        this.etiqueta = scene.add.rectangle(0, yEtiqueta, ancho * 0.84, alto * 0.22, this.color, 0.98)
             .setStrokeStyle(Math.max(3, alto * 0.025), 0x5D3017, 1);
-        this.textoEtiqueta = scene.add.text(0, -alto * 0.42, config.etiqueta, {
+        this.textoEtiqueta = scene.add.text(0, yEtiqueta, config.etiqueta, {
             fontFamily: "Trebuchet MS",
             fontSize: `${alto * 0.13}px`,
             color: "#FFFFFF",
@@ -24,9 +29,6 @@ export default class CanastaSemillas extends Phaser.GameObjects.Container {
             stroke: "#4A2816",
             strokeThickness: Math.max(3, alto * 0.018)
         }).setOrigin(0.5);
-
-        this.imagen = scene.add.image(0, alto * 0.04, "CanastaSemillas");
-        this.imagen.setScale(ancho / this.imagen.width);
 
         this.panelContador = scene.add.rectangle(0, alto * 0.43, ancho * 0.62, alto * 0.22, 0xFFF1C6, 1)
             .setStrokeStyle(Math.max(3, alto * 0.025), this.color, 1);
@@ -37,16 +39,26 @@ export default class CanastaSemillas extends Phaser.GameObjects.Container {
             fontStyle: "bold"
         }).setOrigin(0.5);
 
-        this.icono = scene.add.image(-ancho * 0.31, -alto * 0.42,
+        this.fondoIcono = scene.add.circle(
+            -ancho * 0.31,
+            yEtiqueta,
+            alto * 0.105,
+            0xFFF2D0,
+            0.96
+        ).setStrokeStyle(Math.max(2, alto * 0.014), 0x6B381D, 0.9);
+        this.icono = scene.add.image(-ancho * 0.31, yEtiqueta,
             config.tipo === "buena" ? "SemillaCacaoBuena" : "SemillaCacaoDanada");
-        this.icono.setScale((alto * 0.17) / this.icono.height);
+        this.icono.setScale((alto * 0.25) / this.icono.height);
+
+        // El orden evita que la canasta tape el borde inferior de la etiqueta.
         this.add([
-            this.etiqueta,
-            this.textoEtiqueta,
             this.imagen,
+            this.etiqueta,
+            this.fondoIcono,
+            this.icono,
+            this.textoEtiqueta,
             this.panelContador,
-            this.textoContador,
-            this.icono
+            this.textoContador
         ]);
     }
 
@@ -66,4 +78,3 @@ export default class CanastaSemillas extends Phaser.GameObjects.Container {
         return { x: this.x, y: this.y + this.imagen.displayHeight * 0.02 };
     }
 }
-

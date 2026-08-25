@@ -6,6 +6,11 @@ const TEXTURAS = Object.freeze({
     bomba: "BombaSemillas"
 });
 
+const COLORES_RESALTADO = Object.freeze({
+    buena: 0xFFD75A,
+    danada: 0xD88B55
+});
+
 export default class FichaSemilla extends Phaser.GameObjects.Container {
 
     constructor(scene, config) {
@@ -18,10 +23,30 @@ export default class FichaSemilla extends Phaser.GameObjects.Container {
         this.tamanoCelda = config.tamanoCelda;
         this.seleccionada = false;
 
+        const colorResaltado = COLORES_RESALTADO[this.tipo] ?? 0xFFFFFF;
+        this.haloSeleccion = scene.add.ellipse(
+            0,
+            0,
+            this.tamanoCelda * 0.68,
+            this.tamanoCelda * 0.82,
+            colorResaltado,
+            0
+        );
+        this.haloSeleccion.setBlendMode(Phaser.BlendModes.ADD);
+
         this.sprite = scene.add.image(0, 0, TEXTURAS[this.tipo]);
-        const proporcion = this.tipo === "bomba" ? 0.73 : 0.76;
+        // Las texturas incluyen espacio transparente alrededor del objeto.
+        // Estas proporciones igualan el tamaño visual de la maqueta aprobada
+        // y mantienen las piezas legibles en pantallas pequeñas.
+        const proporcion = this.tipo === "bomba" ? 0.93 : 1.01;
         this.sprite.setScale((this.tamanoCelda * proporcion) / this.sprite.height);
-        this.add(this.sprite);
+        this.add([this.haloSeleccion, this.sprite]);
+
+        this.efectoBrillo = null;
+        if (this.tipo !== "bomba" && scene.game.renderer.type === Phaser.WEBGL && this.sprite.preFX) {
+            this.efectoBrillo = this.sprite.preFX.addGlow(colorResaltado, 2.2, 0.18, false);
+            this.efectoBrillo.setActive(false);
+        }
         this.setDepth(config.depth ?? 25);
     }
 
@@ -35,12 +60,30 @@ export default class FichaSemilla extends Phaser.GameObjects.Container {
         if (!this.active || this.seleccionada === seleccionada) return;
         this.seleccionada = seleccionada;
         this.scene.tweens.killTweensOf(this);
+        this.scene.tweens.killTweensOf(this.haloSeleccion);
+        this.efectoBrillo?.setActive(seleccionada);
         this.scene.tweens.add({
             targets: this,
-            scale: seleccionada ? 1.14 : 1,
-            duration: 100,
+            scale: seleccionada ? 1.10 : 1,
+            duration: 120,
             ease: "Quad.Out"
         });
+        this.scene.tweens.add({
+            targets: this.haloSeleccion,
+            alpha: seleccionada ? 0.20 : 0,
+            scale: seleccionada ? 1.12 : 0.94,
+            duration: 140,
+            ease: "Sine.Out"
+        });
+    }
+
+    prepararRecoleccion() {
+        if (!this.active) return;
+        this.seleccionada = false;
+        this.scene.tweens.killTweensOf(this);
+        this.scene.tweens.killTweensOf(this.haloSeleccion);
+        this.haloSeleccion.setAlpha(0);
+        this.efectoBrillo?.setActive(false);
     }
 
     explotar(alCompletar) {
@@ -79,4 +122,3 @@ export default class FichaSemilla extends Phaser.GameObjects.Container {
         });
     }
 }
-
