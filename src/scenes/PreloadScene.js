@@ -67,6 +67,14 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("MazorcaNaranjaMitadIzquierda", "images/minigames/cosechar/abrir-mazorcas/MazorcaNaranjaMitadIzquierda.webp");
         this.load.image("MazorcaNaranjaMitadDerecha", "images/minigames/cosechar/abrir-mazorcas/MazorcaNaranjaMitadDerecha.webp");
 
+        // Módulo Cosecha: Nivel 4, clasificar semillas
+        this.load.image("btnIconoClasificarSemillas", "images/buttons/btnIconoClasificarSemillas.png");
+        this.load.image("SemillaCacaoBuena", "images/objects/SemillaCacaoBuena.webp");
+        this.load.image("SemillaCacaoDanada", "images/objects/SemillaCacaoDanada.webp");
+        this.load.image("BombaSemillas", "images/objects/BombaSemillas.webp");
+        this.load.image("CanastaSemillas", "images/objects/CanastaSemillas.webp");
+        this.load.image("MarcoTableroSemillas", "images/minigames/cosechar/clasificar-semillas/MarcoTableroSemillas.webp");
+
         // Modulo Sembrar: Nivel 1
         this.load.image(
             "MosaicoTierra",
@@ -135,6 +143,12 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("vozAbrirMazorcasInstruccion", "audio/voice/AbrirMazorcasInstruccion.mp3");
         this.load.audio("vozAbrirMazorcasCompletado", "audio/voice/AbrirMazorcasCompletado.mp3");
         this.load.audio("vozAbrirMazorcasTiempoAgotado", "audio/voice/AbrirMazorcasTiempoAgotado.mp3");
+        this.load.audio("sfxConectarSemilla", "audio/sfx/ConectarSemilla.mp3");
+        this.load.audio("sfxRecolectarSemillas", "audio/sfx/RecolectarSemillas.m4a");
+        this.load.audio("sfxBombaSemillas", "audio/sfx/BombaSemillas.m4a");
+        this.load.audio("vozClasificarSemillasInstruccion", "audio/voice/ClasificarSemillasInstruccion.mp3");
+        this.load.audio("vozClasificarSemillasCompletado", "audio/voice/ClasificarSemillasCompletado.mp3");
+        this.load.audio("vozClasificarSemillasTiempoAgotado", "audio/voice/ClasificarSemillasTiempoAgotado.mp3");
         this.load.audio("vozPrepararTierra", "audio/voice/PrepararTierra.mp3");
     }
 

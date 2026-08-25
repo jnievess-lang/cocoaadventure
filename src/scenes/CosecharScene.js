@@ -183,9 +183,11 @@ export default class CosecharScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.69,
-                label: "REVISIÓN Y ACOPIO",
+                label: "CLASIFICAR SEMILLAS",
+                iconTexture: "btnIconoClasificarSemillas",
                 unlocked: this.progress.cosechar.revisionAcopio.unlocked,
-                stars: this.progress.cosechar.revisionAcopio.stars
+                stars: this.progress.cosechar.revisionAcopio.stars,
+                onClick: () => this.scene.start("ClasificarSemillasScene")
             }
         ];
 

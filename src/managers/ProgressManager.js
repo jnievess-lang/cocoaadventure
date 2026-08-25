@@ -185,4 +185,18 @@ export default class ProgressManager {
         this.save(progress);
 
     }
+
+    static completeRevisionAcopio(stars) {
+
+        const progress = this.load();
+
+        progress.cosechar.revisionAcopio.stars = Math.max(
+            progress.cosechar.revisionAcopio.stars,
+            stars
+        );
+        progress.cosechar.revisionAcopio.unlocked = true;
+
+        this.save(progress);
+
+    }
 }

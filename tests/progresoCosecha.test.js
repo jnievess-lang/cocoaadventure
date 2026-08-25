@@ -38,6 +38,16 @@ test("completar Abrir mazorcas desbloquea Revisión y acopio", () => {
     assert.equal(progress.cosechar.revisionAcopio.unlocked, true);
 });
 
+test("completar Clasificar semillas conserva su mejor puntuación", () => {
+    ProgressManager.completeAbrirMazorcas(1);
+    ProgressManager.completeRevisionAcopio(3);
+    ProgressManager.completeRevisionAcopio(1);
+
+    const progress = ProgressManager.load();
+    assert.equal(progress.cosechar.revisionAcopio.unlocked, true);
+    assert.equal(progress.cosechar.revisionAcopio.stars, 3);
+});
+
 test("normaliza un guardado anterior que ya tenía estrellas", () => {
     const oldProgress = ProgressManager.getDefaultProgress();
     oldProgress.cosechar.seleccionarMaduras.stars = 1;
