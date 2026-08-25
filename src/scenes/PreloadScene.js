@@ -81,6 +81,12 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("Bomba", "images/objects/Bomba.png");
         this.load.image("Explosion", "images/objects/Explosion.png");
 
+        // Módulo Sembrar: Nivel 3 - Plantar plántula
+        this.load.image("HuecoTierra", "images/objects/huecoTierra.png");
+        this.load.image("PlantulaCacao", "images/objects/PlantulaCacao.png");
+        this.load.image("PlantulaCacaoCayendo", "images/objects/plantulaCacaoCayendo.png");
+        this.load.image("PlantulaCacaoCaida", "images/objects/plantulaCacaoCaida.png");
+
         // Botón
         this.load.image(
             "btnPausa",
@@ -117,6 +123,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("vozSeleccionMadurasCompletado", "audio/voice/SeleccionMadurasCompletado.mp3");
         this.load.audio("vozSeleccionMadurasTiempoAgotado", "audio/voice/SeleccionMadurasTiempoAgotado.mp3");
         this.load.audio("vozPrepararTierra", "audio/voice/PrepararTierra.mp3");
+        this.load.audio("vozPlantarPlantula", "audio/voice/PlantarPlantula.mp3");
     }
 
     create() {
