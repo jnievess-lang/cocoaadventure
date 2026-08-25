@@ -382,6 +382,16 @@ Responsabilidades separadas:
 | `ui/BotonIconoHud.js` | Proporciona botones táctiles responsive sin duplicar eventos de puntero. |
 | `ui/PanelPausa.js` | Construye la ventana común de pausa. |
 | `managers/GestorAudioMinijuego.js` | Controla música, atenuación, voces, pausa y restauración de audio. |
+| `ui/ContadorObjetivos.js` | Panel “icono + hechos / total”, con la cifra siempre dibujada por código. |
+| `ui/SelectorHerramienta.js` | Paleta de herramientas con icono y etiqueta escrita. Con una sola herramienta sirve de insignia informativa. |
+| `objects/ObjetivoMantenimiento.js` | Objetivo tocable que distingue acierto de distractor, y desaparece o se transforma al resolverse. |
+| `scenes/EscenaMantenimientoBase.js` | Esqueleto de los minijuegos de Mantener: fondo, HUD, tutorial, contador, resultado y ciclo de vida. |
+| `scenes/EscenaBuscarObjetivos.js` | Mecánica de repartir objetivos y distractores. Regar, Quitar malezas y Buscar plagas solo aportan datos. |
+
+Regla derivada de este módulo: la lógica de un nivel nunca debe depender de que
+termine una animación. El avance de una ronda se apoya en `scene.time`, que se
+pausa junto con el resto del minijuego; los tweens quedan solo para lo
+decorativo. Un tween interrumpido no puede dejar a un niño atascado.
 
 La escena mantiene únicamente la mecánica propia: creación de objetos, validación de acciones, progreso y navegación específica. Durante `Phaser.Scenes.Events.SHUTDOWN`, debe destruir `hud` y `audio` para eliminar eventos y voces activas.
 
@@ -429,7 +439,64 @@ Sus efectos nuevos respetan sus formatos reales: `ConectarSemilla.mp3`, `Recolec
 
 Durante “Abrir mazorcas” no se reproducen voces en medio de la acción. Una apertura madura usa `AperturaMazorca.m4a`, cortar una verde o dañada usa `SeleccionIncorrecta.mp3` y dejar caer una madura solo muestra la pérdida visual de vida, sin SFX. Esto evita detener o saturar un juego con varios objetos simultáneos.
 
-## 7. Estética visual obligatoria
+## 7. Recursos del módulo Mantener
+
+Mantener no guarda nada en `minigames/`: todas sus piezas son reutilizables por
+sí solas y viven en su carpeta semántica. El módulo estrena `icons/`, que la
+arquitectura ya preveía pero aún no existía.
+
+### Recursos de Cosecha que reutiliza
+
+Aplicando el principio de reutilizar antes de crear, el módulo se apoya en seis
+recursos ya aprobados en lugar de duplicarlos:
+
+| Clave Phaser | Uso en Mantener |
+| --- | --- |
+| `FondoFincaCacao` | Fondo de los cuatro niveles |
+| `ArbolCacaoSeleccion` | Árbol de primer plano de “Buscar plagas” |
+| `MazorcaDanada` | Mazorca enferma que hay que detectar |
+| `MazorcaMaduraAmarilla`, `MazorcaMaduraNaranja` | Mazorcas sanas que no deben tocarse |
+| `TijeraPodaAbierta` | Icono de la tarjeta de “Quitar malezas” |
+| `IndicadorCorrecto` | Marca de acierto sobre un objetivo resuelto |
+
+### Recursos propios
+
+| Clave Phaser | Archivo | Significado |
+| --- | --- | --- |
+| `IconoRegadera` | `icons/IconoRegadera.webp` | Herramienta de Regar |
+| `IconoGuantes` | `icons/IconoGuantes.webp` | Herramienta de Quitar malezas |
+| `IconoLupa` | `icons/IconoLupa.webp` | Herramienta de Buscar plagas |
+| `IconoFungicida` | `icons/IconoFungicida.webp` | Herramienta contra hongos |
+| `PlantaSana` | `objects/PlantaSana.webp` | Planta que no necesita atención |
+| `PlantaMarchita` | `objects/PlantaMarchita.webp` | Falta de riego |
+| `PlantaHongos` | `objects/PlantaHongos.webp` | Enfermedad por hongos |
+| `PlantaPlagas` | `objects/PlantaPlagas.webp` | Ataque de insectos |
+| `MalezaFlor` | `objects/MalezaFlor.webp` | Maleza que se debe quitar |
+| `PastoSeco` | `objects/PastoSeco.webp` | Maleza que se debe quitar |
+| `Pulgon` | `objects/Pulgon.webp` | Plaga |
+| `Gusano` | `objects/Gusano.webp` | Plaga |
+| `HojaManchada` | `objects/HojaManchada.webp` | Hoja enferma |
+| `EscobaBruja` | `objects/EscobaBruja.webp` | Enfermedad escoba de bruja |
+| `IndicadorError` | `ui/IndicadorError.webp` | Marca sobre una selección incorrecta |
+
+Las quince se generaron con ChatGPT siguiendo
+[`assets_mantener.md`](assets_mantener.md), que conserva los prompts por si
+alguna hay que rehacerla. Se guardaron en WebP, el mismo formato que usan los
+objetos de Cosecha, y se redujeron desde 1254 × 1254 a un tamaño cercano al doble
+de lo que muestra el juego: 640 para las plantas, 512 para herramientas y
+objetos, 256 para el indicador. El lote pasó de 16,7 MB a 0,86 MB.
+
+Las cuatro plantas son la misma plántula en distinto estado. Si alguna se
+regenera, debe partir de `PlantaSana`; generadas por separado saldrían tres
+plantas distintas y el nivel de diagnóstico dejaría de entenderse.
+
+### Estilo
+
+Estas piezas son ilustración pintada con contorno marrón cálido, igual que la
+familia de Cosecha. Al ampliar Mantener hay que seguir esa familia y no
+mezclarla con estilos planos dentro de una misma pantalla.
+
+## 8. Estética visual obligatoria
 
 - Mantener ilustración 2D infantil, colorida y de formas fáciles de reconocer.
 - Usar contornos oscuros claros y volúmenes suaves, como los assets existentes.
@@ -449,7 +516,7 @@ Durante “Abrir mazorcas” no se reproducen voces en medio de la acción. Una 
 - La clave de Phaser debe coincidir conceptualmente con el archivo y conservarse estable.
 - Los candidatos `v2`, `final` o `aprobado` pertenecen al flujo local de diseño, no a `public/`.
 
-## 8. Flujo para agregar un recurso
+## 9. Flujo para agregar un recurso
 
 1. Definir para qué escena, acción y estado se necesita.
 2. Buscar primero un recurso reutilizable en `public/audio` o `public/images`.
@@ -462,7 +529,7 @@ Durante “Abrir mazorcas” no se reproducen voces en medio de la acción. Una 
 9. Probar en PC y en un celular horizontal.
 10. Confirmar que no existen errores en consola, rutas faltantes ni recursos duplicados.
 
-## 9. Lista de control para revisión de PR
+## 10. Lista de control para revisión de PR
 
 - [ ] El recurso tiene una necesidad concreta y no duplica otro existente.
 - [ ] Está dentro de la carpeta semántica correcta.
@@ -485,7 +552,7 @@ Durante “Abrir mazorcas” no se reproducen voces en medio de la acción. Una 
 - [ ] La interacción fue probada en celular horizontal.
 - [ ] No existen errores en consola ni archivos faltantes.
 
-## 10. Referencias técnicas
+## 11. Referencias técnicas
 
 - [Voces e idiomas compatibles de Microsoft Speech](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support)
 - [Proyecto y uso de la línea de comandos de edge-tts](https://github.com/rany2/edge-tts)

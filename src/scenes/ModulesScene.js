@@ -176,7 +176,7 @@ export default class ModulesScene extends Phaser.Scene {
 
             () => {
 
-                console.log("Mantener");
+                this.scene.start("MantenerScene");
 
             }
 

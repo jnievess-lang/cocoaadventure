@@ -38,6 +38,15 @@ export default class ProgressManager {
                 abrirMazorcas: { unlocked: false, stars: 0 },
                 revisionAcopio: { unlocked: false, stars: 0 }
 
+            },
+
+            mantener: {
+
+                regar: { unlocked: true, stars: 0 },
+                malezas: { unlocked: false, stars: 0 },
+                plagas: { unlocked: false, stars: 0 },
+                cuidadoCorrecto: { unlocked: false, stars: 0 }
+
             }
 
         };
@@ -72,6 +81,10 @@ export default class ProgressManager {
                 cosechar: {
                     ...defaults.cosechar,
                     ...cosecharSinClaveAnterior
+                },
+                mantener: {
+                    ...defaults.mantener,
+                    ...(saved.mantener ?? {})
                 }
             };
 
@@ -95,6 +108,18 @@ export default class ProgressManager {
 
             if (progress.cosechar.abrirMazorcas.stars > 0) {
                 progress.cosechar.revisionAcopio.unlocked = true;
+            }
+
+            if (progress.mantener.regar.stars > 0) {
+                progress.mantener.malezas.unlocked = true;
+            }
+
+            if (progress.mantener.malezas.stars > 0) {
+                progress.mantener.plagas.unlocked = true;
+            }
+
+            if (progress.mantener.plagas.stars > 0) {
+                progress.mantener.cuidadoCorrecto.unlocked = true;
             }
 
             return progress;
@@ -223,6 +248,64 @@ export default class ProgressManager {
             stars
         );
         progress.cosechar.revisionAcopio.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeRegar(stars) {
+
+        const progress = this.load();
+
+        progress.mantener.regar.stars = Math.max(
+            progress.mantener.regar.stars,
+            stars
+        );
+
+        progress.mantener.malezas.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeMalezas(stars) {
+
+        const progress = this.load();
+
+        progress.mantener.malezas.stars = Math.max(
+            progress.mantener.malezas.stars,
+            stars
+        );
+
+        progress.mantener.plagas.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completePlagas(stars) {
+
+        const progress = this.load();
+
+        progress.mantener.plagas.stars = Math.max(
+            progress.mantener.plagas.stars,
+            stars
+        );
+
+        progress.mantener.cuidadoCorrecto.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeCuidadoCorrecto(stars) {
+
+        const progress = this.load();
+
+        progress.mantener.cuidadoCorrecto.stars = Math.max(
+            progress.mantener.cuidadoCorrecto.stars,
+            stars
+        );
 
         this.save(progress);
 

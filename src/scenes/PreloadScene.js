@@ -165,6 +165,61 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("vozClasificarSemillasTiempoAgotado", "audio/voice/ClasificarSemillasTiempoAgotado.mp3");
         this.load.audio("vozPrepararTierra", "audio/voice/PrepararTierra.mp3");
         this.load.audio("vozPlantarPlantula", "audio/voice/PlantarPlantula.mp3");
+
+        // ==========================
+        // Módulo Mantener
+        // ==========================
+
+        // Reutiliza los recursos ya aprobados de Cosecha: FondoFincaCacao,
+        // ArbolCacaoSeleccion, las mazorcas, TijeraPodaAbierta e
+        // IndicadorCorrecto. Aquí solo se registra lo que es propio del módulo.
+
+        // Herramientas
+        this.load.image("IconoRegadera", "images/icons/IconoRegadera.webp");
+        this.load.image("IconoGuantes", "images/icons/IconoGuantes.webp");
+        this.load.image("IconoLupa", "images/icons/IconoLupa.webp");
+        this.load.image("IconoFungicida", "images/icons/IconoFungicida.webp");
+
+        // Estados de la planta
+        this.load.image("PlantaSana", "images/objects/PlantaSana.webp");
+        this.load.image("PlantaMarchita", "images/objects/PlantaMarchita.webp");
+        this.load.image("PlantaHongos", "images/objects/PlantaHongos.webp");
+        this.load.image("PlantaPlagas", "images/objects/PlantaPlagas.webp");
+
+        // Malezas
+        this.load.image("MalezaFlor", "images/objects/MalezaFlor.webp");
+        this.load.image("PastoSeco", "images/objects/PastoSeco.webp");
+
+        // Plagas y enfermedades
+        this.load.image("Pulgon", "images/objects/Pulgon.webp");
+        this.load.image("Gusano", "images/objects/Gusano.webp");
+        this.load.image("HojaManchada", "images/objects/HojaManchada.webp");
+        this.load.image("EscobaBruja", "images/objects/EscobaBruja.webp");
+
+        // Retroalimentación visual
+        this.load.image("IndicadorError", "images/ui/IndicadorError.webp");
+
+        // Voces del módulo Mantener (es-EC-AndreaNeural).
+        // Ver docs/voces_mantener.md para los guiones aprobados.
+        this.load.audio("vozRegarInstruccion", "audio/voice/RegarInstruccion.mp3");
+        this.load.audio("vozRegarAyuda", "audio/voice/RegarAyuda.mp3");
+        this.load.audio("vozRegarCompletado", "audio/voice/RegarCompletado.mp3");
+        this.load.audio("vozRegarTiempoAgotado", "audio/voice/RegarTiempoAgotado.mp3");
+
+        this.load.audio("vozMalezasInstruccion", "audio/voice/MalezasInstruccion.mp3");
+        this.load.audio("vozMalezasAyuda", "audio/voice/MalezasAyuda.mp3");
+        this.load.audio("vozMalezasCompletado", "audio/voice/MalezasCompletado.mp3");
+        this.load.audio("vozMalezasTiempoAgotado", "audio/voice/MalezasTiempoAgotado.mp3");
+
+        this.load.audio("vozPlagasInstruccion", "audio/voice/PlagasInstruccion.mp3");
+        this.load.audio("vozPlagasAyuda", "audio/voice/PlagasAyuda.mp3");
+        this.load.audio("vozPlagasCompletado", "audio/voice/PlagasCompletado.mp3");
+        this.load.audio("vozPlagasTiempoAgotado", "audio/voice/PlagasTiempoAgotado.mp3");
+
+        this.load.audio("vozCuidadoCorrectoInstruccion", "audio/voice/CuidadoCorrectoInstruccion.mp3");
+        this.load.audio("vozCuidadoCorrectoAyuda", "audio/voice/CuidadoCorrectoAyuda.mp3");
+        this.load.audio("vozCuidadoCorrectoCompletado", "audio/voice/CuidadoCorrectoCompletado.mp3");
+        this.load.audio("vozCuidadoCorrectoTiempoAgotado", "audio/voice/CuidadoCorrectoTiempoAgotado.mp3");
     }
 
     create() {
