@@ -139,17 +139,31 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
         return container;
     }
 
+    // Las animaciones de entrada pueden terminar cuando el panel ya se cerró
+    // o la escena cambió. Cada callback comprueba que el panel siga vivo antes
+    // de tocar la escena.
+    sigueActivo() {
+        return !!this.scene && this.active && !this.closing;
+    }
+
     playAnimation() {
         this.scene.tweens.add({
             targets: this.character,
             x: this.gameWidth * 0.02,
             duration: 500,
             ease: "Back.Out",
-            onComplete: () => this.scene.time.delayedCall(180, () => this.showBubble())
+            onComplete: () => {
+                if (!this.sigueActivo()) return;
+                this.scene.time.delayedCall(180, () => {
+                    if (this.sigueActivo()) this.showBubble();
+                });
+            }
         });
     }
 
     showBubble() {
+        if (!this.sigueActivo()) return;
+
         const actionTargets = [this.text];
         if (this.confirmButton) actionTargets.push(this.confirmButton);
         if (this.replayButton) actionTargets.push(this.replayButton);
@@ -161,6 +175,7 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
             duration: 250,
             ease: "Back.Out",
             onComplete: () => {
+                if (!this.sigueActivo()) return;
                 this.scene.tweens.add({ targets: actionTargets, alpha: 1, duration: 160 });
                 this.playVoice();
             }
@@ -168,16 +183,36 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
     }
 
     playVoice() {
+        if (!this.sigueActivo()) return;
+
         if (this.voice) {
             this.voice.stop();
             this.voice.destroy();
         }
 
         this.config.onVoiceStart?.();
+
+        // Sin la voz cargada el tutorial sigue siendo legible: el globo de
+        // texto conserva la instrucción completa.
+        if (!this.scene.cache.audio.exists(this.config.audio)) {
+            this.config.onVoiceComplete?.();
+            if (!this.config.confirmText) {
+                this.scene.time.delayedCall(2600, () => this.hideTutorial());
+            }
+            return;
+        }
+
         const voice = this.scene.sound.add(this.config.audio, { volume: 1 });
         this.voice = voice;
+        let terminada = false;
 
         const finish = () => {
+            if (terminada) return;
+            terminada = true;
+
+            this.temporizadorVoz?.remove();
+            this.temporizadorVoz = null;
+
             this.config.onVoiceComplete?.();
             if (this.voice === voice) {
                 voice.destroy();
@@ -186,13 +221,28 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
             if (!this.config.confirmText) this.hideTutorial();
         };
 
-        if (voice.play()) voice.once("complete", finish);
+        if (voice.play()) {
+            voice.once("complete", finish);
+
+            // Cuando el tutorial no tiene botón de continuar, su cierre depende
+            // del evento `complete`. Si el navegador bloquea o corta la voz ese
+            // evento nunca llega, así que un respaldo por tiempo evita dejar al
+            // jugador esperando.
+            this.temporizadorVoz?.remove();
+            this.temporizadorVoz = this.scene.time.delayedCall(
+                (voice.duration || 6) * 1000 + 2000,
+                finish
+            );
+        }
         else this.scene.time.delayedCall(400, finish);
     }
 
     hideTutorial() {
         if (this.closing) return;
         this.closing = true;
+
+        this.temporizadorVoz?.remove();
+        this.temporizadorVoz = null;
 
         if (this.voice) {
             this.voice.stop();

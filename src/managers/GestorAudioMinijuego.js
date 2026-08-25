@@ -33,6 +33,14 @@ export default class GestorAudioMinijuego {
 
     playVoice(key, onComplete) {
         this.stopVoice();
+
+        // Una voz que todavía no existe en el cache no puede detener el nivel:
+        // el texto visible ya comunica la instrucción.
+        if (!this.scene.cache.audio.exists(key)) {
+            this.scene.time.delayedCall(200, () => onComplete?.());
+            return null;
+        }
+
         this.duckMusic();
 
         const voice = this.scene.sound.add(key, { volume: 1 });
