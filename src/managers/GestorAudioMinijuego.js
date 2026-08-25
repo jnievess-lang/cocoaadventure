@@ -1,3 +1,5 @@
+import AudioSettingsManager from "./AudioSettingsManager";
+
 export default class GestorAudioMinijuego {
 
     constructor(scene, config = {}) {
@@ -20,6 +22,7 @@ export default class GestorAudioMinijuego {
 
         if (!music.isPlaying) music.play();
         music.setVolume(this.musicVolume);
+        AudioSettingsManager.applyToMusic(music);
         return music;
     }
 

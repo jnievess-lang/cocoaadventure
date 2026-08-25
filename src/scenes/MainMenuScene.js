@@ -201,7 +201,7 @@ export default class MainMenuScene extends Phaser.Scene {
 
             this.btnLogros.setScale(this.secondaryScale);
 
-            console.log("Logros");
+            this.scene.start("LogrosScene");
 
         });
 
@@ -219,7 +219,7 @@ export default class MainMenuScene extends Phaser.Scene {
 
             this.btnConfiguracion.setScale(this.secondaryScale);
 
-            console.log("Configuración");
+            this.scene.start("ConfiguracionScene");
 
         });
 

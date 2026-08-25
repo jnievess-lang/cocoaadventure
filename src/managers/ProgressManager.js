@@ -1,5 +1,22 @@
 const STORAGE_KEY = "cocoaAdventureProgress";
 
+// La lista es la única fuente de verdad para los requisitos de cada trofeo.
+// Cuando se agregue un nivel a un módulo, debe añadirse aquí para que el logro
+// exija también sus tres estrellas.
+const ACHIEVEMENT_LEVELS = {
+    sembrar: ["limpiarTerreno", "prepararTierra", "plantarPlantula"],
+    mantener: ["regar", "malezas", "plagas", "cuidadoCorrecto"],
+    cosechar: [
+        "seleccionarMaduras",
+        "corteCuidadoso",
+        "abrirMazorcas",
+        "revisionAcopio"
+    ],
+    // Procesar aún no tiene niveles implementados; por eso su trofeo permanece
+    // oculto hasta que se registren sus niveles reales en esta lista.
+    procesar: []
+};
+
 export default class ProgressManager {
 
     static getDefaultProgress() {
@@ -146,6 +163,20 @@ export default class ProgressManager {
             console.warn("No se pudo guardar el progreso.", error);
 
         }
+
+    }
+
+    static isModulePerfect(moduleKey, progress = this.load()) {
+
+        const levelKeys = ACHIEVEMENT_LEVELS[moduleKey];
+
+        if (!levelKeys || levelKeys.length === 0) return false;
+
+        const moduleProgress = progress[moduleKey];
+
+        return levelKeys.every(levelKey =>
+            Number(moduleProgress?.[levelKey]?.stars) === 3
+        );
 
     }
     
