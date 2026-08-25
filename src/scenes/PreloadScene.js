@@ -73,6 +73,14 @@ export default class PreloadScene extends Phaser.Scene {
             "/images/objects/Hoja.png"
         );
 
+        // Módulo Sembrar: Nivel 2 - Preparar tierra
+        this.load.image("Fertilizante", "images/objects/Fertilizante.png");
+        this.load.image("FertilizanteCortado", "images/objects/FertilizanteCortado.png");
+        this.load.image("Insecticida", "images/objects/Insecticida.png");
+        this.load.image("InsecticidaCortado", "images/objects/InsecticidaCortado.png");
+        this.load.image("Bomba", "images/objects/Bomba.png");
+        this.load.image("Explosion", "images/objects/Explosion.png");
+
         // Botón
         this.load.image(
             "btnPausa",
