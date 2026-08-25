@@ -124,6 +124,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("vozCorteCuidadosoFuerzaAlta", "audio/voice/CorteCuidadosoFuerzaAlta.mp3");
         this.load.audio("vozCorteCuidadosoCompletado", "audio/voice/CorteCuidadosoCompletado.mp3");
         this.load.audio("vozCorteCuidadosoTiempoAgotado", "audio/voice/CorteCuidadosoTiempoAgotado.mp3");
+        this.load.audio("vozPrepararTierra", "audio/voice/PrepararTierra.mp3");
     }
 
     create() {
