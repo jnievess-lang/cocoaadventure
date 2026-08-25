@@ -10,6 +10,7 @@ export default class HudMinijuego {
         this.config = config;
         this.audio = config.audioManager;
         this.state = "idle";
+        this.visible = true;
         this.pauseOverlay = null;
 
         this.createLives(config.lives);
@@ -72,11 +73,29 @@ export default class HudMinijuego {
 
         this.state = "running";
         this.timer.start();
-        this.pauseButton.setIconAlpha(1).setEnabled(true);
+        this.pauseButton
+            .setVisible(this.visible)
+            .setIconAlpha(1)
+            .setEnabled(true);
 
         if (this.config.instructionAudio) {
-            this.replayButton.setVisible(true).setEnabled(true);
+            this.replayButton
+                .setVisible(this.visible)
+                .setEnabled(true);
         }
+    }
+
+    setVisible(visible) {
+        this.visible = visible;
+        this.livesDisplay?.setVisible(visible);
+        this.timer.setVisible(visible);
+        this.pauseButton.setVisible(visible);
+        this.replayButton.setVisible(
+            visible &&
+            this.state === "running" &&
+            Boolean(this.config.instructionAudio)
+        );
+        return this;
     }
 
     loseLife() {

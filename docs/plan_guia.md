@@ -241,7 +241,7 @@ Además, detener y destruir la voz durante `Phaser.Scenes.Events.SHUTDOWN`. Al o
 ### Reglas móviles
 
 - El primer audio puede requerir una interacción del usuario por las restricciones de reproducción automática del navegador.
-- Un tutorial debe ofrecer texto visible y un botón para continuar.
+- Un tutorial debe ofrecer texto visible y una forma clara de continuar: un botón grande o una práctica interactiva sin tiempo ni penalizaciones.
 - Si una voz falla, nunca dejar al jugador atrapado esperando el evento `complete`.
 - Al pausar el juego, pausar también música, avisos y cronómetro.
 

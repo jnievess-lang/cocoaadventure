@@ -14,14 +14,14 @@ import {
 
 export const CONFIGURACION_NIVEL = Object.freeze({
     objetivoMazorcas: 11,
-    duracionSegundos: 90,
+    duracionSegundos: 60,
     vidasMaximas: 3,
     estrellasMaximas: 3,
     maximoSimultaneas: 3,
-    intervaloAparicionMinMs: 1600,
-    intervaloAparicionMaxMs: 2200,
-    duracionVueloMinMs: 4200,
-    duracionVueloMaxMs: 5200,
+    intervaloAparicionMinMs: 1300,
+    intervaloAparicionMaxMs: 1800,
+    duracionVueloMinMs: 3200,
+    duracionVueloMaxMs: 4000,
     proteccionPerdidaVidaMs: 800
 });
 
@@ -54,6 +54,7 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
         this.crearFondo();
         this.crearContador();
         this.crearHud();
+        this.mostrarInterfazJuego(false);
         this.crearGestorCorte();
         this.audio.ensureMusic();
         this.mostrarTutorial();
@@ -97,12 +98,14 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
             1
         );
 
-        const icono = this.add.image(
+        this.iconoContador = this.add.image(
             this.ancho * 0.125,
             this.alto * 0.145,
             "MazorcaMaduraNaranja"
         );
-        icono.setScale((this.alto * 0.043) / icono.height).setDepth(53);
+        this.iconoContador
+            .setScale((this.alto * 0.043) / this.iconoContador.height)
+            .setDepth(53);
 
         this.textoContador = this.add.text(
             this.ancho * 0.176,
@@ -136,12 +139,23 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
         });
     }
 
+    mostrarInterfazJuego(visible) {
+        this.hud.setVisible(visible);
+        this.panelContador.setVisible(visible);
+        this.iconoContador.setVisible(visible);
+        this.textoContador.setVisible(visible);
+    }
+
     crearGestorCorte() {
         this.gestorCorte = new GestorCorteDeslizante(this, {
             distanciaMinima: Math.max(24, this.ancho * 0.018),
-            puedeInteractuar: () => this.estadoNivel === "jugando",
+            puedeInteractuar: () => ["practica", "jugando"].includes(
+                this.estadoNivel
+            ),
             esZonaBloqueada: (x, y) => this.esZonaHud(x, y),
-            obtenerObjetivos: () => [...this.mazorcasActivas],
+            obtenerObjetivos: () => this.estadoNivel === "practica"
+                ? [this.mazorcaTutorial].filter(Boolean)
+                : [...this.mazorcasActivas],
             alCortar: (mazorca, inicio, fin) => {
                 this.procesarCorte(mazorca, inicio, fin);
             }
@@ -163,116 +177,85 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
             audio: "vozAbrirMazorcasInstruccion",
             onVoiceStart: () => this.audio.duckMusic(),
             onVoiceComplete: () => this.audio.restoreMusic(),
-            onComplete: () => this.mostrarDemostracion()
+            onComplete: () => this.mostrarPracticaInteractiva()
         });
     }
 
-    mostrarDemostracion() {
+    mostrarPracticaInteractiva() {
         if (this.estadoNivel !== "tutorial") return;
-        this.estadoNivel = "demostracion";
+        this.estadoNivel = "practica";
 
         const x = this.ancho * 0.50;
         const y = this.alto * 0.52;
         const altura = this.alto * 0.25;
-        const mazorca = this.add.image(x, y, "MazorcaMaduraNaranja")
-            .setDepth(70);
-        mazorca.setScale(altura / mazorca.height);
+        this.mazorcaTutorial = new MazorcaVoladora(this, {
+            tipo: "naranja",
+            carril: -1,
+            posicion: { x, y },
+            estatica: true,
+            alturaVisual: altura,
+            depth: 70
+        });
 
-        const destello = this.add.star(
-            x + altura * 0.24,
-            y - altura * 0.18,
-            4,
-            altura * 0.025,
-            altura * 0.07,
-            0xFFF4A6,
-            0.95
-        ).setDepth(71);
-
-        const linea = this.add.graphics().setDepth(75);
-        const progreso = { valor: 0 };
-        const inicioX = x - altura * 0.58;
-        const finX = x + altura * 0.58;
-
-        this.tweens.add({
-            targets: progreso,
-            valor: 1,
-            duration: 430,
-            delay: 160,
-            ease: "Cubic.Out",
-            onUpdate: () => {
-                linea.clear();
-                linea.lineStyle(
-                    Math.max(8, this.alto * 0.012),
-                    0xFFD34E,
-                    0.65
-                );
-                linea.lineBetween(
-                    inicioX,
-                    y + altura * 0.18,
-                    Phaser.Math.Linear(inicioX, finX, progreso.valor),
-                    y - altura * 0.18
-                );
-                linea.lineStyle(
-                    Math.max(4, this.alto * 0.007),
-                    0xFFFFFF,
-                    1
-                );
-                linea.lineBetween(
-                    inicioX,
-                    y + altura * 0.18,
-                    Phaser.Math.Linear(inicioX, finX, progreso.valor),
-                    y - altura * 0.18
-                );
-            },
-            onComplete: () => {
-                mazorca.setVisible(false);
-                destello.setVisible(false);
-                this.mostrarMitadesDemostracion(x, y, altura);
+        this.textoPractica = this.add.text(
+            x,
+            this.alto * 0.76,
+            "¡Desliza sobre la mazorca para abrirla!",
+            {
+                fontFamily: "Trebuchet MS",
+                fontSize: `${this.alto * 0.035}px`,
+                color: "#FFF7D8",
+                fontStyle: "bold",
+                stroke: "#5F3215",
+                strokeThickness: Math.max(6, this.alto * 0.008),
+                align: "center"
             }
+        ).setOrigin(0.5).setDepth(73);
+
+        this.guiaPractica = this.add.graphics().setDepth(72);
+        const inicio = {
+            x: x - altura * 0.58,
+            y: y + altura * 0.24
+        };
+        const fin = {
+            x: x + altura * 0.58,
+            y: y - altura * 0.24
+        };
+        const segmentos = 7;
+
+        this.guiaPractica.lineStyle(
+            Math.max(4, this.alto * 0.006),
+            0xFFFFFF,
+            0.82
+        );
+        for (let indice = 0; indice < segmentos; indice += 2) {
+            const t1 = indice / segmentos;
+            const t2 = Math.min((indice + 1) / segmentos, 1);
+            this.guiaPractica.lineBetween(
+                Phaser.Math.Linear(inicio.x, fin.x, t1),
+                Phaser.Math.Linear(inicio.y, fin.y, t1),
+                Phaser.Math.Linear(inicio.x, fin.x, t2),
+                Phaser.Math.Linear(inicio.y, fin.y, t2)
+            );
+        }
+
+        this.tweenGuiaPractica = this.tweens.add({
+            targets: [this.guiaPractica, this.textoPractica],
+            alpha: 0.38,
+            duration: 650,
+            yoyo: true,
+            repeat: -1,
+            ease: "Sine.InOut"
         });
 
-        this.time.delayedCall(1200, () => {
-            mazorca.destroy();
-            destello.destroy();
-            linea.destroy();
-            this.iniciarNivel();
-        });
-    }
-
-    mostrarMitadesDemostracion(x, y, altura) {
-        const izquierda = this.add.image(
-            x,
-            y,
-            "MazorcaNaranjaMitadIzquierda"
-        ).setDepth(71).setScale((altura * 0.82) / 768);
-        const derecha = this.add.image(
-            x,
-            y,
-            "MazorcaNaranjaMitadDerecha"
-        ).setDepth(71).setScale((altura * 0.82) / 768);
-
-        this.tweens.add({
-            targets: izquierda,
-            x: x - this.ancho * 0.045,
-            angle: -13,
-            alpha: 0,
-            duration: 570,
-            onComplete: () => izquierda.destroy()
-        });
-        this.tweens.add({
-            targets: derecha,
-            x: x + this.ancho * 0.045,
-            angle: 13,
-            alpha: 0,
-            duration: 570,
-            onComplete: () => derecha.destroy()
-        });
+        this.gestorCorte.setHabilitado(true);
     }
 
     iniciarNivel() {
-        if (this.estadoNivel !== "demostracion") return;
+        if (this.estadoNivel !== "resolviendoPractica") return;
 
         this.estadoNivel = "jugando";
+        this.mostrarInterfazJuego(true);
         this.hud.start();
         this.gestorCorte.setHabilitado(true);
         this.programarAparicion(180);
@@ -363,6 +346,11 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
     }
 
     procesarCorte(mazorca, inicio, fin) {
+        if (this.estadoNivel === "practica") {
+            this.procesarCorteTutorial(mazorca, inicio, fin);
+            return;
+        }
+
         if (this.estadoNivel !== "jugando" || !mazorca.puedeCortarse()) return;
 
         this.mostrarLineaCorte(inicio, fin);
@@ -373,6 +361,28 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
         }
 
         this.procesarError(mazorca);
+    }
+
+    procesarCorteTutorial(mazorca, inicio, fin) {
+        if (
+            mazorca !== this.mazorcaTutorial ||
+            !mazorca?.puedeCortarse()
+        ) return;
+
+        this.estadoNivel = "resolviendoPractica";
+        this.gestorCorte.setHabilitado(false);
+        this.tweenGuiaPractica?.stop();
+        this.guiaPractica?.destroy();
+        this.textoPractica?.destroy();
+        this.guiaPractica = null;
+        this.textoPractica = null;
+        this.mostrarLineaCorte(inicio, fin);
+        this.sound.play("sfxAperturaMazorca", { volume: 0.85 });
+
+        mazorca.abrir(() => {
+            this.mazorcaTutorial = null;
+            this.time.delayedCall(180, () => this.iniciarNivel());
+        });
     }
 
     procesarAcierto(mazorca) {
