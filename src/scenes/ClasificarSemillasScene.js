@@ -12,12 +12,12 @@ export const CONFIGURACION_NIVEL = Object.freeze({
     filas: 7,
     columnas: 7,
     minimoTrayectoria: 3,
-    objetivoBuenas: 12,
-    objetivoDanadas: 12,
-    duracionSegundos: 90,
+    objetivoBuenas: 30,
+    objetivoDanadas: 24,
+    duracionSegundos: 60,
     vidasMaximas: 3,
     estrellasMaximas: 3,
-    cantidadBombas: 2,
+    cantidadBombas: 3,
     permiteDiagonales: true,
     duracionResolucionMs: 550
 });

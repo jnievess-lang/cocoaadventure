@@ -16,7 +16,9 @@ export default class TableroClasificacionSemillas extends Phaser.GameObjects.Con
         this.filas = config.filas;
         this.columnas = config.columnas;
         this.tamano = config.tamano;
-        this.margen = this.tamano * 0.065;
+        // El marco aprobado deja un borde estrecho; las celdas ocupan todo el
+        // espacio interior y se tocan entre sí, sin separación adicional.
+        this.margen = this.tamano * (config.proporcionMargenMarco ?? 0.0283);
         this.ladoInterior = this.tamano - this.margen * 2;
         this.tamanoCelda = this.ladoInterior / Math.max(this.filas, this.columnas);
         this.fichas = [];
@@ -31,26 +33,13 @@ export default class TableroClasificacionSemillas extends Phaser.GameObjects.Con
         this.marco.setDisplaySize(this.tamano, this.tamano);
         this.add(this.marco);
 
-        this.celdas = this.scene.add.graphics();
-        this.celdas.lineStyle(Math.max(2, this.tamanoCelda * 0.035), 0x6A3617, 0.72);
+        this.celdas = this.scene.add.container(0, 0);
         for (let fila = 0; fila < this.filas; fila++) {
             for (let columna = 0; columna < this.columnas; columna++) {
                 const pos = this.obtenerPosicion(fila, columna);
-                this.celdas.fillStyle((fila + columna) % 2 ? 0xA95C24 : 0xBC6E2E, 0.28);
-                this.celdas.fillRoundedRect(
-                    pos.x - this.tamanoCelda * 0.45,
-                    pos.y - this.tamanoCelda * 0.45,
-                    this.tamanoCelda * 0.90,
-                    this.tamanoCelda * 0.90,
-                    this.tamanoCelda * 0.10
-                );
-                this.celdas.strokeRoundedRect(
-                    pos.x - this.tamanoCelda * 0.45,
-                    pos.y - this.tamanoCelda * 0.45,
-                    this.tamanoCelda * 0.90,
-                    this.tamanoCelda * 0.90,
-                    this.tamanoCelda * 0.10
-                );
+                const celda = this.scene.add.image(pos.x, pos.y, "CeldaTableroSemillas");
+                celda.setDisplaySize(this.tamanoCelda, this.tamanoCelda);
+                this.celdas.add(celda);
             }
         }
         this.add(this.celdas);
@@ -132,17 +121,26 @@ export default class TableroClasificacionSemillas extends Phaser.GameObjects.Con
     }
 
     resolverTrayectoria(seleccionadas, destino, duracion, alCompletar) {
+        const retardoTotalMaximo = Math.min(140, Math.max(0, duracion - 300));
+        const pasoRetardo = seleccionadas.length > 1
+            ? retardoTotalMaximo / (seleccionadas.length - 1)
+            : 0;
+        const duracionVuelo = Math.max(260, duracion - retardoTotalMaximo - 20);
+
         seleccionadas.forEach((ficha, indice) => {
             this.matriz[ficha.fila][ficha.columna] = null;
             this.fichas[ficha.fila][ficha.columna] = null;
+            // El glow WebGL es útil durante la selección, pero costoso e
+            // innecesario mientras varias fichas se desplazan a la vez.
+            ficha.prepararRecoleccion();
             this.scene.tweens.add({
                 targets: ficha,
                 x: destino.x - this.x,
                 y: destino.y - this.y,
                 scale: 0.28,
                 alpha: 0,
-                duration: Math.max(260, duracion - 130),
-                delay: indice * 35,
+                duration: duracionVuelo,
+                delay: indice * pasoRetardo,
                 ease: "Quad.In",
                 onComplete: () => ficha.destroy(true)
             });

@@ -86,6 +86,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("BombaSemillas", "images/objects/BombaSemillas.webp");
         this.load.image("CanastaSemillas", "images/objects/CanastaSemillas.webp");
         this.load.image("MarcoTableroSemillas", "images/minigames/cosechar/clasificar-semillas/MarcoTableroSemillas.webp");
+        this.load.image("CeldaTableroSemillas", "images/minigames/cosechar/clasificar-semillas/CeldaTableroSemillas.webp");
 
         // Modulo Sembrar: Nivel 1
         this.load.image(
