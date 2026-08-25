@@ -5,6 +5,7 @@ import MainMenuScene from "./scenes/MainMenuScene";
 import ModulesScene from "./scenes/ModulesScene";
 import SembrarScene from "./scenes/SembrarScene";
 import LimpiarTerrenoScene from "./scenes/LimpiarTerrenoScene";
+import PrepararTierraScene from "./scenes/PrepararTierraScene";
 import CosecharScene from "./scenes/CosecharScene";
 import SeleccionarMadurasScene from "./scenes/SeleccionarMadurasScene";
 import CorteCuidadosoScene from "./scenes/CorteCuidadosoScene";
@@ -31,6 +32,7 @@ const config = {
         ModulesScene,
         SembrarScene,
         LimpiarTerrenoScene,
+        PrepararTierraScene,
         CosecharScene,
         SeleccionarMadurasScene,
         CorteCuidadosoScene

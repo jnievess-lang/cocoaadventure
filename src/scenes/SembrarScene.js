@@ -216,7 +216,7 @@ export default class SembrarScene extends Phaser.Scene {
 
             onClick: () => {
 
-                console.log("Nivel 2");
+                this.scene.start("PrepararTierraScene");
 
             }
 

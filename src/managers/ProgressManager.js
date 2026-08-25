@@ -121,6 +121,21 @@ export default class ProgressManager {
 
     }
 
+    static completePrepararTierra(stars) {
+
+        const progress = this.load();
+
+        progress.sembrar.prepararTierra.stars = Math.max(
+            progress.sembrar.prepararTierra.stars,
+            stars
+        );
+
+        progress.sembrar.plantarPlantula.unlocked = true;
+
+        this.save(progress);
+
+    }
+
     static completeSeleccionarMaduras(stars) {
 
         const progress = this.load();
