@@ -166,7 +166,10 @@ export default class CosecharScene extends Phaser.Scene {
                 x: this.width * 0.63,
                 y: this.height * 0.34,
                 label: "CORTE CUIDADOSO",
-                unlocked: false
+                iconTexture: "btnIconoCorteCuidadoso",
+                unlocked: this.progress.cosechar.corteCuidadoso.unlocked,
+                stars: this.progress.cosechar.corteCuidadoso.stars,
+                onClick: () => this.scene.start("CorteCuidadosoScene")
             },
             {
                 x: this.width * 0.42,

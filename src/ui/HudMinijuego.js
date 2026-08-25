@@ -144,6 +144,23 @@ export default class HudMinijuego {
         this.restoreRunningState("instruction");
     }
 
+    reproducirRetroalimentacion(audioKey, onComplete) {
+        if (this.state !== "running" || !audioKey || !this.audio) {
+            onComplete?.();
+            return false;
+        }
+
+        this.suspend("reproduciendoRetroalimentacion");
+        this.audio.playVoice(audioKey, () => {
+            if (this.state !== "reproduciendoRetroalimentacion") return;
+
+            this.restoreRunningState("retroalimentacion");
+            onComplete?.();
+        });
+
+        return true;
+    }
+
     suspend(nextState) {
         this.state = nextState;
         this.timer.pause();
@@ -183,7 +200,11 @@ export default class HudMinijuego {
     stop() {
         if (this.state === "stopped") return;
 
-        if (this.state === "paused" || this.state === "replayingInstruction") {
+        if (
+            this.state === "paused" ||
+            this.state === "replayingInstruction" ||
+            this.state === "reproduciendoRetroalimentacion"
+        ) {
             this.scene.tweens.resumeAll();
         }
 

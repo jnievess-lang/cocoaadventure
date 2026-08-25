@@ -56,7 +56,7 @@ export default class ProgressManager {
 
             const saved = JSON.parse(data);
 
-            return {
+            const progress = {
                 ...defaults,
                 ...saved,
                 sembrar: {
@@ -68,6 +68,16 @@ export default class ProgressManager {
                     ...(saved.cosechar ?? {})
                 }
             };
+
+            if (progress.cosechar.seleccionarMaduras.stars > 0) {
+                progress.cosechar.corteCuidadoso.unlocked = true;
+            }
+
+            if (progress.cosechar.corteCuidadoso.stars > 0) {
+                progress.cosechar.aLaCanasta.unlocked = true;
+            }
+
+            return progress;
 
         }
         catch (error) {
@@ -119,6 +129,23 @@ export default class ProgressManager {
             progress.cosechar.seleccionarMaduras.stars,
             stars
         );
+
+        progress.cosechar.corteCuidadoso.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeCorteCuidadoso(stars) {
+
+        const progress = this.load();
+
+        progress.cosechar.corteCuidadoso.stars = Math.max(
+            progress.cosechar.corteCuidadoso.stars,
+            stars
+        );
+
+        progress.cosechar.aLaCanasta.unlocked = true;
 
         this.save(progress);
 
