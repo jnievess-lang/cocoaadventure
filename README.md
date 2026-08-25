@@ -4,27 +4,33 @@ Videojuego educativo construido con [Phaser 3](https://phaser.io/) y [Vite](http
 
 ## Requisitos previos
 
-- [Node.js](https://nodejs.org/) 18 o superior.
+- [Node.js](https://nodejs.org/) 18 o superior, que incluye `npm`.
 - [pnpm](https://pnpm.io/) como gestor de paquetes.
 
-### Instalar pnpm
+### Verificar e instalar Node.js, npm y pnpm
 
-Si no tienes pnpm instalado en tu computador, elige una de estas opciones:
-
-**Usando npm (viene incluido con Node.js):**
+Primero verifica si ya tienes las herramientas instaladas:
 
 ```bash
-npm install -g pnpm
+node --version
+npm --version
+pnpm --version
 ```
 
-**Usando Corepack (incluido con Node.js 16.13+):**
+**SI NO TIENES NPM, DEBES INSTALAR NODE.JS 18 O SUPERIOR** en tu computadora desde [Node.js](https://nodejs.org/). Luego cierra y vuelve a abrir la terminal y verifica nuevamente:
 
 ```bash
-corepack enable
-corepack prepare pnpm@latest --activate
+node --version
+npm --version
 ```
 
-Verifica que quedó instalado correctamente:
+**DEBES INSTALAR PNPM** para poder instalar las dependencias y ejecutar el proyecto. Si `pnpm --version` no funciona, instálalo usando `npm`:
+
+```bash
+npm install --global pnpm
+```
+
+Después de instalar pnpm, verifica nuevamente que esté disponible:
 
 ```bash
 pnpm --version
@@ -33,11 +39,13 @@ pnpm --version
 ## Instalación del proyecto
 
 1. Clona el repositorio y entra a la carpeta del proyecto.
-2. Instala las dependencias:
+2. **Instala las dependencias antes de ejecutar el proyecto:**
 
    ```bash
    pnpm install
    ```
+
+   Este paso es obligatorio y debe ejecutarse antes de `pnpm dev`.
 
 ## Ejecutar el proyecto
 
@@ -90,15 +98,36 @@ Para mantener el proyecto organizado y evitar romper la rama principal (`main`),
 
 4. **Ejecuta los tests localmente** y verifica que todos pasen antes de continuar.
 
-5. **Si los tests pasan**, sube tu rama y abre un **Pull Request (PR)** hacia `main`:
+5. **Revisa los cambios y prepáralos para el commit:**
 
    ```bash
-   git push origin tipo/nombre-descriptivo
+   git status
+   git add .
    ```
 
-   Al crear el PR se cargará automáticamente la [plantilla de Pull Request](.github/PULL_REQUEST_TEMPLATE.md). Complétala con la información solicitada.
+6. **Crea un commit con un mensaje descriptivo:**
 
-6. **Espera la revisión.** El administrador del repositorio revisará el PR y hará el merge hacia `main` si todo está correcto. No hagas merge de tu propio PR salvo que se te indique lo contrario.
+   ```bash
+   git commit -m "tipo: descripcion breve del cambio"
+   ```
+
+   Ejemplo:
+
+   ```bash
+   git commit -m "docs: actualizar instrucciones de instalacion"
+   ```
+
+   Repite `git add .` y `git commit` cada vez que tengas un grupo de cambios relacionados.
+
+7. **Si los tests pasan, sube tu rama al repositorio remoto:**
+
+   ```bash
+   git push -u origin tipo/nombre-descriptivo
+   ```
+
+8. **Abre un Pull Request (PR)** desde tu rama hacia `main`. Al crear el PR se cargará automáticamente la [plantilla de Pull Request](.github/PULL_REQUEST_TEMPLATE.md). Complétala con la información solicitada.
+
+9. **Espera la revisión.** El administrador del repositorio revisará el PR y hará el merge hacia `main` si todo está correcto. No hagas merge de tu propio PR salvo que se te indique lo contrario.
 
 ### Reglas rápidas
 

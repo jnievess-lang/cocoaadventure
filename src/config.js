@@ -10,6 +10,7 @@ import PlantarPlantula from "./scenes/PlantarPlantula";
 import CosecharScene from "./scenes/CosecharScene";
 import SeleccionarMadurasScene from "./scenes/SeleccionarMadurasScene";
 import CorteCuidadosoScene from "./scenes/CorteCuidadosoScene";
+import AbrirMazorcasScene from "./scenes/AbrirMazorcasScene";
 
 const config = {
     type: Phaser.AUTO,
@@ -37,7 +38,8 @@ const config = {
         PlantarPlantula,
         CosecharScene,
         SeleccionarMadurasScene,
-        CorteCuidadosoScene
+        CorteCuidadosoScene,
+        AbrirMazorcasScene
         ]
 };
 

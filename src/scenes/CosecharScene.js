@@ -174,14 +174,18 @@ export default class CosecharScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.69,
-                label: "A LA CANASTA",
-                unlocked: false
+                label: "ABRIR MAZORCAS",
+                iconTexture: "btnIconoAbrirMazorcas",
+                unlocked: this.progress.cosechar.abrirMazorcas.unlocked,
+                stars: this.progress.cosechar.abrirMazorcas.stars,
+                onClick: () => this.scene.start("AbrirMazorcasScene")
             },
             {
                 x: this.width * 0.63,
                 y: this.height * 0.69,
                 label: "REVISIÓN Y ACOPIO",
-                unlocked: false
+                unlocked: this.progress.cosechar.revisionAcopio.unlocked,
+                stars: this.progress.cosechar.revisionAcopio.stars
             }
         ];
 

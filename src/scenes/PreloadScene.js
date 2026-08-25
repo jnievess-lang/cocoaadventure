@@ -60,6 +60,13 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("TijeraPodaCerrada", "images/objects/TijeraPodaCerrada.webp");
         this.load.image("btnMantenerCorte", "images/buttons/btnMantenerCorte.png");
 
+        // Módulo Cosecha: Nivel 3, abrir mazorcas
+        this.load.image("btnIconoAbrirMazorcas", "images/buttons/btnIconoAbrirMazorcas.png");
+        this.load.image("MazorcaAmarillaMitadIzquierda", "images/minigames/cosechar/abrir-mazorcas/MazorcaAmarillaMitadIzquierda.webp");
+        this.load.image("MazorcaAmarillaMitadDerecha", "images/minigames/cosechar/abrir-mazorcas/MazorcaAmarillaMitadDerecha.webp");
+        this.load.image("MazorcaNaranjaMitadIzquierda", "images/minigames/cosechar/abrir-mazorcas/MazorcaNaranjaMitadIzquierda.webp");
+        this.load.image("MazorcaNaranjaMitadDerecha", "images/minigames/cosechar/abrir-mazorcas/MazorcaNaranjaMitadDerecha.webp");
+
         // Modulo Sembrar: Nivel 1
         this.load.image(
             "MosaicoTierra",
@@ -138,6 +145,10 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("vozCorteCuidadosoFuerzaAlta", "audio/voice/CorteCuidadosoFuerzaAlta.mp3");
         this.load.audio("vozCorteCuidadosoCompletado", "audio/voice/CorteCuidadosoCompletado.mp3");
         this.load.audio("vozCorteCuidadosoTiempoAgotado", "audio/voice/CorteCuidadosoTiempoAgotado.mp3");
+        this.load.audio("sfxAperturaMazorca", "audio/sfx/AperturaMazorca.m4a");
+        this.load.audio("vozAbrirMazorcasInstruccion", "audio/voice/AbrirMazorcasInstruccion.mp3");
+        this.load.audio("vozAbrirMazorcasCompletado", "audio/voice/AbrirMazorcasCompletado.mp3");
+        this.load.audio("vozAbrirMazorcasTiempoAgotado", "audio/voice/AbrirMazorcasTiempoAgotado.mp3");
         this.load.audio("vozPrepararTierra", "audio/voice/PrepararTierra.mp3");
         this.load.audio("vozPlantarPlantula", "audio/voice/PlantarPlantula.mp3");
     }
