@@ -22,10 +22,12 @@ const MITADES = Object.freeze({
 export default class MazorcaVoladora extends Phaser.GameObjects.Container {
 
     constructor(scene, config) {
+        const inicio = config.posicion ?? config.trayectoria.inicio;
+
         super(
             scene,
-            config.trayectoria.inicio.x,
-            config.trayectoria.inicio.y
+            inicio.x,
+            inicio.y
         );
         scene.add.existing(this);
 
@@ -40,13 +42,14 @@ export default class MazorcaVoladora extends Phaser.GameObjects.Container {
         this.alturaVisual = config.alturaVisual;
         this.trayectoria = config.trayectoria;
         this.duracionVueloMs = config.duracionVueloMs;
+        this.estatica = config.estatica ?? false;
         this.progresoVuelo = { valor: 0 };
         this.tweensDestello = [];
 
         this.setDepth(config.depth ?? 20);
         this.crearSprite();
         if (this.madura) this.crearDestellos();
-        this.iniciarVuelo();
+        if (!this.estatica) this.iniciarVuelo();
     }
 
     crearSprite() {

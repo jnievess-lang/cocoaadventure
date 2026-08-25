@@ -45,7 +45,7 @@ Tras perder una vida existe una protección global de 800 ms. Durante ella los o
 
 ## Tutorial y audio
 
-Cacaíto presenta la instrucción, desaparece y da paso a una demostración automática de 1,2 segundos. La partida comienza después de la demostración, sin botón “Jugar”.
+Cacaíto presenta la instrucción y desaparece. Después aparece una mazorca madura estática con una guía visual y el mensaje “¡Desliza sobre la mazorca para abrirla!”. El niño debe realizar personalmente el gesto correcto; no existen tiempo, puntos ni penalizaciones durante esta práctica. El reloj, los corazones, el contador y los controles permanecen ocultos para dejar claro que el nivel todavía no empezó. La partida y el HUD comienzan únicamente después de que la mazorca tutorial se abre, sin botón “Jugar”.
 
 | Archivo | Texto o función |
 | --- | --- |
