@@ -26,5 +26,21 @@ test("un trofeo exige tres estrellas en todos los niveles de su módulo", () => 
 });
 
 test("un módulo sin niveles registrados no concede un trofeo", () => {
-    assert.equal(ProgressManager.isModulePerfect("procesar"), false);
+    // Procesar ya tiene sus cuatro niveles registrados, así que la invariante
+    // se comprueba con una clave que no existe en la lista de logros.
+    assert.equal(ProgressManager.isModulePerfect("moduloInexistente"), false);
+});
+
+test("el trofeo de Procesar exige tres estrellas en sus cuatro niveles", () => {
+    const progress = ProgressManager.getDefaultProgress();
+
+    progress.procesar.secado.stars = 3;
+    progress.procesar.tostado.stars = 3;
+    progress.procesar.descascarillado.stars = 3;
+
+    assert.equal(ProgressManager.isModulePerfect("procesar", progress), false);
+
+    progress.procesar.molienda.stars = 3;
+
+    assert.equal(ProgressManager.isModulePerfect("procesar", progress), true);
 });

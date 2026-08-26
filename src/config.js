@@ -17,6 +17,11 @@ import RegarScene from "./scenes/RegarScene";
 import MalezasScene from "./scenes/MalezasScene";
 import PlagasScene from "./scenes/PlagasScene";
 import CuidadoCorrectoScene from "./scenes/CuidadoCorrectoScene";
+import ProcesarScene from "./scenes/ProcesarScene";
+import SecarGranosScene from "./scenes/SecarGranosScene";
+import TostarScene from "./scenes/TostarScene";
+import DescascarillarScene from "./scenes/DescascarillarScene";
+import MolerScene from "./scenes/MolerScene";
 import LogrosScene from "./scenes/LogrosScene";
 import ConfiguracionScene from "./scenes/ConfiguracionScene";
 
@@ -57,7 +62,12 @@ const config = {
         RegarScene,
         MalezasScene,
         PlagasScene,
-        CuidadoCorrectoScene
+        CuidadoCorrectoScene,
+        ProcesarScene,
+        SecarGranosScene,
+        TostarScene,
+        DescascarillarScene,
+        MolerScene
         ]
 };
 

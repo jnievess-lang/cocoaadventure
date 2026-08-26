@@ -212,7 +212,7 @@ export default class ModulesScene extends Phaser.Scene {
 
             () => {
 
-                console.log("Procesar");
+                this.scene.start("ProcesarScene");
 
             }
 

@@ -12,9 +12,7 @@ const ACHIEVEMENT_LEVELS = {
         "abrirMazorcas",
         "revisionAcopio"
     ],
-    // Procesar aún no tiene niveles implementados; por eso su trofeo permanece
-    // oculto hasta que se registren sus niveles reales en esta lista.
-    procesar: []
+    procesar: ["secado", "tostado", "descascarillado", "molienda"]
 };
 
 export default class ProgressManager {
@@ -64,6 +62,15 @@ export default class ProgressManager {
                 plagas: { unlocked: false, stars: 0 },
                 cuidadoCorrecto: { unlocked: false, stars: 0 }
 
+            },
+
+            procesar: {
+
+                secado: { unlocked: true, stars: 0 },
+                tostado: { unlocked: false, stars: 0 },
+                descascarillado: { unlocked: false, stars: 0 },
+                molienda: { unlocked: false, stars: 0 }
+
             }
 
         };
@@ -102,6 +109,10 @@ export default class ProgressManager {
                 mantener: {
                     ...defaults.mantener,
                     ...(saved.mantener ?? {})
+                },
+                procesar: {
+                    ...defaults.procesar,
+                    ...(saved.procesar ?? {})
                 }
             };
 
@@ -137,6 +148,18 @@ export default class ProgressManager {
 
             if (progress.mantener.plagas.stars > 0) {
                 progress.mantener.cuidadoCorrecto.unlocked = true;
+            }
+
+            if (progress.procesar.secado.stars > 0) {
+                progress.procesar.tostado.unlocked = true;
+            }
+
+            if (progress.procesar.tostado.stars > 0) {
+                progress.procesar.descascarillado.unlocked = true;
+            }
+
+            if (progress.procesar.descascarillado.stars > 0) {
+                progress.procesar.molienda.unlocked = true;
             }
 
             return progress;
@@ -335,6 +358,64 @@ export default class ProgressManager {
 
         progress.mantener.cuidadoCorrecto.stars = Math.max(
             progress.mantener.cuidadoCorrecto.stars,
+            stars
+        );
+
+        this.save(progress);
+
+    }
+
+    static completeSecado(stars) {
+
+        const progress = this.load();
+
+        progress.procesar.secado.stars = Math.max(
+            progress.procesar.secado.stars,
+            stars
+        );
+
+        progress.procesar.tostado.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeTostado(stars) {
+
+        const progress = this.load();
+
+        progress.procesar.tostado.stars = Math.max(
+            progress.procesar.tostado.stars,
+            stars
+        );
+
+        progress.procesar.descascarillado.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeDescascarillado(stars) {
+
+        const progress = this.load();
+
+        progress.procesar.descascarillado.stars = Math.max(
+            progress.procesar.descascarillado.stars,
+            stars
+        );
+
+        progress.procesar.molienda.unlocked = true;
+
+        this.save(progress);
+
+    }
+
+    static completeMolienda(stars) {
+
+        const progress = this.load();
+
+        progress.procesar.molienda.stars = Math.max(
+            progress.procesar.molienda.stars,
             stars
         );
 
