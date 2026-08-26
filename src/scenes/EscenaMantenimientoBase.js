@@ -49,7 +49,7 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
             this.nivel.fondo
         );
 
-        // Los fondos del módulo son más anchos que el lienzo de 1920 × 1080.
+        // Los fondos del módulo son más anchos que el lienzo real del dispositivo.
         // Se escalan a "cover" y la mecánica se mantiene en la zona central.
         fondo.setScale(
             Math.max(this.ancho / fondo.width, this.alto / fondo.height)

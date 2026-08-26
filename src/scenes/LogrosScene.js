@@ -52,7 +52,7 @@ export default class LogrosScene extends Phaser.Scene {
             "FondoTrofeos"
         );
 
-        // Conserva la proporción y cubre por completo el lienzo 1920 x 1080.
+        // Conserva la proporción y cubre por completo el lienzo, sea cual sea su tamaño real.
         background.setScale(Math.max(
             this.width / background.width,
             this.height / background.height

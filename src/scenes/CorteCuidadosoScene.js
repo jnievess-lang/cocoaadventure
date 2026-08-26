@@ -75,7 +75,7 @@ export default class CorteCuidadosoScene extends Phaser.Scene {
 
     crearContador() {
         this.panelContador = this.add.rectangle(
-            this.ancho * 0.16,
+            this.ancho * 0.13,
             this.alto * 0.155,
             this.ancho * 0.15,
             this.alto * 0.06,
@@ -89,14 +89,14 @@ export default class CorteCuidadosoScene extends Phaser.Scene {
         );
 
         const icono = this.add.image(
-            this.ancho * 0.125,
+            this.ancho * 0.095,
             this.alto * 0.155,
             "MazorcaMaduraNaranja"
         );
         icono.setScale((this.alto * 0.044) / icono.height).setDepth(51);
 
         this.textoContador = this.add.text(
-            this.ancho * 0.175,
+            this.ancho * 0.145,
             this.alto * 0.155,
             `0 / ${CONFIGURACION_NIVEL.totalMazorcas}`,
             {

@@ -42,11 +42,11 @@ export default class HudMinijuego {
     createControls(config = {}) {
         const width = this.scene.scale.width;
         const height = this.scene.scale.height;
-        const buttonWidth = Math.min(width * 0.055, height * 0.09);
+        const buttonWidth = Math.min(width * 0.07, height * 0.115);
         const common = {
             displayWidth: buttonWidth,
-            hitWidth: width * 0.085,
-            hitHeight: height * 0.12,
+            hitWidth: width * 0.10,
+            hitHeight: height * 0.145,
             depth: 51
         };
 

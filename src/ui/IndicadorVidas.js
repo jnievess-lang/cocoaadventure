@@ -18,7 +18,7 @@ export default class IndicadorVidas extends Phaser.GameObjects.Container {
             (availableWidth / this.maxLives) * 0.84
         );
         const spacing = heartWidth * 1.12;
-        const centerX = scene.scale.width * (config.centerX ?? 0.16);
+        const centerX = scene.scale.width * (config.centerX ?? 0.13);
         const centerY = scene.scale.height * (config.centerY ?? 0.065);
         const startX = centerX - spacing * (this.maxLives - 1) / 2;
 

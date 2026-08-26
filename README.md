@@ -138,3 +138,4 @@ Para mantener el proyecto organizado y evitar romper la rama principal (`main`),
 ## Documentación del proyecto
 
 - [Plan y guía de recursos](docs/plan_guia.md): reglas para crear, reutilizar y organizar audios, imágenes y assets de minijuegos.
+- [Guía para probar en Android](docs/guia_pruebas_android.md): cómo conectar un celular por USB o WiFi, ejecutar la app con `pnpm dev:android` y generar un APK para compartir con `pnpm g:android`. Incluye una [guía alterna con emulador](docs/guia_emulador_android.md) para quien no quiera usar un celular físico.

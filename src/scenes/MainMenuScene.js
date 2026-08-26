@@ -96,7 +96,7 @@ export default class MainMenuScene extends Phaser.Scene {
 
         );
 
-        const desiredLogoWidth = this.width * 0.35;
+        const desiredLogoWidth = this.width * 0.30;
 
         this.logo.setScale(
 

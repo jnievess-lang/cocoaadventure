@@ -42,11 +42,6 @@ export default class FichaSemilla extends Phaser.GameObjects.Container {
         this.sprite.setScale((this.tamanoCelda * proporcion) / this.sprite.height);
         this.add([this.haloSeleccion, this.sprite]);
 
-        this.efectoBrillo = null;
-        if (this.tipo !== "bomba" && scene.game.renderer.type === Phaser.WEBGL && this.sprite.preFX) {
-            this.efectoBrillo = this.sprite.preFX.addGlow(colorResaltado, 2.2, 0.18, false);
-            this.efectoBrillo.setActive(false);
-        }
         this.setDepth(config.depth ?? 25);
     }
 
@@ -61,7 +56,6 @@ export default class FichaSemilla extends Phaser.GameObjects.Container {
         this.seleccionada = seleccionada;
         this.scene.tweens.killTweensOf(this);
         this.scene.tweens.killTweensOf(this.haloSeleccion);
-        this.efectoBrillo?.setActive(seleccionada);
         this.scene.tweens.add({
             targets: this,
             scale: seleccionada ? 1.10 : 1,
@@ -70,8 +64,8 @@ export default class FichaSemilla extends Phaser.GameObjects.Container {
         });
         this.scene.tweens.add({
             targets: this.haloSeleccion,
-            alpha: seleccionada ? 0.20 : 0,
-            scale: seleccionada ? 1.12 : 0.94,
+            alpha: seleccionada ? 0.60 : 0,
+            scale: seleccionada ? 1.28 : 0.94,
             duration: 140,
             ease: "Sine.Out"
         });
@@ -83,7 +77,6 @@ export default class FichaSemilla extends Phaser.GameObjects.Container {
         this.scene.tweens.killTweensOf(this);
         this.scene.tweens.killTweensOf(this.haloSeleccion);
         this.haloSeleccion.setAlpha(0);
-        this.efectoBrillo?.setActive(false);
     }
 
     explotar(alCompletar) {

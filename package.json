@@ -9,10 +9,13 @@
     "test": "node --test",
     "preview": "vite preview",
     "dev:android": "vite build && npx cap sync android && android\\gradlew.bat -p android assembleDebug && adb install -r android/app/build/outputs/apk/debug/app-debug.apk && adb shell monkey -p com.cocoaadventure.app -c android.intent.category.LAUNCHER 1",
-    "pro:android": "vite build && npx cap sync android && android\\gradlew.bat -p android assembleRelease && adb install -r android/app/build/outputs/apk/release/app-release.apk && adb shell monkey -p com.cocoaadventure.app -c android.intent.category.LAUNCHER 1"
+    "pro:android": "vite build && npx cap sync android && android\\gradlew.bat -p android assembleRelease && adb install -r android/app/build/outputs/apk/release/app-release.apk && adb shell monkey -p com.cocoaadventure.app -c android.intent.category.LAUNCHER 1",
+    "g:android": "vite build && npx cap sync android && android\\gradlew.bat -p android assembleRelease && copy android\\app\\build\\outputs\\apk\\release\\app-release.apk CocoaAdventure.apk"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.5.0",
+    "sharp": "^0.35.3",
     "vite": "^8.1.0"
   },
   "dependencies": {

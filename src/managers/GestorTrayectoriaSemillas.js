@@ -159,11 +159,11 @@ export default class GestorTrayectoriaSemillas {
         }
 
         for (let indice = 1; indice < puntos.length; indice++) {
-            this.grafico.lineStyle(Math.max(14, this.scene.scale.height * 0.019), colorHalo, 0.22);
+            this.grafico.lineStyle(Math.max(22, this.scene.scale.height * 0.030), colorHalo, 0.40);
             this.grafico.lineBetween(puntos[indice - 1].x, puntos[indice - 1].y, puntos[indice].x, puntos[indice].y);
-            this.grafico.lineStyle(Math.max(9, this.scene.scale.height * 0.012), colorExterior, 0.72);
+            this.grafico.lineStyle(Math.max(14, this.scene.scale.height * 0.019), colorExterior, 0.88);
             this.grafico.lineBetween(puntos[indice - 1].x, puntos[indice - 1].y, puntos[indice].x, puntos[indice].y);
-            this.grafico.lineStyle(Math.max(3, this.scene.scale.height * 0.0045), colorInterior, 0.90);
+            this.grafico.lineStyle(Math.max(6, this.scene.scale.height * 0.008), colorInterior, 0.95);
             this.grafico.lineBetween(puntos[indice - 1].x, puntos[indice - 1].y, puntos[indice].x, puntos[indice].y);
         }
 
