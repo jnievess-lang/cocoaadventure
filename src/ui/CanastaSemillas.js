@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { calcularEtapaLlenadoCanasta } from "../utils/calcularEtapaLlenadoCanasta";
 
 export default class CanastaSemillas extends Phaser.GameObjects.Container {
 
@@ -9,6 +10,16 @@ export default class CanastaSemillas extends Phaser.GameObjects.Container {
         this.objetivo = config.objetivo;
         this.valor = 0;
         this.tipo = config.tipo;
+        const prefijoTipo = config.tipo === "buena"
+            ? "CanastaSemillasBuenasNivel"
+            : "CanastaSemillasDanadasNivel";
+        this.clavesCanasta = config.clavesCanasta ?? [
+            "CanastaSemillas",
+            `${prefijoTipo}1`,
+            `${prefijoTipo}2`,
+            `${prefijoTipo}3`
+        ];
+        this.etapaLlenado = 0;
         this.color = config.tipo === "buena" ? 0x4E9B35 : 0xA9472A;
         this.setDepth(config.depth ?? 30);
 
@@ -18,6 +29,7 @@ export default class CanastaSemillas extends Phaser.GameObjects.Container {
 
         this.imagen = scene.add.image(0, alto * 0.04, "CanastaSemillas");
         this.imagen.setScale(ancho / this.imagen.width);
+        this.escalaImagenBase = this.imagen.scaleX;
 
         this.etiqueta = scene.add.rectangle(0, yEtiqueta, ancho * 0.84, alto * 0.22, this.color, 0.98)
             .setStrokeStyle(Math.max(3, alto * 0.025), 0x5D3017, 1);
@@ -65,8 +77,35 @@ export default class CanastaSemillas extends Phaser.GameObjects.Container {
     establecerValor(valor) {
         this.valor = Math.min(this.objetivo, Math.max(0, valor));
         this.textoContador.setText(`${this.valor} / ${this.objetivo}`);
+
+        const nuevaEtapa = calcularEtapaLlenadoCanasta(
+            this.valor,
+            this.objetivo,
+            this.clavesCanasta.length - 1
+        );
+        if (nuevaEtapa !== this.etapaLlenado) {
+            this.etapaLlenado = nuevaEtapa;
+            this.imagen.setTexture(this.clavesCanasta[nuevaEtapa]);
+        }
+
+        this.scene.tweens.killTweensOf([
+            this.imagen,
+            this.panelContador,
+            this.textoContador
+        ]);
+        this.imagen.setScale(this.escalaImagenBase);
+        this.panelContador.setScale(1);
+        this.textoContador.setScale(1);
+
         this.scene.tweens.add({
-            targets: [this.imagen, this.panelContador, this.textoContador],
+            targets: this.imagen,
+            scaleX: this.escalaImagenBase * 1.06,
+            scaleY: this.escalaImagenBase * 1.06,
+            duration: 120,
+            yoyo: true
+        });
+        this.scene.tweens.add({
+            targets: [this.panelContador, this.textoContador],
             scaleX: 1.06,
             scaleY: 1.06,
             duration: 120,
