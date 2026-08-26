@@ -61,6 +61,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("CorazonVacio", "images/ui/CorazonVacio.png");
         this.load.image("PanelTemporizador", "images/ui/PanelTemporizador.png");
         this.load.image("btnRepetirAudio", "images/ui/btnRepetirAudio.png");
+        this.load.image("ManoIndicadoraTutorial", "images/ui/ManoIndicadoraTutorial.png");
         this.load.image("btnIconoMazorcasListas", "images/buttons/btnIconoMazorcasListas.png");
 
         // Módulo Cosecha: Nivel 2, corte cuidadoso

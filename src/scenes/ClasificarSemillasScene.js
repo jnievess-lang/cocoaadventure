@@ -4,6 +4,7 @@ import GestorAudioMinijuego from "../managers/GestorAudioMinijuego";
 import GestorTrayectoriaSemillas from "../managers/GestorTrayectoriaSemillas";
 import TutorialPanel from "../ui/TutorialPanel";
 import ResultPanel from "../ui/ResultPanel";
+import ManoGuia from "../ui/ManoGuia";
 import TableroClasificacionSemillas from "../ui/TableroClasificacionSemillas";
 import CanastaSemillas from "../ui/CanastaSemillas";
 import ProgressManager from "../managers/ProgressManager";
@@ -175,11 +176,38 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
                 strokeThickness: Math.max(6, this.alto * 0.008)
             }
         ).setOrigin(0.5).setDepth(90);
+
+        const fichasPractica = this.tablero.fichas.flat().filter(Boolean);
+        const primeraFicha = fichasPractica[0];
+        const ultimaFicha = fichasPractica.at(-1);
+        if (primeraFicha && ultimaFicha) {
+            this.manoGuiaPractica = new ManoGuia(this, {
+                anchoVisual: this.alto * 0.14,
+                radioCirculo: this.tablero.tamanoCelda * 0.38,
+                depth: 95
+            });
+            this.manoGuiaPractica.mostrarDeslizamiento(
+                {
+                    x: this.tablero.x + primeraFicha.x,
+                    y: this.tablero.y + primeraFicha.y
+                },
+                {
+                    x: this.tablero.x + ultimaFicha.x,
+                    y: this.tablero.y + ultimaFicha.y
+                },
+                {
+                    duracionMovimientoMs: 1150,
+                    pausaEntreRepeticionesMs: 450
+                }
+            );
+        }
         this.gestorTrayectoria.setHabilitado(true);
     }
 
     iniciarNivelReal() {
         this.estadoNivel = "jugando";
+        this.manoGuiaPractica?.destroy(true);
+        this.manoGuiaPractica = null;
         this.textoPractica?.destroy();
         this.canastaDanada.setVisible(true);
         this.hud.setVisible(true);
@@ -211,6 +239,8 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
     procesarTrayectoriaValida(seleccion) {
         if (this.estadoNivel === "practica") {
             this.estadoNivel = "resolviendo";
+            this.manoGuiaPractica?.destroy(true);
+            this.manoGuiaPractica = null;
             this.gestorTrayectoria.setHabilitado(false);
             this.tablero.setHabilitado(false);
             this.reproducirRecoleccion();
@@ -405,6 +435,7 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         document.addEventListener("visibilitychange", this.manejarVisibilidad);
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             document.removeEventListener("visibilitychange", this.manejarVisibilidad);
+            this.manoGuiaPractica?.destroy(true);
             this.gestorTrayectoria?.destroy();
             this.sonidoRecoleccion?.destroy();
             this.sonidoBomba?.destroy();
