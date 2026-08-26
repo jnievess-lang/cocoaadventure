@@ -85,7 +85,7 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
 
     crearContador() {
         this.panelContador = this.add.rectangle(
-            this.ancho * 0.16,
+            this.ancho * 0.13,
             this.alto * 0.145,
             this.ancho * 0.15,
             this.alto * 0.058,
@@ -99,7 +99,7 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
         );
 
         this.iconoContador = this.add.image(
-            this.ancho * 0.125,
+            this.ancho * 0.095,
             this.alto * 0.145,
             "MazorcaMaduraNaranja"
         );
@@ -108,7 +108,7 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
             .setDepth(53);
 
         this.textoContador = this.add.text(
-            this.ancho * 0.176,
+            this.ancho * 0.146,
             this.alto * 0.145,
             `0 / ${CONFIGURACION_NIVEL.objetivoMazorcas}`,
             {

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# APK generado por `pnpm g:android` para compartir con otras personas
+*.apk
+
 # Fuentes, candidatos y descartes generados durante el diseño local
 design/
 

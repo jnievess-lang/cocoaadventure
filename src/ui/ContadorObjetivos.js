@@ -16,7 +16,7 @@ export default class ContadorObjetivos extends Phaser.GameObjects.Container {
 
         const ancho = scene.scale.width;
         const alto = scene.scale.height;
-        const centroX = ancho * (config.centerX ?? 0.16);
+        const centroX = ancho * (config.centerX ?? 0.13);
         const centroY = alto * (config.centerY ?? 0.155);
 
         this.panel = scene.add.rectangle(

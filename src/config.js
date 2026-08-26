@@ -30,9 +30,11 @@ const config = {
 
     backgroundColor: "#8FD3FF",
 
+    // El tamaño real del lienzo (con ajuste por densidad de píxeles) se
+    // controla a mano en main.js mediante scale.resize(); ver el comentario
+    // allí para el motivo.
     scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.NONE
     },
 
         scene: [

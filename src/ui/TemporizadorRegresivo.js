@@ -17,7 +17,7 @@ export default class TemporizadorRegresivo extends Phaser.GameObjects.Container 
         const width = scene.scale.width;
         const height = scene.scale.height;
         const centerX = width * (config.centerX ?? 0.5);
-        const centerY = height * (config.centerY ?? 0.075);
+        const centerY = height * (config.centerY ?? 0.105);
 
         this.panel = scene.add.image(
             centerX,
@@ -25,16 +25,16 @@ export default class TemporizadorRegresivo extends Phaser.GameObjects.Container 
             config.panelTexture ?? "PanelTemporizador"
         );
         this.panel.setScale(
-            (width * (config.displayWidth ?? 0.18)) / this.panel.width
+            (width * (config.displayWidth ?? 0.155)) / this.panel.width
         );
 
         this.text = scene.add.text(
-            width * (config.textX ?? 0.527),
+            width * (config.textX ?? 0.523),
             centerY,
             this.formatTime(this.remainingTime),
             {
                 fontFamily: "Trebuchet MS",
-                fontSize: `${height * (config.fontSize ?? 0.034)}px`,
+                fontSize: `${height * (config.fontSize ?? 0.044)}px`,
                 color: "#FFFFFF",
                 fontStyle: "bold"
             }

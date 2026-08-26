@@ -109,8 +109,16 @@ export default class HarvestLevelCard extends Phaser.GameObjects.Container {
             this.config.iconTexture
         );
 
-        const iconWidth = this.scene.scale.width * 0.14;
-        icon.setScale(iconWidth / icon.width);
+        // Se limitan tanto el ancho como el alto disponibles dentro de la
+        // tarjeta (no solo el ancho) para que el icono nunca sobresalga de su
+        // marco, sin importar la proporción del icono ni la del dispositivo.
+        const maxIconWidth = this.cardWidth * 0.80;
+        const maxIconHeight = this.cardHeight * 0.72;
+        const iconScale = Math.min(
+            maxIconWidth / icon.width,
+            maxIconHeight / icon.height
+        );
+        icon.setScale(iconScale);
 
         this.add(icon);
 

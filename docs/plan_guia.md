@@ -8,8 +8,9 @@ Esta guía define cómo crear, reutilizar, nombrar y ubicar los recursos del jue
 2. La categoría semántica manda. Un personaje pertenece a `characters/` aunque se use en un solo minijuego.
 3. Un recurso debe tener una sola fuente de verdad. No se deben guardar copias de la misma imagen en varias carpetas públicas.
 4. Los recursos de producción viven en `public/`. Los archivos fuente, candidatos y descartes locales de `design/` no se publican ni se incluyen en Git.
-5. Todo recurso debe funcionar en pantallas táctiles y en el lienzo lógico de 1920 × 1080 configurado con `Phaser.Scale.FIT`.
-6. El audio complementa la experiencia, pero nunca puede ser la única forma de comunicar una instrucción o resultado.
+5. Todo recurso debe funcionar en pantallas táctiles y en el lienzo real de cada dispositivo. El juego usa `Phaser.Scale.NONE`: el lienzo no tiene un tamaño lógico fijo tipo 1920 × 1080, sino que `src/main.js` lo ajusta en tiempo real a la resolución física del celular (ancho, alto y densidad de píxeles). Esto implica que la proporción de pantalla varía por dispositivo y no puede asumirse 16:9 ni ninguna otra fija.
+6. Cuando el tamaño o la posición de un recurso dependen de otro (por ejemplo, un objeto que se ubica sobre un personaje, un árbol o un tablero), ambos deben calcularse a partir de la misma dimensión de referencia de ese contenedor (su `displayWidth` o su `displayHeight` reales), nunca mezclando uno basado en el ancho de la escena y el otro en su alto. Como la proporción de pantalla cambia entre dispositivos, mezclar bases distintas rompe la relación espacial entre ambos recursos en algunas proporciones aunque funcione en otras.
+7. El audio complementa la experiencia, pero nunca puede ser la única forma de comunicar una instrucción o resultado.
 
 ## 2. Arquitectura de audio
 
@@ -307,7 +308,7 @@ Reglas de implementación:
 
 ### Implementación reutilizable del HUD
 
-No copiar los métodos de vidas, cronómetro, pausa o repetición dentro de una escena. El componente `src/ui/HudMinijuego.js` compone y coordina los elementos comunes. La escena solamente entrega configuración y callbacks para sus objetos particulares.
+No copiar los métodos de vidas, cronómetro, pausa, repetición o del contador de objetivos dentro de una escena. El componente `src/ui/HudMinijuego.js` compone y coordina vidas, cronómetro y controles; la escena solamente entrega configuración y callbacks para sus objetos particulares. El panel de progreso "icono + hechos / total" debe construirse siempre con `src/ui/ContadorObjetivos.js`, nunca dibujando de nuevo un rectángulo, un icono y un texto propios dentro de la escena: dos instancias del mismo panel con posiciones escritas a mano en escenas distintas terminan desalineadas entre sí en cuanto una de las dos cambia.
 
 ```js
 import HudMinijuego from "../ui/HudMinijuego";
@@ -507,6 +508,7 @@ mezclarla con estilos planos dentro de una misma pantalla.
 - No depender únicamente del color: separar los objetos del follaje, mantener siluetas reconocibles y añadir indicadores visuales cuando sea necesario.
 - Las zonas táctiles deben ser cómodas en celular aunque el sprite visible sea pequeño.
 - Revisar cada composición en horizontal y con el escalado de Phaser, no únicamente viendo el PNG aislado.
+- No usar los efectos `preFX`/`postFX` de Phaser (`addGlow`, `addShadow`, `addBlur`, etc.) sobre sprites del juego: requieren capacidades de WebGL2 o extensiones que varios celulares Android de gama media con WebGL1 no soportan de forma confiable, y en lugar de fallar limpiamente pueden corromper el sprite. Para resaltar una selección, usar un elemento adicional (círculo o elipse) con `setBlendMode(Phaser.BlendModes.ADD)` y alfa animado, como ya hace `FichaSemilla`.
 
 ### Convenciones de nombres
 

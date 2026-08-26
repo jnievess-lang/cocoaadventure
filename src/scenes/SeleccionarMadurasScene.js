@@ -90,7 +90,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
     createHud() {
 
         this.progressPanel = this.add.rectangle(
-            this.width * 0.16,
+            this.width * 0.13,
             this.height * 0.155,
             this.width * 0.15,
             this.height * 0.06,
@@ -105,7 +105,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         );
 
         const podIcon = this.add.image(
-            this.width * 0.125,
+            this.width * 0.095,
             this.height * 0.155,
             "MazorcaMaduraAmarilla"
         );
@@ -115,7 +115,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
             .setDepth(51);
 
         this.progressText = this.add.text(
-            this.width * 0.175,
+            this.width * 0.145,
             this.height * 0.155,
             `0 / ${this.totalRipe}`,
             {
@@ -247,7 +247,12 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         const treeLeft = this.tree.x - this.tree.displayWidth / 2;
         const treeTop = this.tree.y - this.tree.displayHeight / 2;
-        const podDisplayWidth = this.width * 0.068;
+        // El tamaño de las mazorcas se ancla al ancho real del árbol (no al
+        // ancho de pantalla): el árbol se escala según el alto disponible, así
+        // que en pantallas muy anchas un tamaño basado en el ancho de pantalla
+        // agranda las mazorcas más que al árbol y el árbol se queda sin
+        // combinaciones de posiciones sin superposición.
+        const podDisplayWidth = this.tree.displayWidth * 0.0916;
         const podDisplayHeight = podDisplayWidth * 1.5;
 
         const validLayouts = this.buildValidPodLayouts(
