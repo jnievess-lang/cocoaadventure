@@ -21,6 +21,14 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
         this.nivel = configuracionNivel;
     }
 
+    /**
+     * Pantalla de niveles a la que vuelve el nivel al salir o al terminar.
+     * Los niveles de Mantener no la declaran y conservan su destino original.
+     */
+    get escenaModulo() {
+        return this.nivel.escenaModulo ?? "MantenerScene";
+    }
+
     create() {
         const { width, height } = this.scale;
 
@@ -89,7 +97,7 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
             onLivesEmpty: () => this.fallarNivel("vidas"),
             onGameplaySuspended: razon => this.suspenderJuego(razon),
             onGameplayResumed: razon => this.reanudarJuego(razon),
-            onExit: () => this.scene.start("MantenerScene")
+            onExit: () => this.scene.start(this.escenaModulo)
         });
     }
 
@@ -191,7 +199,7 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
             retryText: "Reintentar",
             nextText: "Niveles",
             onRetry: () => this.scene.restart(),
-            onNext: () => this.scene.start("MantenerScene")
+            onNext: () => this.scene.start(this.escenaModulo)
         });
     }
 
