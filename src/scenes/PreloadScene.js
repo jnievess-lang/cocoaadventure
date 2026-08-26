@@ -233,6 +233,53 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("vozCuidadoCorrectoAyuda", "audio/voice/CuidadoCorrectoAyuda.mp3");
         this.load.audio("vozCuidadoCorrectoCompletado", "audio/voice/CuidadoCorrectoCompletado.mp3");
         this.load.audio("vozCuidadoCorrectoTiempoAgotado", "audio/voice/CuidadoCorrectoTiempoAgotado.mp3");
+
+        // ==========================
+        // Módulo Procesar
+        // ==========================
+
+        // Reutiliza de Cosecha: SemillaCacaoBuena como nib limpio,
+        // IndicadorCorrecto e IndicadorError, y todo el HUD.
+
+        // Fondos de los cuatro niveles
+        this.load.image("FondoTendalSecado", "images/background/FondoTendalSecado.webp");
+        this.load.image("FondoTostadora", "images/background/FondoTostadora.webp");
+        this.load.image("FondoDescascarillado", "images/background/FondoDescascarillado.webp");
+        this.load.image("FondoMolienda", "images/background/FondoMolienda.webp");
+
+        // Nivel 1: secar granos
+        this.load.image("CanastaSecadoVacia", "images/minigames/procesar/secado/CanastaSecadoVacia.webp");
+        this.load.image("CanastaSecadoBuenos", "images/minigames/procesar/secado/CanastaSecadoBuenos.webp");
+        this.load.image("CanastaSecadoDanados", "images/minigames/procesar/secado/CanastaSecadoDanados.webp");
+        this.load.image("GranoSecoBueno", "images/minigames/procesar/secado/GranoSecoBueno.webp");
+        this.load.image("GranoSecoAgrietado", "images/minigames/procesar/secado/GranoSecoAgrietado.webp");
+
+        // Nivel 2: tostar
+        this.load.image("BarraTueste", "images/minigames/procesar/tostado/BarraTueste.webp");
+
+        // Nivel 4: moler
+        this.load.image("Molino", "images/minigames/procesar/molienda/Molino.webp");
+        this.load.image("TazonChocolate", "images/minigames/procesar/molienda/TazonChocolate.webp");
+        this.load.image("BarraChocolate", "images/minigames/procesar/molienda/BarraChocolate.webp");
+        this.load.image("Azucar", "images/minigames/procesar/molienda/Azucar.webp");
+        this.load.image("Leche", "images/minigames/procesar/molienda/Leche.webp");
+        this.load.image("MantecaCacao", "images/minigames/procesar/molienda/MantecaCacao.webp");
+
+        // Voces del módulo Procesar (es-EC-AndreaNeural, generadas en ttsfree).
+        // Ver docs/plan_procesar.md para los guiones aprobados.
+        [
+            "SecarGranos",
+            "Tostar",
+            "Descascarillar",
+            "Moler"
+        ].forEach(nivel => {
+            ["Instruccion", "Ayuda", "Completado", "TiempoAgotado"].forEach(tipo => {
+                this.load.audio(
+                    `voz${nivel}${tipo}`,
+                    `audio/voice/${nivel}${tipo}.mp3`
+                );
+            });
+        });
     }
 
     create() {
