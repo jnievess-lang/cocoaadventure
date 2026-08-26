@@ -4,7 +4,7 @@ Cuarto minijuego de Cosecha. El niño conecta en una matriz configurable tres o 
 
 ## Configuración
 
-La escena centraliza filas, columnas, mínimo de cadena, objetivos, tiempo, vidas, bombas, diagonales y duración de resolución en `CONFIGURACION_NIVEL`. Los valores iniciales son matriz 7×7, mínimo tres, objetivos 12 y 12, 90 segundos, tres vidas y dos bombas.
+La escena centraliza filas, columnas, mínimo de cadena, objetivos, tiempo, vidas, bombas, diagonales y duración de resolución en `CONFIGURACION_NIVEL`. Los valores actuales son matriz 7×7, mínimo tres, objetivos 30 buenas y 24 dañadas, 60 segundos, tres vidas y tres bombas.
 
 ## Flujo
 
@@ -35,9 +35,17 @@ También se reutilizan botones, error, aviso de tiempo, derrota, estrellas y mú
 - `public/images/objects/SemillaCacaoDanada.webp`
 - `public/images/objects/BombaSemillas.webp`
 - `public/images/objects/CanastaSemillas.webp`
+- `public/images/objects/CanastaSemillasBuenasNivel1.webp`
+- `public/images/objects/CanastaSemillasBuenasNivel2.webp`
+- `public/images/objects/CanastaSemillasBuenasNivel3.webp`
+- `public/images/objects/CanastaSemillasDanadasNivel1.webp`
+- `public/images/objects/CanastaSemillasDanadasNivel2.webp`
+- `public/images/objects/CanastaSemillasDanadasNivel3.webp`
 - `public/images/minigames/cosechar/clasificar-semillas/MarcoTableroSemillas.webp`
 
 Los candidatos originales se conservan en `design/assets/cosecha-candidates/clasificar-semillas/` para revisión local.
+
+La canasta vacía corresponde a la etapa cero. Los tres assets de cada tipo representan un tercio, dos tercios y llenado completo. La etapa no utiliza cantidades fijas: `CanastaSemillas` calcula `floor(valor * 3 / objetivo)`, limitado entre cero y tres. Por ejemplo, un objetivo de 30 cambia en 10, 20 y 30; uno de 24 cambia en 8, 16 y 24; y uno de 25 cambia en 9, 17 y 25.
 
 Las dos semillas representan cacao fresco cubierto de pulpa blanca. La buena muestra mucílago limpio, húmedo y carnoso. La dañada conserva esa misma base, pero presenta manchas oscuras localizadas, pulpa grisácea y una grieta anormal. No se utiliza una semilla uniformemente marrón o arrugada como señal de daño, porque podría confundirse con cacao correctamente fermentado y seco.
 

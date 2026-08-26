@@ -432,7 +432,9 @@ Actualmente “Seleccionar maduras” no necesita guardar imágenes en esa carpe
 
 “Abrir mazorcas” utiliza `minigames/cosechar/abrir-mazorcas/` para las mitades amarillas y anaranjadas que forman su animación exclusiva. Las mazorcas completas permanecen en `objects/` porque se reutilizan en distintos niveles. La estela, destellos, indicadores `+1` y `−1` y partículas se dibujan con Phaser; no deben convertirse en imágenes duplicadas.
 
-“Clasificar semillas” guarda únicamente `MarcoTableroSemillas.webp` en `minigames/cosechar/clasificar-semillas/`, porque es una composición propia de ese tablero. `SemillaCacaoBuena`, `SemillaCacaoDanada`, `BombaSemillas` y `CanastaSemillas` pertenecen a `objects/`; el botón completo pertenece a `buttons/`. Las líneas de trayectoria, celdas, X, humo, destellos, contadores y textos se dibujan con Phaser.
+“Clasificar semillas” guarda únicamente `MarcoTableroSemillas.webp` en `minigames/cosechar/clasificar-semillas/`, porque es una composición propia de ese tablero. `SemillaCacaoBuena`, `SemillaCacaoDanada`, `BombaSemillas`, la canasta vacía y sus tres estados de llenado por tipo pertenecen a `objects/`; el botón completo pertenece a `buttons/`. Las líneas de trayectoria, celdas, X, humo, destellos, contadores y textos se dibujan con Phaser.
+
+Los estados de llenado de las canastas siempre se calculan proporcionalmente al objetivo configurable. No se deben codificar umbrales como 10 u 8 semillas: la etapa visual es `floor(valor * cantidadEtapas / objetivo)`. Con tres estados, cada textura representa un tercio del objetivo aunque este cambie.
 
 En esta mecánica las semillas representan cacao fresco recién extraído: la semilla buena debe conservar su pulpa o mucílago blanco, húmedo y carnoso. Una semilla marrón, seca o arrugada no debe usarse como símbolo de daño, porque puede representar cacao fermentado y secado correctamente. La semilla dañada debe partir de la misma apariencia fresca y diferenciarse mediante manchas oscuras localizadas, zonas hundidas, cambio grisáceo de la pulpa o una grieta claramente anormal. Esta diferencia también debe entenderse sin depender únicamente del color.
 
