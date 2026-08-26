@@ -3,6 +3,7 @@ import CacaoPod from "../objects/CacaoPod";
 import TutorialPanel from "../ui/TutorialPanel";
 import ResultPanel from "../ui/ResultPanel";
 import HudMinijuego from "../ui/HudMinijuego";
+import ManoGuia from "../ui/ManoGuia";
 import GestorAudioMinijuego from "../managers/GestorAudioMinijuego";
 import ProgressManager from "../managers/ProgressManager";
 
@@ -41,6 +42,11 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         this.createTree();
         this.createHud();
         this.crearHudMinijuego();
+        this.manoGuia = new ManoGuia(this, {
+            anchoVisual: this.height * 0.15,
+            radioCirculo: this.height * 0.052,
+            depth: 90
+        });
         this.audio.ensureMusic();
         this.showTutorial();
         this.setupLifecycleEvents();
@@ -404,6 +410,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         }
 
         this.lastInteractionAt = this.time.now;
+        this.manoGuia?.ocultar();
 
         if (pod.podState === "ripe") {
 
@@ -480,8 +487,13 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         );
 
         if (availableRipePods.length > 0) {
-
-            Phaser.Utils.Array.GetRandom(availableRipePods).showHint();
+            const pod = Phaser.Utils.Array.GetRandom(availableRipePods);
+            pod.showHint();
+            this.manoGuia?.mostrarToque(
+                pod.x,
+                pod.y + pod.displayHeight * 0.48,
+                { duracionVisibleMs: 2400 }
+            );
 
         }
 
@@ -559,6 +571,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
     disablePods() {
 
         this.pods.forEach(pod => pod.disableInteractive());
+        this.manoGuia?.ocultar();
 
     }
 
@@ -581,6 +594,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             document.removeEventListener("visibilitychange", this.handleVisibilityChange);
             this.stopGameplayEvents();
+            this.manoGuia?.destroy(true);
             this.hud.destroy();
             this.audio.destroy();
         });

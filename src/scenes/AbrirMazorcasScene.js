@@ -4,6 +4,7 @@ import GestorAudioMinijuego from "../managers/GestorAudioMinijuego";
 import GestorCorteDeslizante from "../managers/GestorCorteDeslizante";
 import TutorialPanel from "../ui/TutorialPanel";
 import ResultPanel from "../ui/ResultPanel";
+import ManoGuia from "../ui/ManoGuia";
 import MazorcaVoladora from "../objects/MazorcaVoladora";
 import ProgressManager from "../managers/ProgressManager";
 import {
@@ -248,6 +249,16 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
             ease: "Sine.InOut"
         });
 
+        this.manoGuiaPractica = new ManoGuia(this, {
+            anchoVisual: this.alto * 0.16,
+            radioCirculo: this.alto * 0.045,
+            depth: 74
+        });
+        this.manoGuiaPractica.mostrarDeslizamiento(inicio, fin, {
+            duracionMovimientoMs: 1050,
+            pausaEntreRepeticionesMs: 420
+        });
+
         this.gestorCorte.setHabilitado(true);
     }
 
@@ -372,6 +383,8 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
         this.estadoNivel = "resolviendoPractica";
         this.gestorCorte.setHabilitado(false);
         this.tweenGuiaPractica?.stop();
+        this.manoGuiaPractica?.destroy(true);
+        this.manoGuiaPractica = null;
         this.guiaPractica?.destroy();
         this.textoPractica?.destroy();
         this.guiaPractica = null;
@@ -632,6 +645,7 @@ export default class AbrirMazorcasScene extends Phaser.Scene {
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             document.removeEventListener("visibilitychange", this.manejarVisibilidad);
             this.detenerApariciones();
+            this.manoGuiaPractica?.destroy(true);
             this.gestorCorte?.destroy();
             this.audio?.destroy();
         });
