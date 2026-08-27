@@ -1,20 +1,38 @@
 <!doctype html>
 <html lang="es">
-
 <head>
-
   <meta charset="UTF-8" />
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
   <title>Cocoa Adventure</title>
-
   <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-
+  <link rel="stylesheet" href="/src/pantallaCargaInicial.css" />
 </head>
-
 <body>
+  <div id="pantalla-carga-inicial" role="status" aria-live="polite">
+    <div class="contenido-carga">
+      <img
+        class="logo-carga"
+        src="/images/ui/logoCocoaAdventure.png"
+        alt="Cocoa Adventure"
+      />
+      <p id="mensaje-carga" class="mensaje-carga">Preparando la aventura...</p>
+      <div
+        id="barra-carga"
+        class="barra-carga"
+        role="progressbar"
+        aria-label="Progreso de carga"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <div id="progreso-carga" class="progreso-carga"></div>
+      </div>
+      <p id="porcentaje-carga" class="porcentaje-carga">0 %</p>
+    </div>
+  </div>
 
   <div id="game-container"></div>
 
@@ -27,7 +45,5 @@
   </div>
 
   <script type="module" src="/src/main.js"></script>
-
 </body>
-
 </html>

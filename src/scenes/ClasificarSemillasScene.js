@@ -20,7 +20,9 @@ export const CONFIGURACION_NIVEL = Object.freeze({
     estrellasMaximas: 3,
     cantidadBombas: 3,
     permiteDiagonales: true,
-    duracionResolucionMs: 550
+    duracionResolucionMs: 550,
+    tiempoAyudaInactividadMs: 6000,
+    duracionAyudaVisualMs: 3200
 });
 
 export default class ClasificarSemillasScene extends Phaser.Scene {
@@ -45,6 +47,7 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         this.crearTablero();
         this.crearHud();
         this.crearGestorTrayectoria();
+        this.crearAyudaEnJuego();
         this.mostrarElementosJuego(false);
         this.audio.ensureMusic();
         this.mostrarTutorial();
@@ -125,11 +128,20 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
             obtenerFicha: (x, y) => this.tablero.obtenerFichaEnPunto(x, y),
             obtenerTamanoCelda: () => this.tablero.tamanoCelda,
             obtenerTablero: () => this.tablero,
+            alIniciar: () => this.registrarInteraccion(),
             alConectar: longitud => this.reproducirConexion(longitud),
             alTrayectoriaCorta: seleccion => this.procesarTrayectoriaCorta(seleccion),
             alMezclarTipos: (ficha, seleccion) => this.procesarMezcla(ficha, seleccion),
             alTocarBomba: bomba => this.procesarBomba(bomba),
             alTrayectoriaValida: seleccion => this.procesarTrayectoriaValida(seleccion)
+        });
+    }
+
+    crearAyudaEnJuego() {
+        this.manoGuiaJuego = new ManoGuia(this, {
+            anchoVisual: this.alto * 0.14,
+            radioCirculo: this.tablero.tamanoCelda * 0.38,
+            depth: 95
         });
     }
 
@@ -215,6 +227,63 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         this.tablero.setHabilitado(true);
         this.gestorTrayectoria.setHabilitado(true);
         this.hud.start();
+        this.iniciarDetectorDeInactividad();
+    }
+
+    iniciarDetectorDeInactividad() {
+        this.ultimaInteraccion = this.time.now;
+        this.eventoAyuda?.remove(false);
+        this.eventoAyuda = this.time.addEvent({
+            delay: 500,
+            loop: true,
+            callback: () => this.comprobarAyudaPorInactividad()
+        });
+    }
+
+    registrarInteraccion() {
+        this.ultimaInteraccion = this.time.now;
+        this.manoGuiaJuego?.ocultar();
+    }
+
+    comprobarAyudaPorInactividad() {
+        if (this.estadoNivel !== "jugando" || this.gestorTrayectoria?.activo) return;
+        if (
+            this.time.now - this.ultimaInteraccion <
+            CONFIGURACION_NIVEL.tiempoAyudaInactividadMs
+        ) return;
+
+        this.mostrarAyudaEnJuego();
+        this.ultimaInteraccion = this.time.now;
+    }
+
+    mostrarAyudaEnJuego() {
+        const progresoBuenas = this.buenas / CONFIGURACION_NIVEL.objetivoBuenas;
+        const progresoDanadas = this.danadas / CONFIGURACION_NIVEL.objetivoDanadas;
+        const tiposPendientes = [];
+
+        if (this.buenas < CONFIGURACION_NIVEL.objetivoBuenas) {
+            tiposPendientes.push({ tipo: "buena", progreso: progresoBuenas });
+        }
+        if (this.danadas < CONFIGURACION_NIVEL.objetivoDanadas) {
+            tiposPendientes.push({ tipo: "danada", progreso: progresoDanadas });
+        }
+        tiposPendientes.sort((a, b) => a.progreso - b.progreso);
+
+        const fichas = this.tablero.obtenerTrayectoriaSugerida({
+            minimoTrayectoria: CONFIGURACION_NIVEL.minimoTrayectoria,
+            tiposPreferidos: tiposPendientes.map(({ tipo }) => tipo)
+        });
+        if (fichas.length < CONFIGURACION_NIVEL.minimoTrayectoria) return;
+
+        const puntos = fichas.map(ficha => ({
+            x: this.tablero.x + ficha.x,
+            y: this.tablero.y + ficha.y
+        }));
+        this.manoGuiaJuego.mostrarTrayectoria(puntos, {
+            duracionMovimientoMs: 1150,
+            pausaEntreRepeticionesMs: 420,
+            duracionVisibleMs: CONFIGURACION_NIVEL.duracionAyudaVisualMs
+        });
     }
 
     reproducirConexion(longitud) {
@@ -293,6 +362,7 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
     }
 
     bloquearMatrizDuranteResolucion() {
+        this.manoGuiaJuego?.ocultar();
         this.hud.pausarTemporizador();
         this.tablero.setHabilitado(false);
         this.gestorTrayectoria.setHabilitado(false);
@@ -308,6 +378,8 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
             return;
         }
         this.estadoNivel = "jugando";
+        this.registrarInteraccion();
+        if (this.eventoAyuda) this.eventoAyuda.paused = false;
         this.tablero.setHabilitado(true);
         this.gestorTrayectoria.setHabilitado(true);
         this.hud.reanudarTemporizador();
@@ -364,6 +436,8 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         this.estadoNivel = "suspendido";
         this.gestorTrayectoria.cancelar();
         this.tablero.setHabilitado(false);
+        this.manoGuiaJuego?.ocultar();
+        if (this.eventoAyuda) this.eventoAyuda.paused = true;
         if (this.sonidoRecoleccion?.isPlaying) this.sonidoRecoleccion.pause();
         if (this.sonidoBomba?.isPlaying) this.sonidoBomba.pause();
     }
@@ -373,6 +447,8 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         this.estadoAntesSuspension = null;
         this.estadoNivel = anterior === "jugando" ? "jugando" : anterior ?? "jugando";
         if (this.estadoNivel === "jugando") {
+            this.registrarInteraccion();
+            if (this.eventoAyuda) this.eventoAyuda.paused = false;
             this.tablero.setHabilitado(true);
             this.gestorTrayectoria.setHabilitado(true);
         }
@@ -385,6 +461,7 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         this.resultadoMostrado = true;
         this.estadoNivel = "resultado";
         this.hud.stop();
+        this.detenerAyudaEnJuego();
         this.tablero.setHabilitado(false);
         this.gestorTrayectoria.setHabilitado(false);
         const estrellas = this.hud.calculateStars(CONFIGURACION_NIVEL.estrellasMaximas);
@@ -399,6 +476,7 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         this.resultadoMostrado = true;
         this.estadoNivel = "resultado";
         this.hud.stop();
+        this.detenerAyudaEnJuego();
         this.tablero.setHabilitado(false);
         this.gestorTrayectoria.setHabilitado(false);
         const mostrar = () => {
@@ -425,6 +503,12 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         });
     }
 
+    detenerAyudaEnJuego() {
+        this.eventoAyuda?.remove(false);
+        this.eventoAyuda = null;
+        this.manoGuiaJuego?.ocultar();
+    }
+
     configurarCicloDeVida() {
         this.manejarVisibilidad = () => {
             if (document.hidden && this.estadoNivel === "jugando") {
@@ -435,7 +519,9 @@ export default class ClasificarSemillasScene extends Phaser.Scene {
         document.addEventListener("visibilitychange", this.manejarVisibilidad);
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             document.removeEventListener("visibilitychange", this.manejarVisibilidad);
+            this.detenerAyudaEnJuego();
             this.manoGuiaPractica?.destroy(true);
+            this.manoGuiaJuego?.destroy(true);
             this.gestorTrayectoria?.destroy();
             this.sonidoRecoleccion?.destroy();
             this.sonidoBomba?.destroy();

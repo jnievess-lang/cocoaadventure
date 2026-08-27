@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import FichaSemilla from "../objects/FichaSemilla";
 import {
+    buscarTrayectoriaValida,
     generarMatrizSemillas,
     TIPOS_SEMILLA,
     validarMatrizSemillas,
@@ -114,6 +115,18 @@ export default class TableroClasificacionSemillas extends Phaser.GameObjects.Con
     setHabilitado(habilitado) {
         this.habilitado = habilitado;
         return this;
+    }
+
+    obtenerTrayectoriaSugerida(opciones = {}) {
+        const posiciones = buscarTrayectoriaValida(this.matriz, {
+            minimoTrayectoria: opciones.minimoTrayectoria ?? this.config.minimoTrayectoria,
+            permiteDiagonales: this.config.permiteDiagonales,
+            tiposPreferidos: opciones.tiposPreferidos
+        });
+
+        return posiciones
+            .map(({ fila, columna }) => this.fichas[fila]?.[columna])
+            .filter(ficha => ficha?.active);
     }
 
     cancelarSeleccion() {

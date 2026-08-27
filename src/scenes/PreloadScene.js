@@ -7,6 +7,16 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
+        window.actualizarPantallaCarga?.(0, "Preparando la aventura...");
+
+        this.load.on("progress", progress => {
+            window.actualizarPantallaCarga?.(progress);
+        });
+
+        this.load.once("complete", () => {
+            window.actualizarPantallaCarga?.(1, "¡Todo listo!");
+        });
+
          // Menú principal
         this.load.image("logo", "images/ui/logoCocoaAdventure.png");
         this.load.image("btnPlay", "images/buttons/btnPlay.png");

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
     buscarComponentes,
+    buscarTrayectoriaValida,
     generarMatrizSemillas,
     TIPOS_SEMILLA,
     validarMatrizSemillas
@@ -56,3 +57,25 @@ test("rechaza una semilla aislada", () => {
     }), false);
 });
 
+test("encuentra una trayectoria sugerida válida sin atravesar bombas ni mezclar tipos", () => {
+    const matriz = [
+        ["buena", "buena", "bomba"],
+        ["danada", "buena", "danada"],
+        ["danada", "danada", "danada"]
+    ];
+    const trayectoria = buscarTrayectoriaValida(matriz, {
+        minimoTrayectoria: 3,
+        permiteDiagonales: true,
+        tiposPreferidos: [TIPOS_SEMILLA.BUENA],
+        aleatorio: () => 0.5
+    });
+
+    assert.equal(trayectoria.length, 3);
+    assert.ok(trayectoria.every(({ fila, columna }) => matriz[fila][columna] === TIPOS_SEMILLA.BUENA));
+    for (let indice = 1; indice < trayectoria.length; indice++) {
+        const anterior = trayectoria[indice - 1];
+        const actual = trayectoria[indice];
+        assert.ok(Math.abs(anterior.fila - actual.fila) <= 1);
+        assert.ok(Math.abs(anterior.columna - actual.columna) <= 1);
+    }
+});

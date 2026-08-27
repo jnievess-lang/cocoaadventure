@@ -24,6 +24,64 @@ export function sonAdyacentes(a, b, diagonales = true) {
     return df <= 1 && dc <= 1 && (df + dc > 0) && (diagonales || df + dc === 1);
 }
 
+/**
+ * Encuentra una cadena jugable sin modificar la matriz. Se usa para ayudas
+ * visuales: cada paso es vecino, del mismo tipo y nunca atraviesa bombas.
+ */
+export function buscarTrayectoriaValida(matriz, config = {}) {
+    if (!Array.isArray(matriz) || !matriz.length || !matriz[0]?.length) return [];
+
+    const minimo = Math.max(2, Math.floor(config.minimoTrayectoria ?? 3));
+    const diagonales = config.permiteDiagonales ?? true;
+    const aleatorio = config.aleatorio ?? Math.random;
+    const tiposSemilla = [TIPOS_SEMILLA.BUENA, TIPOS_SEMILLA.DANADA];
+    const preferidos = (config.tiposPreferidos ?? [])
+        .filter((tipo, indice, lista) => tiposSemilla.includes(tipo) && lista.indexOf(tipo) === indice);
+    const tipos = [...preferidos, ...tiposSemilla.filter(tipo => !preferidos.includes(tipo))];
+
+    const mezclarCopia = elementos => mezclar([...elementos], aleatorio);
+
+    for (const tipo of tipos) {
+        const inicios = [];
+        matriz.forEach((fila, f) => fila.forEach((valor, c) => {
+            if (valor === tipo) inicios.push({ fila: f, columna: c });
+        }));
+
+        for (const inicio of mezclarCopia(inicios)) {
+            const ruta = [inicio];
+            const usadas = new Set([`${inicio.fila}:${inicio.columna}`]);
+
+            const buscar = actual => {
+                if (ruta.length >= minimo) return true;
+
+                const vecinas = obtenerVecinos(
+                    matriz,
+                    actual.fila,
+                    actual.columna,
+                    diagonales
+                ).filter(({ fila, columna }) => (
+                    matriz[fila][columna] === tipo &&
+                    !usadas.has(`${fila}:${columna}`)
+                ));
+
+                for (const vecina of mezclarCopia(vecinas)) {
+                    const clave = `${vecina.fila}:${vecina.columna}`;
+                    usadas.add(clave);
+                    ruta.push(vecina);
+                    if (buscar(vecina)) return true;
+                    ruta.pop();
+                    usadas.delete(clave);
+                }
+                return false;
+            };
+
+            if (buscar(inicio)) return ruta;
+        }
+    }
+
+    return [];
+}
+
 export function buscarComponentes(matriz, diagonales = true) {
     const visitadas = new Set();
     const componentes = [];
@@ -181,4 +239,3 @@ export function generarMatrizSemillas(config, aleatorio = Math.random) {
     }
     throw new Error("No se pudo generar una matriz de semillas solucionable.");
 }
-
