@@ -17,7 +17,7 @@ export default class ProcesarScene extends Phaser.Scene {
         this.height = height;
         this.progress = ProgressManager.load();
 
-        this.crearFondo();
+        this.createBackground();
         this.crearPanel();
         this.crearDecoraciones();
         this.crearTitulo();
@@ -27,19 +27,18 @@ export default class ProcesarScene extends Phaser.Scene {
 
     }
 
-    crearFondo() {
+    createBackground() {
 
-        this.cameras.main.setBackgroundColor("#8FD3FF");
-
-        const sol = this.add.circle(
-            this.width * 0.09,
-            this.height * 0.13,
-            this.height * 0.075,
-            0xFFF2A8,
-            0.8
+        const background = this.add.image(
+            this.width * 0.50,
+            this.height * 0.50,
+            "fondoConfiguracion"
         );
 
-        sol.setStrokeStyle(12, 0xFFFFFF, 0.25);
+        background.setScale(Math.max(
+            this.width / background.width,
+            this.height / background.height
+        ));
 
     }
 
