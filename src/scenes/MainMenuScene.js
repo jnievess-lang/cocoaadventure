@@ -43,6 +43,12 @@ export default class MainMenuScene extends Phaser.Scene {
         this.createLogo();
         this.createButtons();
 
+        // Esperar dos fotogramas garantiza que el menú ya esté pintado detrás
+        // del cargador antes de iniciar su desvanecimiento.
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => window.ocultarPantallaCarga?.());
+        });
+
         console.log("MainMenuScene iniciada");
     }
 

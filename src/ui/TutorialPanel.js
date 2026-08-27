@@ -49,33 +49,83 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
 
     createBubble() {
         this.bubble = this.scene.add.image(
-            this.gameWidth * 0.28,
+            this.gameWidth * 0.29,
             this.gameHeight * 0.52,
             "GloboTexto"
         );
 
-        this.bubbleScale = (this.gameWidth * 0.30) / this.bubble.width;
+        // El globo crece con el ancho, pero tiene un límite basado en la altura
+        // para no invadir la pantalla en celulares ultrapanorámicos.
+        this.bubbleScale = Math.min(
+            (this.gameWidth * 0.34) / this.bubble.width,
+            (this.gameHeight * 0.64) / this.bubble.height
+        );
         this.bubble.setScale(0).setAlpha(0);
         this.add(this.bubble);
     }
 
     createText() {
+        const anchoGlobo = this.bubble.width * this.bubbleScale;
+        const altoGlobo = this.bubble.height * this.bubbleScale;
+
+        // La cola ocupa la parte inferior del PNG. Estas proporciones mantienen
+        // el texto dentro del cuerpo blanco y lejos del borde oscuro.
+        this.anchoSeguroTexto = anchoGlobo * 0.82;
+        this.altoSeguroTexto = altoGlobo * (this.config.confirmText ? 0.37 : 0.60);
+
         this.text = this.scene.add.text(
-            this.gameWidth * 0.29,
-            this.gameHeight * 0.47,
+            this.bubble.x,
+            this.bubble.y - altoGlobo * (this.config.confirmText ? 0.12 : 0.07),
             this.config.text,
             {
                 fontFamily: "Trebuchet MS",
-                fontSize: `${this.gameHeight * 0.025}px`,
+                fontSize: `${this.gameHeight * 0.043}px`,
                 color: "#3B2416",
                 fontStyle: "bold",
                 align: "center",
-                wordWrap: { width: this.gameWidth * 0.22 }
+                lineSpacing: Math.max(1, Math.round(this.gameHeight * 0.002)),
+                wordWrap: {
+                    width: this.anchoSeguroTexto,
+                    useAdvancedWrap: true
+                }
             }
         );
 
         this.text.setOrigin(0.5).setAlpha(0);
+        this.ajustarTextoAlGlobo();
         this.add(this.text);
+    }
+
+    ajustarTextoAlGlobo() {
+        const tamanoInicial = Math.round(this.gameHeight * 0.043);
+        const tamanoMinimoPreferido = Math.round(this.gameHeight * 0.028);
+        const tamanoMinimoAbsoluto = Math.max(12, Math.round(this.gameHeight * 0.021));
+
+        let tamano = tamanoInicial;
+        this.text.setFontSize(tamano);
+
+        // Phaser recalcula width/height al cambiar el tamaño. Primero se intenta
+        // conservar al menos 2,8 % de la altura (mayor que el 2,5 % anterior).
+        while (
+            tamano > tamanoMinimoPreferido
+            && (this.text.width > this.anchoSeguroTexto || this.text.height > this.altoSeguroTexto)
+        ) {
+            tamano -= 1;
+            this.text.setFontSize(tamano);
+        }
+
+        // Respaldo para textos futuros excepcionalmente largos: nunca se deja
+        // que una instrucción se salga del globo, aunque incumpla la longitud
+        // recomendada en la guía de contenidos.
+        while (
+            tamano > tamanoMinimoAbsoluto
+            && (this.text.width > this.anchoSeguroTexto || this.text.height > this.altoSeguroTexto)
+        ) {
+            tamano -= 1;
+            this.text.setFontSize(tamano);
+        }
+
+        this.fontSizeAplicado = tamano;
     }
 
     createActions() {
@@ -197,7 +247,7 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
         if (!this.scene.cache.audio.exists(this.config.audio)) {
             this.config.onVoiceComplete?.();
             if (!this.config.confirmText) {
-                this.scene.time.delayedCall(2600, () => this.hideTutorial());
+                this.programarTemporizadorVoz(2600, () => this.hideTutorial());
             }
             return;
         }
@@ -207,11 +257,10 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
         let terminada = false;
 
         const finish = () => {
-            if (terminada) return;
+            if (terminada || !this.sigueActivo()) return;
             terminada = true;
 
-            this.temporizadorVoz?.remove();
-            this.temporizadorVoz = null;
+            this.limpiarTemporizadorVoz();
 
             this.config.onVoiceComplete?.();
             if (this.voice === voice) {
@@ -221,28 +270,44 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
             if (!this.config.confirmText) this.hideTutorial();
         };
 
+        // El oyente se registra antes de iniciar la reproducción para no
+        // perder el evento en WebView cuando el audio ya está decodificado.
+        voice.once("complete", finish);
+
         if (voice.play()) {
-            voice.once("complete", finish);
 
             // Cuando el tutorial no tiene botón de continuar, su cierre depende
-            // del evento `complete`. Si el navegador bloquea o corta la voz ese
-            // evento nunca llega, así que un respaldo por tiempo evita dejar al
-            // jugador esperando.
-            this.temporizadorVoz?.remove();
-            this.temporizadorVoz = this.scene.time.delayedCall(
-                (voice.duration || 6) * 1000 + 2000,
+            // del evento `complete`. Algunos WebView no lo emiten al finalizar
+            // ciertos MP3. El respaldo usa el reloj del navegador, independiente
+            // del reloj de Phaser, para que una escena pausada no deje el globo
+            // bloqueado permanentemente.
+            this.programarTemporizadorVoz(
+                (voice.duration || 6) * 1000 + 350,
                 finish
             );
         }
-        else this.scene.time.delayedCall(400, finish);
+        else this.programarTemporizadorVoz(400, finish);
+    }
+
+    programarTemporizadorVoz(duracionMs, callback) {
+        this.limpiarTemporizadorVoz();
+        this.temporizadorVoz = window.setTimeout(() => {
+            this.temporizadorVoz = null;
+            callback();
+        }, duracionMs);
+    }
+
+    limpiarTemporizadorVoz() {
+        if (this.temporizadorVoz == null) return;
+        window.clearTimeout(this.temporizadorVoz);
+        this.temporizadorVoz = null;
     }
 
     hideTutorial() {
         if (this.closing) return;
         this.closing = true;
 
-        this.temporizadorVoz?.remove();
-        this.temporizadorVoz = null;
+        this.limpiarTemporizadorVoz();
 
         if (this.voice) {
             this.voice.stop();
@@ -260,6 +325,16 @@ export default class TutorialPanel extends Phaser.GameObjects.Container {
                 this.config.onComplete?.();
             }
         });
+    }
+
+    destroy(fromScene) {
+        this.limpiarTemporizadorVoz();
+        if (this.voice) {
+            this.voice.stop();
+            this.voice.destroy();
+            this.voice = null;
+        }
+        super.destroy(fromScene);
     }
 
 }

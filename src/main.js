@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import "./pantallaCargaInicial.js";
 import "./style.css";
 
 import config from "./config";

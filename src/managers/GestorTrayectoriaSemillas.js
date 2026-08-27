@@ -47,6 +47,8 @@ export default class GestorTrayectoriaSemillas {
         const ficha = this.config.obtenerFicha?.(pointer.x, pointer.y);
         if (!ficha) return;
 
+        this.config.alIniciar?.(ficha);
+
         this.activo = true;
         this.bloqueadoHastaSoltar = false;
         this.seleccion = [];

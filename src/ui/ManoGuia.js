@@ -80,12 +80,31 @@ export default class ManoGuia extends Phaser.GameObjects.Container {
     }
 
     mostrarDeslizamiento(inicio, fin, opciones = {}) {
+        return this.mostrarTrayectoria([inicio, fin], opciones);
+    }
+
+    mostrarTrayectoria(puntos, opciones = {}) {
+        if (!Array.isArray(puntos) || puntos.length < 2) return this.ocultar();
+
         this.detenerAnimaciones();
+        const inicio = puntos[0];
         this.setPosition(inicio.x, inicio.y).setAlpha(0).setVisible(true);
         this.mano
             .setAngle(opciones.angulo ?? 0)
             .setScale(this.escalaBase);
         this.iniciarPulso();
+
+        const duracionMovimiento = opciones.duracionMovimientoMs ?? 1050;
+        const duracionPorTramo = Math.max(
+            120,
+            duracionMovimiento / (puntos.length - 1)
+        );
+        const movimientos = puntos.slice(1).map(punto => ({
+            x: punto.x,
+            y: punto.y,
+            duration: duracionPorTramo,
+            ease: "Sine.InOut"
+        }));
 
         this.cadenaMovimiento = this.scene.tweens.chain({
             targets: this,
@@ -98,12 +117,7 @@ export default class ManoGuia extends Phaser.GameObjects.Container {
                     duration: opciones.duracionEntradaMs ?? 180,
                     ease: "Sine.Out"
                 },
-                {
-                    x: fin.x,
-                    y: fin.y,
-                    duration: opciones.duracionMovimientoMs ?? 1050,
-                    ease: "Sine.InOut"
-                },
+                ...movimientos,
                 {
                     alpha: 0,
                     duration: opciones.duracionSalidaMs ?? 180,
@@ -117,6 +131,14 @@ export default class ManoGuia extends Phaser.GameObjects.Container {
                 }
             ]
         });
+
+        const duracionVisible = opciones.duracionVisibleMs ?? 0;
+        if (duracionVisible > 0) {
+            this.eventoOcultar = this.scene.time.delayedCall(
+                duracionVisible,
+                () => this.ocultar()
+            );
+        }
 
         return this;
     }
