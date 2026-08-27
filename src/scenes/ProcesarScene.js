@@ -50,22 +50,22 @@ export default class ProcesarScene extends Phaser.Scene {
             this.height * 0.51,
             this.width * 0.63,
             this.height * 0.84,
-            0x4A2718,
+            0x7D2C77,
             0.22
         );
 
-        sombra.setStrokeStyle(9, 0x5C3517, 0.35);
+        sombra.setStrokeStyle(9, 0x461245, 0.35);
 
         const panel = this.add.rectangle(
             this.width * 0.52,
             this.height * 0.49,
             this.width * 0.62,
             this.height * 0.82,
-            0x9A6134,
+            0x7D2C77,
             1
         );
 
-        panel.setStrokeStyle(9, 0x5C3517, 1);
+        panel.setStrokeStyle(9, 0x461245, 1);
 
     }
 
@@ -111,7 +111,7 @@ export default class ProcesarScene extends Phaser.Scene {
                 fontSize: `${this.height * 0.055}px`,
                 color: "#FFF7D8",
                 fontStyle: "bold",
-                stroke: "#4A2718",
+                stroke: "#461245",
                 strokeThickness: 8
             }
         );

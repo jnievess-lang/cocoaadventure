@@ -50,22 +50,22 @@ export default class SembrarScene extends Phaser.Scene {
             this.height * 0.51,
             this.width * 0.63,
             this.height * 0.84,
-            0x6F360F,
+            0x27784E,
             0.22
         );
 
-        shadow.setStrokeStyle(9, 0x8D491A, 0.35);
+        shadow.setStrokeStyle(9, 0x1C5B3A, 0.35);
 
         const panel = this.add.rectangle(
             this.width * 0.52,
             this.height * 0.49,
             this.width * 0.62,
             this.height * 0.82,
-            0xD77B27,
+            0x27784E,
             1
         );
 
-        panel.setStrokeStyle(9, 0x8D491A, 1);
+        panel.setStrokeStyle(9, 0x1C5B3A, 1);
 
     }
 
@@ -113,7 +113,7 @@ export default class SembrarScene extends Phaser.Scene {
                 fontSize: `${this.height * 0.055}px`,
                 color: "#FFF7D8",
                 fontStyle: "bold",
-                stroke: "#73350F",
+                stroke: "#1C5B3A",
                 strokeThickness: 8
             }
         );

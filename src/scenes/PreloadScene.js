@@ -19,12 +19,12 @@ export default class PreloadScene extends Phaser.Scene {
 
          // Menú principal
         this.load.image("logo", "images/ui/logoCocoaAdventure.png");
-        this.load.image("btnPlay", "images/buttons/btnPlay.png");
-        this.load.image("btnLogros", "images/buttons/btnLogros.png");
-        this.load.image("btnConfiguracion", "images/buttons/btnConfiguracion.png");
+        this.load.image("btnPlay", "images/buttons/btnPlayv2.png");
+        this.load.image("btnLogros", "images/buttons/btnLogrosv2.png");
+        this.load.image("btnConfiguracion", "images/buttons/btnConfiguracionv2.png");
 
         // Pantalla de módulos
-        this.load.image("btnRegresar", "images/buttons/btnRegresar.png");
+        this.load.image("btnRegresar", "images/buttons/btnRegresarv2.png");
 
         // Pantalla de configuración
         this.load.image("fondoConfiguracion", "images/background/fondoConfiguracion.png");
@@ -44,13 +44,13 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("btnProcesarModulo", "images/modules/btnProcesarModulo.png");
 
         this.load.image("CacaitoModulo", "images/characters/CacaitoModulo.png");
-        this.load.image("ArbolEsquinaSuperiorDerecha", "images/decorations/ArbolEsquinaSuperiorDerecha.png");
-        this.load.image("ArbolEsquinaSuperiorIzquierda","images/decorations/ArbolEsquinaSuperiorIzquierda.png");
+        this.load.image("ArbolEsquinaSuperiorDerecha", "images/decorations/ArbolEsquinaSuperiorDerechav2.png");
+        this.load.image("ArbolEsquinaSuperiorIzquierda","images/decorations/ArbolEsquinaSuperiorIzquierdav2.png");
 
         // Modulo Sembrar
-        this.load.image("btnLimpiarTerreno", "images/buttons/btnLimpiarTerreno.png");
-        this.load.image("btnPrepararTierra", "images/buttons/btnPrepararTierra.png");
-        this.load.image("btnPlantarPlantula", "images/buttons/btnPlantarPlantula.png");
+        this.load.image("btnLimpiarTerreno", "images/buttons/btnLimpiarTerreno2v.png");
+        this.load.image("btnPrepararTierra", "images/buttons/btnPrepararTierrav2.png");
+        this.load.image("btnPlantarPlantula", "images/buttons/btnPlantarPlantulav2.png");
         this.load.image("CacaitoSembrando", "images/characters/CacaitoSembrando.png");
 
         this.load.image("EstrellaLlena", "images/ui/EstrellaLlena.png");
