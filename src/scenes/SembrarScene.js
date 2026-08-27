@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-
-import LevelCard from "../ui/LevelCard";
+import HarvestLevelCard from "../ui/HarvestLevelCard";
 import ProgressManager from "../managers/ProgressManager";
+import AudioSettingsManager from "../managers/AudioSettingsManager";
 
 export default class SembrarScene extends Phaser.Scene {
 
@@ -10,73 +10,20 @@ export default class SembrarScene extends Phaser.Scene {
     }
 
     create() {
-        console.log(this.progress);
 
         const { width, height } = this.scale;
 
         this.width = width;
         this.height = height;
-
         this.progress = ProgressManager.load();
-
-        this.initializeLayout();
 
         this.createBackground();
         this.createPanel();
         this.createDecorations();
+        this.createTitle();
         this.createBackButton();
         this.createLevels();
-
-        console.log("SembrarScene iniciada");
-    }
-
-    initializeLayout() {
-
-        this.pos = {
-
-            backButton: {
-                x: this.width * 0.07,
-                y: this.height * 0.09
-            },
-
-            guide: {
-                x: this.width * 0,
-                y: this.height * 1
-            },
-
-            tree: {
-                x: this.width * 1.00,
-                y: this.height * 0
-            },
-
-            panel: {
-                x: this.width * 0.21,
-                y: this.height * 0.09,
-                width: this.width * 0.60,
-                height: this.height * 0.82,
-                radius: 35
-            },
-
-            levels: {
-
-                level1: {
-                    x: this.width * 0.42,
-                    y: this.height * 0.32
-                },
-
-                level2: {
-                    x: this.width * 0.62,
-                    y: this.height * 0.32
-                },
-
-                level3: {
-                    x: this.width * 0.42,
-                    y: this.height * 0.64
-                }
-
-            }
-
-        };
+        this.ensureMusic();
 
     }
 
@@ -84,162 +31,195 @@ export default class SembrarScene extends Phaser.Scene {
 
         this.cameras.main.setBackgroundColor("#8FD3FF");
 
+        const sun = this.add.circle(
+            this.width * 0.09,
+            this.height * 0.13,
+            this.height * 0.075,
+            0xFFF2A8,
+            0.8
+        );
+
+        sun.setStrokeStyle(12, 0xFFFFFF, 0.25);
+
     }
 
     createPanel() {
 
-        const graphics = this.add.graphics();
-
-        graphics.fillStyle(0x39B86B, 1);
-
-        graphics.fillRoundedRect(
-
-            this.pos.panel.x,
-            this.pos.panel.y,
-            this.pos.panel.width,
-            this.pos.panel.height,
-            this.pos.panel.radius
-
+        const shadow = this.add.rectangle(
+            this.width * 0.53,
+            this.height * 0.51,
+            this.width * 0.63,
+            this.height * 0.84,
+            0x1C5B3A,
+            0.22
         );
+
+        shadow.setStrokeStyle(9, 0x27784E, 0.35);
+
+        const panel = this.add.rectangle(
+            this.width * 0.52,
+            this.height * 0.49,
+            this.width * 0.62,
+            this.height * 0.82,
+            0x3FA469,
+            1
+        );
+
+        panel.setStrokeStyle(9, 0x27784E, 1);
 
     }
 
     createDecorations() {
 
-        //==========================
-        // Árbol
-        //==========================
-
-        this.tree = this.add.image(
-
-            this.pos.tree.x,
-            this.pos.tree.y,
+        const tree = this.add.image(
+            this.width,
+            0,
             "ArbolEsquinaSuperiorDerecha"
-
         );
 
-        this.tree.setOrigin(1, 0);
+        tree
+            .setOrigin(1, 0)
+            .setScale((this.width * 0.24) / tree.width);
 
-        const treeWidth = this.width * 0.25;
-
-        this.treeScale = treeWidth / this.tree.width;
-
-        this.tree.setScale(this.treeScale);
-
-        //==========================
-        // Personaje guía
-        //==========================
-
-        this.guide = this.add.image(
-
-            this.pos.guide.x,
-            this.pos.guide.y,
+        const guide = this.add.image(
+            0,
+            this.height,
             "CacaitoSembrando"
-
         );
 
-        this.guide.setOrigin(0, 1);
+        guide
+            .setOrigin(0, 1)
+            .setScale((this.height * 0.61) / guide.height);
 
-        const guideHeight = this.height * 0.55;
+        this.tweens.add({
+            targets: guide,
+            y: guide.y - this.height * 0.012,
+            duration: 1800,
+            ease: "Sine.InOut",
+            yoyo: true,
+            repeat: -1
+        });
 
-        this.guideScale = guideHeight / this.guide.height;
+    }
 
-        this.guide.setScale(this.guideScale);
+    createTitle() {
+
+        const title = this.add.text(
+            this.width * 0.52,
+            this.height * 0.125,
+            "SEMBRAR",
+            {
+                fontFamily: "Trebuchet MS",
+                fontSize: `${this.height * 0.055}px`,
+                color: "#FFF7D8",
+                fontStyle: "bold",
+                stroke: "#1E5B39",
+                strokeThickness: 8
+            }
+        );
+
+        title.setOrigin(0.5);
 
     }
 
     createBackButton() {
 
-        this.btnBack = this.add.image(
-
-            this.pos.backButton.x,
-            this.pos.backButton.y,
+        const button = this.add.image(
+            this.width * 0.07,
+            this.height * 0.09,
             "btnRegresar"
-
         );
 
-        const backWidth = this.width * 0.075;
+        const baseScale = (this.width * 0.085) / button.width;
 
-        this.backScale = backWidth / this.btnBack.width;
-
-        this.btnBack
-            .setScale(this.backScale)
+        button
+            .setScale(baseScale)
             .setInteractive({ useHandCursor: true });
 
-        this.btnBack.on("pointerdown", () => {
-
-            this.btnBack.setScale(this.backScale * 0.95);
-
+        button.on("pointerdown", () => {
+            this.sound.play("sfxBotonTocar", { volume: 1 });
+            button.setScale(baseScale * 0.95);
         });
 
-        this.btnBack.on("pointerup", () => {
+        button.on("pointerout", () => button.setScale(baseScale));
 
-            this.btnBack.setScale(this.backScale);
-
+        button.on("pointerup", () => {
+            button.setScale(baseScale);
+            this.stopMusic();
             this.scene.start("ModulesScene");
-
         });
 
     }
 
     createLevels() {
 
-        new LevelCard(this, {
-
-            x: this.pos.levels.level1.x,
-            y: this.pos.levels.level1.y,
-
-            texture: "btnLimpiarTerreno",
-
-            stars: this.progress.sembrar.limpiarTerreno.stars,
-
-            unlocked: this.progress.sembrar.limpiarTerreno.unlocked,
-
-            onClick: () => {
-
-                this.scene.start("LimpiarTerrenoScene");
-
+        const levels = [
+            {
+                x: this.width * 0.42,
+                y: this.height * 0.34,
+                label: "LIMPIAR TERRENO",
+                iconTexture: "btnLimpiarTerreno",
+                unlocked: this.progress.sembrar.limpiarTerreno.unlocked,
+                stars: this.progress.sembrar.limpiarTerreno.stars,
+                onClick: () => this.scene.start("LimpiarTerrenoScene")
+            },
+            {
+                x: this.width * 0.63,
+                y: this.height * 0.34,
+                label: "PREPARAR TIERRA",
+                iconTexture: "btnPrepararTierra",
+                unlocked: this.progress.sembrar.prepararTierra.unlocked,
+                stars: this.progress.sembrar.prepararTierra.stars,
+                onClick: () => this.scene.start("PrepararTierraScene")
+            },
+            {
+                x: this.width * 0.42,
+                y: this.height * 0.69,
+                label: "PLANTAR PLÁNTULA",
+                iconTexture: "btnPlantarPlantula",
+                unlocked: this.progress.sembrar.plantarPlantula.unlocked,
+                stars: this.progress.sembrar.plantarPlantula.stars,
+                onClick: () => this.scene.start("PlantarPlantulaScene")
             }
+        ];
 
+        levels.forEach((level, index) => {
+            new HarvestLevelCard(this, {
+                ...level,
+                delay: 90 * index
+            });
         });
 
-        new LevelCard(this, {
+    }
 
-            x: this.pos.levels.level2.x,
-            y: this.pos.levels.level2.y,
+    ensureMusic() {
 
-            texture: "btnPrepararTierra",
+        let music = this.sound.get("musicaFondo");
 
-            stars: this.progress.sembrar.prepararTierra.stars,
+        if (!music) {
+            music = this.sound.add("musicaFondo", {
+                loop: true,
+                volume: 0.22
+            });
+        }
 
-            unlocked: this.progress.sembrar.prepararTierra.unlocked,
+        if (!music.isPlaying) {
+            music.play();
+        }
 
-            onClick: () => {
+        music.setVolume(0.22);
+        AudioSettingsManager.applyToMusic(music);
 
-                this.scene.start("PrepararTierraScene");
+    }
 
-            }
+    stopMusic() {
 
-        });
+        const music = this.sound.get("musicaFondo");
 
-        new LevelCard(this, {
-
-            x: this.pos.levels.level3.x,
-            y: this.pos.levels.level3.y,
-
-            texture: "btnPlantarPlantula",
-
-            stars: this.progress.sembrar.plantarPlantula.stars,
-
-            unlocked: this.progress.sembrar.plantarPlantula.unlocked,
-
-            onClick: () => {
-
-                this.scene.start("PlantarPlantulaScene");
-
-            }
-
-        });
+        if (music) {
+            music.stop();
+            music.destroy();
+        }
 
     }
 

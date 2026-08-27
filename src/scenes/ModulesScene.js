@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import AudioSettingsManager from "../managers/AudioSettingsManager";
 
 export default class ModulesScene extends Phaser.Scene {
 
@@ -13,70 +14,13 @@ export default class ModulesScene extends Phaser.Scene {
         this.width = width;
         this.height = height;
 
-        this.initializeLayout();
-
         this.createBackground();
         this.createPanel();
         this.createDecorations();
-        this.createModuleButtons();
+        this.createTitle();
         this.createBackButton();
-
-        console.log("ModulesScene iniciada");
-
-    }
-
-    initializeLayout() {
-
-        this.pos = {
-
-            backButton: {
-                x: this.width * 0.07,
-                y: this.height * 0.09
-            },
-
-            guide: {
-                x: this.width * 0,
-                y: this.height * 1
-            },
-
-            tree: {
-                x: this.width * 1.00,
-                y: this.height * 0
-            },
-
-            panel: {
-                x: this.width * 0.21,
-                y: this.height * 0.09,
-                width: this.width * 0.60,
-                height: this.height * 0.82,
-                radius: 35
-            },
-
-            modules: {
-
-                sembrar: {
-                    x: this.width * 0.39,
-                    y: this.height * 0.30
-                },
-
-                mantener: {
-                    x: this.width * 0.64,
-                    y: this.height * 0.30
-                },
-
-                cosechar: {
-                    x: this.width * 0.39,
-                    y: this.height * 0.67
-                },
-
-                procesar: {
-                    x: this.width * 0.64,
-                    y: this.height * 0.67
-                }
-
-            }
-
-        };
+        this.createModuleButtons();
+        this.ensureMusic();
 
     }
 
@@ -84,206 +28,254 @@ export default class ModulesScene extends Phaser.Scene {
 
         this.cameras.main.setBackgroundColor("#8FD3FF");
 
+        const sun = this.add.circle(
+            this.width * 0.09,
+            this.height * 0.13,
+            this.height * 0.075,
+            0xFFF2A8,
+            0.8
+        );
+
+        sun.setStrokeStyle(12, 0xFFFFFF, 0.25);
+
     }
 
     createPanel() {
 
-        const graphics = this.add.graphics();
-
-        graphics.fillStyle(0xC98A3A, 1);
-
-        graphics.fillRoundedRect(
-
-            this.pos.panel.x,
-            this.pos.panel.y,
-            this.pos.panel.width,
-            this.pos.panel.height,
-            this.pos.panel.radius
-
+        const shadow = this.add.rectangle(
+            this.width * 0.53,
+            this.height * 0.51,
+            this.width * 0.63,
+            this.height * 0.84,
+            0x6F360F,
+            0.22
         );
+
+        shadow.setStrokeStyle(9, 0x8D491A, 0.35);
+
+        const panel = this.add.rectangle(
+            this.width * 0.52,
+            this.height * 0.49,
+            this.width * 0.62,
+            this.height * 0.82,
+            0xD77B27,
+            1
+        );
+
+        panel.setStrokeStyle(9, 0x8D491A, 1);
 
     }
 
     createDecorations() {
 
-        // Árbol
-
-        this.tree = this.add.image(
-
-            this.pos.tree.x,
-            this.pos.tree.y,
+        const tree = this.add.image(
+            this.width,
+            0,
             "ArbolEsquinaSuperiorDerecha"
-
         );
 
-        this.tree.setOrigin(1, 0);
+        tree
+            .setOrigin(1, 0)
+            .setScale((this.width * 0.24) / tree.width);
 
-        const treeWidth = this.width * 0.25;
-
-        this.treeScale = treeWidth / this.tree.width;
-
-        this.tree.setScale(this.treeScale);
-
-        // Personaje guía
-
-        this.guide = this.add.image(
-
-            this.pos.guide.x,
-            this.pos.guide.y,
+        const guide = this.add.image(
+            0,
+            this.height,
             "CacaitoModulo"
-
         );
 
-        this.guide.setOrigin(0, 1);
+        guide
+            .setOrigin(0, 1)
+            .setScale((this.height * 0.61) / guide.height);
 
-        const guideHeight = this.height * 0.55;
+        this.tweens.add({
+            targets: guide,
+            y: guide.y - this.height * 0.012,
+            duration: 1800,
+            ease: "Sine.InOut",
+            yoyo: true,
+            repeat: -1
+        });
 
-        this.guideScale = guideHeight / this.guide.height;
+    }
 
-        this.guide.setScale(this.guideScale);
+    createTitle() {
+
+        const title = this.add.text(
+            this.width * 0.52,
+            this.height * 0.125,
+            "MÓDULOS",
+            {
+                fontFamily: "Trebuchet MS",
+                fontSize: `${this.height * 0.055}px`,
+                color: "#FFF7D8",
+                fontStyle: "bold",
+                stroke: "#73350F",
+                strokeThickness: 8
+            }
+        );
+
+        title.setOrigin(0.5);
+
+    }
+
+    createBackButton() {
+
+        const button = this.add.image(
+            this.width * 0.07,
+            this.height * 0.09,
+            "btnRegresar"
+        );
+
+        const baseScale = (this.width * 0.085) / button.width;
+
+        button
+            .setScale(baseScale)
+            .setInteractive({ useHandCursor: true });
+
+        button.on("pointerdown", () => {
+            this.sound.play("sfxBotonTocar", { volume: 1 });
+            button.setScale(baseScale * 0.95);
+        });
+
+        button.on("pointerout", () => button.setScale(baseScale));
+
+        button.on("pointerup", () => {
+            button.setScale(baseScale);
+            this.stopMusic();
+            this.scene.start("MainMenuScene");
+        });
 
     }
 
     createModuleButtons() {
 
-        // ==========================
-        // SEMBRAR
-        // ==========================
-
-        this.btnSembrar = this.createModuleButton(
-
-            this.pos.modules.sembrar.x,
-            this.pos.modules.sembrar.y,
-            "btnSembrarModulo",
-
-            () => {
-
-                this.scene.start("SembrarScene");
-
+        const modules = [
+            {
+                x: this.width * 0.42,
+                y: this.height * 0.34,
+                texture: "btnSembrarModulo",
+                onClick: () => this.scene.start("SembrarScene")
+            },
+            {
+                x: this.width * 0.63,
+                y: this.height * 0.34,
+                texture: "btnMantenerModulo",
+                onClick: () => this.scene.start("MantenerScene")
+            },
+            {
+                x: this.width * 0.42,
+                y: this.height * 0.69,
+                texture: "btnCosecharModulo",
+                onClick: () => this.scene.start("CosecharScene")
+            },
+            {
+                x: this.width * 0.63,
+                y: this.height * 0.69,
+                texture: "btnProcesarModulo"
             }
+        ];
 
-        );
-
-        // ==========================
-        // MANTENER
-        // ==========================
-
-        this.btnMantener = this.createModuleButton(
-
-            this.pos.modules.mantener.x,
-            this.pos.modules.mantener.y,
-            "btnMantenerModulo",
-
-            () => {
-
-                this.scene.start("MantenerScene");
-
-            }
-
-        );
-
-        // ==========================
-        // COSECHAR
-        // ==========================
-
-        this.btnCosechar = this.createModuleButton(
-
-            this.pos.modules.cosechar.x,
-            this.pos.modules.cosechar.y,
-            "btnCosecharModulo",
-
-            () => {
-
-                this.scene.start("CosecharScene");
-
-            }
-
-        );
-
-        // ==========================
-        // PROCESAR
-        // ==========================
-
-        this.btnProcesar = this.createModuleButton(
-
-            this.pos.modules.procesar.x,
-            this.pos.modules.procesar.y,
-            "btnProcesarModulo",
-
-            () => {
-
-                console.log("Procesar");
-
-            }
-
-        );
+        modules.forEach((module, index) => {
+            this.createModuleCard({
+                ...module,
+                delay: 90 * index
+            });
+        });
 
     }
 
-    createModuleButton(x, y, texture, onClick) {
+    createModuleCard(config) {
 
-        const button = this.add.image(x, y, texture);
+        const cardWidth = this.width * 0.18;
+        const cardHeight = this.height * 0.27;
+        const container = this.add.container(config.x, config.y)
+            .setAlpha(0)
+            .setScale(0.86)
+            .setDepth(20);
 
-        const moduleWidth = this.width * 0.18;
+        const shadow = this.add.rectangle(
+            8,
+            12,
+            cardWidth,
+            cardHeight,
+            0x65320E,
+            0.35
+        );
 
-        this.moduleScale = moduleWidth / button.width;
+        shadow.setStrokeStyle(5, 0x65320E, 0.4);
+
+        const background = this.add.rectangle(
+            0,
+            0,
+            cardWidth,
+            cardHeight,
+            0xB96D2A,
+            1
+        );
+
+        background.setStrokeStyle(7, 0x7D3F14, 1);
+
+        const button = this.add.image(0, 0, config.texture);
+        const baseScale = (this.width * 0.145) / button.width;
 
         button
-            .setScale(this.moduleScale)
+            .setScale(baseScale)
             .setInteractive({ useHandCursor: true });
 
         button.on("pointerdown", () => {
-
-            button.setScale(this.moduleScale * 0.95);
-
+            this.sound.play("sfxBotonTocar", { volume: 1 });
+            container.setScale(0.96);
         });
+
+        button.on("pointerout", () => container.setScale(1));
 
         button.on("pointerup", () => {
-
-        button.setScale(this.moduleScale);
-
-        if (onClick) {
-
-            onClick();
-
-        }
-
+            container.setScale(1);
+            config.onClick?.();
         });
 
-        return button;
+        container.add([shadow, background, button]);
+
+        this.tweens.add({
+            targets: container,
+            alpha: 1,
+            scale: 1,
+            duration: 360,
+            delay: config.delay,
+            ease: "Back.Out"
+        });
 
     }
-    createBackButton() {
 
-        this.btnBack = this.add.image(
+    ensureMusic() {
 
-            this.pos.backButton.x,
-            this.pos.backButton.y,
-            "btnRegresar"
+        let music = this.sound.get("musicaFondo");
 
-        );
+        if (!music) {
+            music = this.sound.add("musicaFondo", {
+                loop: true,
+                volume: 0.22
+            });
+        }
 
-        const backWidth = this.width * 0.075;
+        if (!music.isPlaying) {
+            music.play();
+        }
 
-        this.backScale = backWidth / this.btnBack.width;
+        music.setVolume(0.22);
+        AudioSettingsManager.applyToMusic(music);
 
-        this.btnBack
-            .setScale(this.backScale)
-            .setInteractive({ useHandCursor: true });
+    }
 
-        this.btnBack.on("pointerdown", () => {
+    stopMusic() {
 
-            this.btnBack.setScale(this.backScale * 0.95);
+        const music = this.sound.get("musicaFondo");
 
-        });
-
-        this.btnBack.on("pointerup", () => {
-
-            this.btnBack.setScale(this.backScale);
-
-            this.scene.start("MainMenuScene");
-
-        });
+        if (music) {
+            music.stop();
+            music.destroy();
+        }
 
     }
 
