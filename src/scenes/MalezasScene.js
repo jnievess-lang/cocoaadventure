@@ -1,11 +1,12 @@
 import EscenaBuscarObjetivos from "./EscenaBuscarObjetivos";
 import ProgressManager from "../managers/ProgressManager";
+import { arrancarConGuante } from "../utils/efectosMantenimiento";
 
 const CONFIGURACION_NIVEL = Object.freeze({
 
     fondo: "FondoFincaCacao",
 
-    tutorial: "La maleza le quita el alimento al cacao. Toca solo las hierbas y el pasto seco. ¡Cuidado! Las plantitas de cacao se quedan.",
+    tutorial: "La maleza le quita el alimento al cacao. Arrastra el guante hasta las hierbas y el pasto seco, y suéltalo encima para arrancarlos. ¡Cuidado! Las plantitas de cacao se quedan.",
 
     tituloExito: "¡Terreno limpio!",
 
@@ -22,7 +23,12 @@ const CONFIGURACION_NIVEL = Object.freeze({
     totalObjetivos: 6,
     totalDistractores: 3,
     iconoContador: "IconoGuantes",
-    tamanoObjetivo: 0.07,
+    tamanoObjetivo: 0.075,
+    tamanoHerramienta: 0.13,
+
+    // El guante se lleva la maleza tirando de ella, así que la salida del
+    // objetivo la anima el efecto y no el propio objetivo.
+    resolucionExterna: true,
 
     herramienta: {
         clave: "guantes",
@@ -52,6 +58,13 @@ const CONFIGURACION_NIVEL = Object.freeze({
         { x: 0.59, y: 0.92 },
         { x: 0.76, y: 0.90 }
     ],
+
+    esperaAlUsar: 450,
+
+    efecto: (escena, objetivo) => arrancarConGuante(escena, objetivo, {
+        depth: objetivo.depth + 20,
+        tamano: 0.15
+    }),
 
     guardarProgreso: estrellas => ProgressManager.completeMalezas(estrellas)
 
