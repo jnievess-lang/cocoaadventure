@@ -35,8 +35,8 @@ export default class LogrosScene extends Phaser.Scene {
                 y: this.height * 0.09
             },
             trophies: {
-                sembrar: { x: this.width * 0.405, y: this.height * 0.398 },
-                mantener: { x: this.width * 0.595, y: this.height * 0.398 },
+                sembrar: { x: this.width * 0.405, y: this.height * 0.450 },
+                mantener: { x: this.width * 0.595, y: this.height * 0.450 },
                 cosechar: { x: this.width * 0.405, y: this.height * 0.72 },
                 procesar: { x: this.width * 0.595, y: this.height * 0.72 }
             }
@@ -88,7 +88,7 @@ export default class LogrosScene extends Phaser.Scene {
             const position = this.pos.trophies[module];
             const trophy = this.add.image(position.x, position.y, texture);
 
-            trophy.setScale((this.width * 0.155) / trophy.width);
+            trophy.setScale((this.width * 0.105) / trophy.width);
         });
 
     }

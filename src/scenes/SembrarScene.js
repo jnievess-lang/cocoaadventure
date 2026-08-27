@@ -29,17 +29,16 @@ export default class SembrarScene extends Phaser.Scene {
 
     createBackground() {
 
-        this.cameras.main.setBackgroundColor("#8FD3FF");
-
-        const sun = this.add.circle(
-            this.width * 0.09,
-            this.height * 0.13,
-            this.height * 0.075,
-            0xFFF2A8,
-            0.8
+        const background = this.add.image(
+            this.width * 0.50,
+            this.height * 0.50,
+            "fondoConfiguracion"
         );
 
-        sun.setStrokeStyle(12, 0xFFFFFF, 0.25);
+        background.setScale(Math.max(
+            this.width / background.width,
+            this.height / background.height
+        ));
 
     }
 
@@ -50,22 +49,22 @@ export default class SembrarScene extends Phaser.Scene {
             this.height * 0.51,
             this.width * 0.63,
             this.height * 0.84,
-            0x6F360F,
+            0x27784E,
             0.22
         );
 
-        shadow.setStrokeStyle(9, 0x8D491A, 0.35);
+        shadow.setStrokeStyle(9, 0x1C5B3A, 0.35);
 
         const panel = this.add.rectangle(
             this.width * 0.52,
             this.height * 0.49,
             this.width * 0.62,
             this.height * 0.82,
-            0xD77B27,
+            0x27784E,
             1
         );
 
-        panel.setStrokeStyle(9, 0x8D491A, 1);
+        panel.setStrokeStyle(9, 0x1C5B3A, 1);
 
     }
 
@@ -113,7 +112,7 @@ export default class SembrarScene extends Phaser.Scene {
                 fontSize: `${this.height * 0.055}px`,
                 color: "#FFF7D8",
                 fontStyle: "bold",
-                stroke: "#73350F",
+                stroke: "#1C5B3A",
                 strokeThickness: 8
             }
         );
