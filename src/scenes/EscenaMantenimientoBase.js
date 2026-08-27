@@ -57,6 +57,10 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
             this.nivel.fondo
         );
 
+        // Se guarda porque la lupa de “Buscar plagas” necesita saber qué parte
+        // del escenario debe verse ampliada dentro del cristal.
+        this.fondo = fondo;
+
         // Los fondos del módulo son más anchos que el lienzo real del dispositivo.
         // Se escalan a "cover" y la mecánica se mantiene en la zona central.
         fondo.setScale(

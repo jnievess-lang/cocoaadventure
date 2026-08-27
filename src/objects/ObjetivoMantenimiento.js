@@ -28,7 +28,11 @@ export default class ObjetivoMantenimiento extends Phaser.GameObjects.Image {
 
         this.crearZonaTactil();
         this.crearAnimacionInactiva();
-        this.habilitar();
+
+        // Los niveles que se juegan arrastrando una herramienta resuelven el
+        // objetivo desde la escena, así que su toque directo queda apagado.
+        if (config.interactivo === false) this.deshabilitar();
+        else this.habilitar();
     }
 
     /**
@@ -65,6 +69,30 @@ export default class ObjetivoMantenimiento extends Phaser.GameObjects.Image {
         });
     }
 
+    /**
+     * ¿Cae este punto sobre el objetivo? Lo usa la escena para saber sobre qué
+     * se soltó la herramienta. La holgura compensa que un dedo no apunta fino.
+     */
+    contienePunto(x, y, holgura = 1.3) {
+        if (this.resuelto || !this.active) return false;
+
+        const limites = this.getBounds();
+        const anchoExtra = (limites.width * (holgura - 1)) / 2;
+        const altoExtra = (limites.height * (holgura - 1)) / 2;
+
+        return (
+            x >= limites.x - anchoExtra &&
+            x <= limites.right + anchoExtra &&
+            y >= limites.y - altoExtra &&
+            y <= limites.bottom + altoExtra
+        );
+    }
+
+    /** Distancia del centro del objetivo a un punto, para desempatar. */
+    distanciaA(x, y) {
+        return Phaser.Math.Distance.Between(this.x, this.y, x, y);
+    }
+
     seleccionar() {
         if (this.resuelto || this.bloqueado) return;
 
@@ -84,6 +112,10 @@ export default class ObjetivoMantenimiento extends Phaser.GameObjects.Image {
         this.setScale(this.escalaBase);
 
         this.mostrarDestello();
+
+        // Con resolución externa la escena se encarga de la salida, por ejemplo
+        // el guante que se lleva la maleza tirando de ella.
+        if (this.config.resolucionExterna) return;
 
         if (this.texturaResuelta) this.transformar();
         else this.desvanecer();
