@@ -20,7 +20,7 @@ Cada archivo va en `public/audio/voice/` con exactamente el nombre indicado.
 
 | Archivo | Clave Phaser | Texto |
 | --- | --- | --- |
-| `RegarInstruccion.mp3` | `vozRegarInstruccion` | Algunas plantas están caídas porque tienen sed. Tócalas para regarlas. |
+| `RegarInstruccion.mp3` | `vozRegarInstruccion` | Arrastra la regadera hasta las plantas caídas para darles agua. |
 | `RegarAyuda.mp3` | `vozRegarAyuda` | Esa planta ya está verde y sana. Busca las que están caídas. |
 | `RegarCompletado.mp3` | `vozRegarCompletado` | ¡Muy bien! Todas las plantas ya tomaron agua. |
 | `RegarTiempoAgotado.mp3` | `vozRegarTiempoAgotado` | Se acabó el tiempo. Volvamos a regar las plantas. |
@@ -29,7 +29,7 @@ Cada archivo va en `public/audio/voice/` con exactamente el nombre indicado.
 
 | Archivo | Clave Phaser | Texto |
 | --- | --- | --- |
-| `MalezasInstruccion.mp3` | `vozMalezasInstruccion` | Toca las hierbas y el pasto seco que crecen junto al cacao. |
+| `MalezasInstruccion.mp3` | `vozMalezasInstruccion` | Arrastra el guante hasta las hierbas y el pasto seco para arrancarlos. |
 | `MalezasAyuda.mp3` | `vozMalezasAyuda` | Esa es una plantita de cacao. Ella se queda en el terreno. |
 | `MalezasCompletado.mp3` | `vozMalezasCompletado` | ¡Excelente! El terreno quedó limpio para el cacao. |
 | `MalezasTiempoAgotado.mp3` | `vozMalezasTiempoAgotado` | Se acabó el tiempo. Volvamos a limpiar el terreno. |
@@ -38,7 +38,7 @@ Cada archivo va en `public/audio/voice/` con exactamente el nombre indicado.
 
 | Archivo | Clave Phaser | Texto |
 | --- | --- | --- |
-| `PlagasInstruccion.mp3` | `vozPlagasInstruccion` | Revisa el árbol con la lupa y toca lo que esté enfermo o tenga insectos. |
+| `PlagasInstruccion.mp3` | `vozPlagasInstruccion` | Arrastra la lupa por el árbol y mantenla sobre lo que esté enfermo hasta completar el círculo. |
 | `PlagasAyuda.mp3` | `vozPlagasAyuda` | Esa mazorca está sana. Busca las que tienen manchas o bichitos. |
 | `PlagasCompletado.mp3` | `vozPlagasCompletado` | ¡Muy bien! Dejaste el árbol sano y revisado. |
 | `PlagasTiempoAgotado.mp3` | `vozPlagasTiempoAgotado` | Se acabó el tiempo. Revisemos el árbol otra vez. |
@@ -78,15 +78,15 @@ el mismo perfil que el resto del proyecto: velocidad, tono y volumen sin
 alterar.
 
 ```bash
-edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Algunas plantas están caídas porque tienen sed. Tócalas para regarlas." --write-media RegarInstruccion.mp3
+edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Arrastra la regadera hasta las plantas caídas para darles agua." --write-media RegarInstruccion.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Esa planta ya está verde y sana. Busca las que están caídas." --write-media RegarAyuda.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "¡Muy bien! Todas las plantas ya tomaron agua." --write-media RegarCompletado.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Se acabó el tiempo. Volvamos a regar las plantas." --write-media RegarTiempoAgotado.mp3
-edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Toca las hierbas y el pasto seco que crecen junto al cacao." --write-media MalezasInstruccion.mp3
+edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Arrastra el guante hasta las hierbas y el pasto seco para arrancarlos." --write-media MalezasInstruccion.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Esa es una plantita de cacao. Ella se queda en el terreno." --write-media MalezasAyuda.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "¡Excelente! El terreno quedó limpio para el cacao." --write-media MalezasCompletado.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Se acabó el tiempo. Volvamos a limpiar el terreno." --write-media MalezasTiempoAgotado.mp3
-edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Revisa el árbol con la lupa y toca lo que esté enfermo o tenga insectos." --write-media PlagasInstruccion.mp3
+edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Arrastra la lupa por el árbol y mantenla sobre lo que esté enfermo hasta completar el círculo." --write-media PlagasInstruccion.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Esa mazorca está sana. Busca las que tienen manchas o bichitos." --write-media PlagasAyuda.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "¡Muy bien! Dejaste el árbol sano y revisado." --write-media PlagasCompletado.mp3
 edge-tts --voice es-EC-AndreaNeural --rate=+0% --pitch=+0Hz --volume=+0% --text "Se acabó el tiempo. Revisemos el árbol otra vez." --write-media PlagasTiempoAgotado.mp3

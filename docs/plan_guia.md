@@ -385,9 +385,18 @@ Responsabilidades separadas:
 | `managers/GestorAudioMinijuego.js` | Controla música, atenuación, voces, pausa y restauración de audio. |
 | `ui/ContadorObjetivos.js` | Panel “icono + hechos / total”, con la cifra siempre dibujada por código. |
 | `ui/SelectorHerramienta.js` | Paleta de herramientas con icono y etiqueta escrita. Con una sola herramienta sirve de insignia informativa. |
-| `objects/ObjetivoMantenimiento.js` | Objetivo tocable que distingue acierto de distractor, y desaparece o se transforma al resolverse. |
+| `objects/ObjetivoMantenimiento.js` | Objetivo que distingue acierto de distractor, y desaparece o se transforma al resolverse. |
+| `ui/HerramientaArrastrable.js` | Herramienta que se arrastra desde su base y vuelve sola al soltarla. |
+| `ui/LupaAumento.js` | Lupa con aumento real y anillo de progreso para completar cada búsqueda. |
+| `utils/efectosMantenimiento.js` | Riego, rociado y arranque con guante. Todo decorativo. |
 | `scenes/EscenaMantenimientoBase.js` | Esqueleto de los minijuegos de Mantener: fondo, HUD, tutorial, contador, resultado y ciclo de vida. |
 | `scenes/EscenaBuscarObjetivos.js` | Mecánica de repartir objetivos y distractores. Regar, Quitar malezas y Buscar plagas solo aportan datos. |
+
+Los cuatro niveles se juegan arrastrando la herramienta hasta el objetivo, no
+tocándolo. `ui/HerramientaArrastrable.js` resuelve ese arrastre y `ui/LupaAumento.js`
+la lupa de “Buscar plagas”, que amplía de verdad con una segunda cámara de Phaser
+recortada en círculo. Los efectos visuales viven en `utils/efectosMantenimiento.js`
+y sus partículas se generan por código, sin añadir imágenes.
 
 Regla derivada de este módulo: la lógica de un nivel nunca debe depender de que
 termine una animación. El avance de una ronda se apoya en `scene.time`, que se
@@ -476,6 +485,8 @@ recursos ya aprobados en lugar de duplicarlos:
 | `PlantaPlagas` | `objects/PlantaPlagas.webp` | Ataque de insectos |
 | `MalezaFlor` | `objects/MalezaFlor.webp` | Maleza que se debe quitar |
 | `PastoSeco` | `objects/PastoSeco.webp` | Maleza que se debe quitar |
+| `GuanteAbierto` | `objects/GuanteAbierto.webp` | Guante que se arrastra y baja a agarrar la maleza |
+| `GuanteCerrado` | `objects/GuanteCerrado.webp` | Segundo fotograma del mismo guante, ya cerrado sobre la maleza |
 | `Pulgon` | `objects/Pulgon.webp` | Plaga |
 | `Gusano` | `objects/Gusano.webp` | Plaga |
 | `HojaManchada` | `objects/HojaManchada.webp` | Hoja enferma |
