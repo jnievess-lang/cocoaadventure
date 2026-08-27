@@ -206,6 +206,7 @@ export default class PreloadScene extends Phaser.Scene {
 
         // Herramientas
         this.load.image("IconoRegadera", "images/icons/IconoRegadera.webp");
+        this.load.image("IconoRegaderaQuieta", "images/objects/IconoRegaderaQuieta.webp");
         this.load.image("IconoGuantes", "images/icons/IconoGuantes.webp");
         this.load.image("IconoLupa", "images/icons/IconoLupa.webp");
         this.load.image("IconoFungicida", "images/icons/IconoFungicida.webp");
@@ -220,6 +221,10 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("MalezaFlor", "images/objects/MalezaFlor.webp");
         this.load.image("PastoSeco", "images/objects/PastoSeco.webp");
 
+        // Guante que arranca la maleza: dos poses del mismo guante
+        this.load.image("GuanteAbierto", "images/objects/GuanteAbierto.webp");
+        this.load.image("GuanteCerrado", "images/objects/GuanteCerrado.webp");
+
         // Plagas y enfermedades
         this.load.image("Pulgon", "images/objects/Pulgon.webp");
         this.load.image("Gusano", "images/objects/Gusano.webp");
@@ -231,6 +236,7 @@ export default class PreloadScene extends Phaser.Scene {
 
         // Voces del módulo Mantener (es-EC-AndreaNeural).
         // Ver docs/voces_mantener.md para los guiones aprobados.
+        this.load.audio("sfxRiegoAgua", "audio/sfx/RiegoAgua.wav");
         this.load.audio("vozRegarInstruccion", "audio/voice/RegarInstruccion.mp3");
         this.load.audio("vozRegarAyuda", "audio/voice/RegarAyuda.mp3");
         this.load.audio("vozRegarCompletado", "audio/voice/RegarCompletado.mp3");

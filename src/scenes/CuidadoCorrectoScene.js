@@ -6,9 +6,20 @@ import animarHerramienta from "../utils/animarHerramienta";
 import ProgressManager from "../managers/ProgressManager";
 import esCuidadoCorrecto, {
     obtenerCuidado,
+    herramientaCorrecta,
     PROBLEMAS_DE_PLANTA,
-    PLANTA_CON_MALEZA
+    PLANTA_CON_MALEZA,
+    HERRAMIENTA_REGADERA,
+    HERRAMIENTA_GUANTES,
+    HERRAMIENTA_LUPA,
+    HERRAMIENTA_FUNGICIDA
 } from "../utils/diagnosticoPlanta";
+import {
+    regar,
+    rociar,
+    arrancarConGuante,
+    inclinarRegadera
+} from "../utils/efectosMantenimiento";
 
 const HERRAMIENTAS = Object.freeze([
     { clave: "regadera", textura: "IconoRegadera", etiqueta: "Regadera" },
@@ -189,7 +200,7 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
     aplicarHerramienta(clave) {
         const origen = this.selector.obtenerPosicion(clave);
 
-        animarHerramienta(this, {
+        this.herramientaEnVuelo = animarHerramienta(this, {
             texture: obtenerTexturaHerramienta(clave),
             desdeX: origen?.x ?? this.ancho * 0.5,
             desdeY: origen?.y ?? this.alto * 0.85,
@@ -199,23 +210,81 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
         });
     }
 
+    /**
+     * Cada herramienta resuelve la planta a su manera, con la misma animación
+     * que el niño ya vio en el nivel donde la aprendió.
+     */
     resolverPlanta() {
         if (!this.planta) return;
 
-        if (this.maleza) {
+        const animaciones = {
+            [HERRAMIENTA_REGADERA]: () => this.animarRiego(),
+            [HERRAMIENTA_GUANTES]: () => this.animarArranque(),
+            [HERRAMIENTA_LUPA]: () => this.animarInspeccion(),
+            [HERRAMIENTA_FUNGICIDA]: () => this.animarRociado()
+        };
+
+        const herramienta = herramientaCorrecta(this.problemaActual);
+
+        (animaciones[herramienta] ?? (() => this.planta.resolver()))();
+    }
+
+    animarRiego() {
+        inclinarRegadera(this, this.herramientaEnVuelo, { grados: 45 });
+
+        regar(this, this.planta.x, this.planta.y - this.planta.displayHeight * 0.5, {
+            depth: this.planta.depth + 5
+        });
+
+        this.time.delayedCall(260, () => this.planta?.resolver());
+    }
+
+    /** El guante se lleva la maleza y deja la planta libre. */
+    animarArranque() {
+        if (!this.maleza) {
+            this.planta.resolver();
+            return;
+        }
+
+        const maleza = this.maleza;
+        this.maleza = null;
+
+        arrancarConGuante(this, maleza, { depth: 40 });
+        this.time.delayedCall(420, () => this.planta?.resolver());
+    }
+
+    /** La lupa se acerca y crece antes de dar con la plaga. */
+    animarInspeccion() {
+        const lupa = this.herramientaEnVuelo;
+
+        if (lupa?.active) {
             this.tweens.add({
-                targets: this.maleza,
-                scale: 0,
-                angle: 180,
-                duration: 220,
-                onComplete: () => {
-                    this.maleza?.destroy();
-                    this.maleza = null;
-                }
+                targets: lupa,
+                scale: lupa.scale * 1.6,
+                duration: 320,
+                yoyo: true,
+                ease: "Sine.InOut"
             });
         }
 
-        this.planta.resolver();
+        this.tweens.add({
+            targets: this.planta,
+            scale: this.planta.scale * 1.06,
+            duration: 200,
+            yoyo: true,
+            repeat: 1,
+            ease: "Sine.InOut"
+        });
+
+        this.time.delayedCall(420, () => this.planta?.resolver());
+    }
+
+    animarRociado() {
+        rociar(this, this.planta.x, this.planta.y - this.planta.displayHeight * 0.55, {
+            depth: this.planta.depth + 5
+        });
+
+        this.time.delayedCall(300, () => this.planta?.resolver());
     }
 
     terminarRonda() {
