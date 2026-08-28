@@ -67,6 +67,9 @@ const CONFIGURACION_NIVEL = Object.freeze({
         const regadera = escena.herramienta;
 
         colocarRegaderaSobre(escena, regadera, objetivo, {
+            // El pico queda bien despegado de las hojas: a la altura anterior
+            // la regadera se solapaba con la planta y el agua salía entre ellas.
+            altura: 1.55,
             onListo: () => {
                 inclinarRegadera(escena, regadera);
 
