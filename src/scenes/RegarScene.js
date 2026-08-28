@@ -3,7 +3,6 @@ import ProgressManager from "../managers/ProgressManager";
 import {
     regar,
     inclinarRegadera,
-    boquillaDe,
     colocarRegaderaSobre
 } from "../utils/efectosMantenimiento";
 
@@ -62,13 +61,13 @@ const CONFIGURACION_NIVEL = Object.freeze({
     ],
 
     // La regadera se acomoda arriba y a la derecha de la planta, se inclina y
-    // el agua sale por su boquilla mientras la planta se endereza y reverdece.
+    // riega mientras la planta se endereza y reverdece.
     efecto: (escena, objetivo) => {
         const regadera = escena.herramienta;
 
         colocarRegaderaSobre(escena, regadera, objetivo, {
-            // El pico queda bien despegado de las hojas: a la altura anterior
-            // la regadera se solapaba con la planta y el agua salía entre ellas.
+            // El pico queda despegado de las hojas: más abajo, la regadera se
+            // solapaba con la planta.
             altura: 1.55,
             onListo: () => {
                 inclinarRegadera(escena, regadera);
@@ -78,14 +77,15 @@ const CONFIGURACION_NIVEL = Object.freeze({
                 }
 
                 escena.time.delayedCall(120, () => {
-                    const salida = boquillaDe(regadera) ?? {
-                        x: objetivo.x,
-                        y: objetivo.y - objetivo.displayHeight
-                    };
-
-                    regar(escena, salida.x, salida.y, {
-                        depth: objetivo.depth + 5
-                    });
+                    // El agua se mide desde la planta, no desde la regadera:
+                    // atada al pico subía junto con ella y caía demasiado
+                    // arriba, lejos de las hojas que debe mojar.
+                    regar(
+                        escena,
+                        objetivo.x,
+                        objetivo.y - objetivo.displayHeight * 1.05,
+                        { depth: objetivo.depth + 5 }
+                    );
                 });
             }
         });

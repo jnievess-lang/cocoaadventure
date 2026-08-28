@@ -25,14 +25,6 @@ function asegurarTexturaCirculo(scene, clave, color, radio) {
  */
 export const BOQUILLA_REGADERA = Object.freeze({ x: 0.107, y: 0.325 });
 
-export function boquillaDe(regadera) {
-    if (!regadera?.active) return null;
-
-    return {
-        x: regadera.x + (BOQUILLA_REGADERA.x - regadera.originX) * regadera.displayWidth,
-        y: regadera.y + (BOQUILLA_REGADERA.y - regadera.originY) * regadera.displayHeight
-    };
-}
 
 /** Chorro corto de gotas que cae desde el punto indicado. */
 export function regar(scene, x, y, opciones = {}) {
