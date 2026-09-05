@@ -78,68 +78,90 @@ export default class MazorcaCortable extends Phaser.GameObjects.Container {
     }
 
     crearAyudaVisual() {
-        this.resaltado = this.scene.add.graphics();
-        this.resaltado.setPosition(
-            this.xCorte,
-            this.yCorte
+        this.yInicioBarrido = this.altoJuego * 0.22;
+        this.yFinBarrido = this.altoJuego * 0.82;
+        this.toleranciaLinea = this.altoJuego * (
+            this.config.toleranciaLinea ?? 0.045
         );
-        this.resaltado.lineStyle(
+        this.duracionBarridoMs = this.config.duracionBarridoMs ?? 1900;
+        this.anchoLinea = this.anchoJuego * 0.18;
+        this.xLinea = this.anchoJuego * (this.config.posicionXLinea ?? 0.44);
+        this.ayudaPedunculoActiva = false;
+        this.radioIndicadorPedunculo = this.altoJuego * 0.075;
+
+        this.indicadorPedunculo = this.scene.add.graphics();
+        this.indicadorPedunculo.setPosition(
+            this.xCorte,
+            this.yCorte + this.altoJuego * 0.035
+        );
+        this.indicadorPedunculo.fillStyle(0xFFF4A8, 0.12);
+        this.indicadorPedunculo.fillCircle(0, 0, this.radioIndicadorPedunculo);
+        this.indicadorPedunculo.lineStyle(
             Math.max(5, this.altoJuego * 0.006),
             0xFFF4A8,
             1
         );
-        this.resaltado.strokeCircle(
+        this.indicadorPedunculo.strokeCircle(0, 0, this.radioIndicadorPedunculo);
+
+        this.sombraLinea = this.scene.add.rectangle(
+            this.xLinea,
             0,
-            0,
-            this.altoJuego * 0.07
+            this.anchoLinea,
+            Math.max(12, this.altoJuego * 0.018),
+            0xFF3048,
+            0.28
         );
 
-        this.flecha = this.scene.add.text(
-            this.xCorte,
-            this.yCorte - this.altoJuego * 0.09,
-            "▼",
-            {
-                fontFamily: "Trebuchet MS",
-                fontSize: `${this.altoJuego * 0.055}px`,
-                color: "#FFF4A8",
-                fontStyle: "bold",
-                stroke: "#5A3218",
-                strokeThickness: 5
-            }
-        ).setOrigin(0.5);
-
-        this.areaPedunculo = this.scene.add.rectangle(
-            this.xCorte,
-            this.yCorte,
-            Math.max(this.anchoJuego * 0.085, this.altoJuego * 0.13),
-            this.altoJuego * 0.16,
-            0xFFFFFF,
-            0.001
+        this.lineaCorte = this.scene.add.rectangle(
+            this.xLinea,
+            0,
+            this.anchoLinea,
+            Math.max(6, this.altoJuego * 0.009),
+            0xFF3048,
+            1
+        );
+        this.lineaCorte.setStrokeStyle(
+            Math.max(1, this.altoJuego * 0.002),
+            0xFFF0D6,
+            0.95
         );
 
-        this.add([this.resaltado, this.flecha, this.areaPedunculo]);
+        this.lineaBarrido = this.scene.add.container(
+            0,
+            this.yInicioBarrido,
+            [this.sombraLinea, this.lineaCorte]
+        );
+
+        this.add([this.indicadorPedunculo, this.lineaBarrido]);
         this.ocultarAyuda();
     }
 
     configurarInteraccion() {
         this.areaJuego.on("pointerdown", () => {
-            if (this.habilitado) this.config.onPuntoIncorrecto?.();
-        });
-
-        this.areaPedunculo.on("pointerdown", (pointer, localX, localY, event) => {
-            event.stopPropagation();
             if (!this.habilitado) return;
-            this.deshabilitarPedunculo();
-            this.config.onPedunculoSeleccionado?.();
+
+            if (this.lineaSobrePedunculo()) {
+                this.deshabilitarPedunculo();
+                this.config.onPedunculoSeleccionado?.();
+            }
+            else {
+                this.config.onPuntoIncorrecto?.();
+            }
         });
+    }
+
+    lineaSobrePedunculo() {
+        return Math.abs(this.lineaBarrido.y - this.yCorte) <= this.toleranciaLinea;
     }
 
     prepararRonda() {
         this.scene.tweens.killTweensOf([
             this.composicion,
             this.mazorcaDesprendida,
-            this.resaltado,
-            this.flecha,
+            this.lineaBarrido,
+            this.sombraLinea,
+            this.lineaCorte,
+            this.indicadorPedunculo,
             this.tijera
         ]);
 
@@ -177,27 +199,32 @@ export default class MazorcaCortable extends Phaser.GameObjects.Container {
     habilitarPedunculo() {
         this.habilitado = true;
         this.areaJuego.setInteractive({ useHandCursor: true });
-        this.areaPedunculo.setInteractive({ useHandCursor: true });
         this.mostrarAyuda();
     }
 
     deshabilitarPedunculo() {
         this.habilitado = false;
         this.areaJuego.disableInteractive();
-        this.areaPedunculo.disableInteractive();
         this.ocultarAyuda();
     }
 
     mostrarAyuda() {
-        this.resaltado.setVisible(true).setAlpha(1).setScale(1);
-        this.flecha.setVisible(true).setAlpha(1);
+        this.scene.tweens.killTweensOf(this.lineaBarrido);
+        this.lineaBarrido
+            .setY(this.yInicioBarrido)
+            .setVisible(true)
+            .setAlpha(1);
+        this.lineaCorte.setScale(1).setAlpha(1);
+        this.sombraLinea.setScale(1).setAlpha(0.28);
+
+        if (this.ayudaPedunculoActiva) this.animarIndicadorPedunculo();
+        else this.indicadorPedunculo.setVisible(false);
 
         this.scene.tweens.add({
-            targets: [this.resaltado, this.flecha],
-            alpha: { from: 0.45, to: 1 },
-            scale: { from: 0.92, to: 1.08 },
-            duration: 620,
-            ease: "Sine.InOut",
+            targets: this.lineaBarrido,
+            y: this.yFinBarrido,
+            duration: this.duracionBarridoMs,
+            ease: "Linear",
             yoyo: true,
             repeat: -1
         });
@@ -205,22 +232,75 @@ export default class MazorcaCortable extends Phaser.GameObjects.Container {
 
     reforzarAyuda() {
         this.scene.tweens.add({
-            targets: [this.resaltado, this.flecha],
-            scale: 1.24,
-            duration: 150,
+            targets: [this.sombraLinea, this.lineaCorte],
+            scaleY: 1.8,
+            alpha: 0.45,
+            duration: 110,
             ease: "Back.Out",
             yoyo: true,
             onComplete: () => {
-                this.resaltado.setScale(1);
-                this.flecha.setScale(1);
+                this.sombraLinea.setScale(1).setAlpha(0.28);
+                this.lineaCorte.setScale(1).setAlpha(1);
             }
+        });
+
+        if (!this.scene.textures.exists("IndicadorError")) return;
+
+        const indicador = this.scene.add.image(
+            this.xLinea,
+            this.lineaBarrido.y,
+            "IndicadorError"
+        );
+        this.add(indicador);
+
+        const escalaFinal = (this.anchoJuego * 0.042) / indicador.width;
+        indicador.setScale(0).setAlpha(0.95);
+
+        this.scene.tweens.add({
+            targets: indicador,
+            scale: escalaFinal,
+            alpha: 0,
+            y: indicador.y - this.altoJuego * 0.04,
+            duration: 520,
+            ease: "Sine.Out",
+            onComplete: () => indicador.destroy()
+        });
+    }
+
+    mostrarObjetivoPedunculo() {
+        this.ayudaPedunculoActiva = true;
+        this.animarIndicadorPedunculo();
+    }
+
+    animarIndicadorPedunculo() {
+        this.scene.tweens.killTweensOf(this.indicadorPedunculo);
+        this.indicadorPedunculo
+            .setVisible(true)
+            .setAlpha(1)
+            .setScale(0.92);
+
+        this.scene.tweens.add({
+            targets: this.indicadorPedunculo,
+            scale: 1.08,
+            alpha: 0.58,
+            duration: 560,
+            ease: "Sine.InOut",
+            yoyo: true,
+            repeat: -1
         });
     }
 
     ocultarAyuda() {
-        this.scene.tweens.killTweensOf([this.resaltado, this.flecha]);
-        this.resaltado.setVisible(false).setScale(1);
-        this.flecha.setVisible(false).setScale(1);
+        this.scene.tweens.killTweensOf([
+            this.lineaBarrido,
+            this.sombraLinea,
+            this.lineaCorte,
+            this.indicadorPedunculo
+        ]);
+        this.lineaBarrido.setVisible(false).setAlpha(1);
+        this.indicadorPedunculo.setVisible(false).setAlpha(1).setScale(1);
+        this.sombraLinea.setScale(1).setAlpha(0.28);
+        this.lineaCorte.setScale(1).setAlpha(1);
     }
 
     mostrarTijera() {

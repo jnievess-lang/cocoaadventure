@@ -83,12 +83,13 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
 
         this.tree = this.add.image(
             this.width * 0.53,
-            this.height * 0.56,
+            this.height * 0.60,
             "ArbolCacaoSeleccion"
         );
 
         this.tree
-            .setScale((this.height * 0.88) / this.tree.height)
+            // Mantiene la base en el borde inferior y libera la zona del reloj.
+            .setScale((this.height * 0.80) / this.tree.height)
             .setDepth(3);
 
     }
@@ -440,7 +441,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
         this.sound.play("sfxSeleccionIncorrecta", { volume: 0.45 });
 
         if (pod.podState === "damaged") {
-            pod.showDamaged();
+            this.indicators.push(pod.showDamaged("IndicadorError"));
 
             if (!this.firstDamagedVoicePlayed) {
                 this.firstDamagedVoicePlayed = true;
@@ -448,7 +449,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
             }
         }
         else {
-            this.indicators.push(pod.showNotReady("IndicadorEspera"));
+            this.indicators.push(pod.showNotReady("IndicadorError"));
         }
 
         if (
