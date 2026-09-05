@@ -10,8 +10,11 @@ import ProgressManager from "../managers/ProgressManager";
 const CONFIGURACION_NIVEL = Object.freeze({
     totalMazorcas: 4,
     duracionSegundos: 60,
-    vidasMaximas: 3,
+    vidasMaximas: 4,
     estrellasMaximas: 3,
+    duracionBarridoMs: 1200,
+    toleranciaLinea: 0.045,
+    posicionXLinea: 0.44,
     duracionCargaMs: 2200,
     zonasSeguras: [
         { minimo: 0.25, maximo: 0.80 },
@@ -129,6 +132,9 @@ export default class CorteCuidadosoScene extends Phaser.Scene {
 
     crearMecanica() {
         this.mazorcaCortable = new MazorcaCortable(this, {
+            duracionBarridoMs: CONFIGURACION_NIVEL.duracionBarridoMs,
+            toleranciaLinea: CONFIGURACION_NIVEL.toleranciaLinea,
+            posicionXLinea: CONFIGURACION_NIVEL.posicionXLinea,
             onPedunculoSeleccionado: () => this.seleccionarPedunculo(),
             onPuntoIncorrecto: () => this.marcarPuntoIncorrecto()
         });
@@ -150,7 +156,7 @@ export default class CorteCuidadosoScene extends Phaser.Scene {
 
         new TutorialPanel(this, {
             character: "CacaitoIndicaciones",
-            text: "Primero toca el tallito brillante, llamado pedúnculo. Luego mantén presionado y suelta cuando la barra llegue a la zona verde.",
+            text: "Toca cuando la línea roja pase sobre el tallito de la mazorca. Luego mantén presionado y suelta en la zona verde.",
             audio: "vozCorteCuidadosoInstruccion",
             onVoiceStart: () => this.audio.duckMusic(),
             onComplete: () => {
@@ -180,11 +186,20 @@ export default class CorteCuidadosoScene extends Phaser.Scene {
     marcarPuntoIncorrecto() {
         if (this.estadoNivel !== "buscandoPedunculo") return;
 
+        const esPrimerError = !this.primeraVozPunto;
+
         this.sound.play("sfxSeleccionIncorrecta", { volume: 0.72 });
         this.mazorcaCortable.reforzarAyuda();
 
-        if (!this.primeraVozPunto) {
+        if (esPrimerError) {
             this.primeraVozPunto = true;
+            this.mazorcaCortable.mostrarObjetivoPedunculo();
+        }
+
+        const vidasRestantes = this.hud.loseLife();
+        if (vidasRestantes <= 0 || this.estadoNivel === "fallido") return;
+
+        if (esPrimerError) {
             this.hud.reproducirRetroalimentacion(
                 "vozCorteCuidadosoPuntoIncorrecto"
             );
