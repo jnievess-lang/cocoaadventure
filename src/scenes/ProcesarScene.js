@@ -162,7 +162,7 @@ export default class ProcesarScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.34,
-                label: "SECAR GRANOS",
+                label: "Secar granos",
                 iconTexture: "CanastaSecadoBuenos",
                 unlocked: procesar.secado.unlocked,
                 stars: procesar.secado.stars,
@@ -171,7 +171,7 @@ export default class ProcesarScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.34,
-                label: "TOSTAR",
+                label: "Tostar",
                 iconTexture: "GranoSecoBueno",
                 unlocked: procesar.tostado.unlocked,
                 stars: procesar.tostado.stars,
@@ -180,7 +180,7 @@ export default class ProcesarScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.69,
-                label: "DESCASCARILLAR",
+                label: "Descascarrillar",
                 iconTexture: "GranoSecoAgrietado",
                 unlocked: procesar.descascarillado.unlocked,
                 stars: procesar.descascarillado.stars,
@@ -189,7 +189,7 @@ export default class ProcesarScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.69,
-                label: "MOLER",
+                label: "Moler",
                 iconTexture: "TazonChocolate",
                 unlocked: procesar.molienda.unlocked,
                 stars: procesar.molienda.stars,

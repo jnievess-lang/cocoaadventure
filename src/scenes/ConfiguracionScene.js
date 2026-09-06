@@ -77,7 +77,7 @@ export default class ConfiguracionScene extends Phaser.Scene {
 
         board.setScale(this.pos.board.width / board.width);
 
-        this.add.text(this.pos.title.x, this.pos.title.y, "CONFIGURACIÓN", {
+        this.add.text(this.pos.title.x, this.pos.title.y, "Configuración", {
             fontFamily: "Arial, sans-serif",
             fontSize: `${this.height * 0.055}px`,
             fontStyle: "bold",
@@ -143,7 +143,7 @@ export default class ConfiguracionScene extends Phaser.Scene {
 
         this.musicButton.setAlpha(this.musicEnabled ? 1 : 0.52);
         this.musicLabel.setText(
-            `MÚSICA DE FONDO\n${this.musicEnabled ? "ENCENDIDA" : "APAGADA"}`
+            `Música de fondo\n${this.musicEnabled ? "Encendida" : "Apagada"}`
         );
 
     }

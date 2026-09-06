@@ -156,7 +156,7 @@ export default class SembrarScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.34,
-                label: "LIMPIAR TERRENO",
+                label: "Limpiar terreno",
                 iconTexture: "btnLimpiarTerreno",
                 unlocked: this.progress.sembrar.limpiarTerreno.unlocked,
                 stars: this.progress.sembrar.limpiarTerreno.stars,
@@ -165,7 +165,7 @@ export default class SembrarScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.34,
-                label: "PREPARAR TIERRA",
+                label: "Preparar tierra",
                 iconTexture: "btnPrepararTierra",
                 unlocked: this.progress.sembrar.prepararTierra.unlocked,
                 stars: this.progress.sembrar.prepararTierra.stars,
@@ -174,7 +174,7 @@ export default class SembrarScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.69,
-                label: "PLANTAR PLÁNTULA",
+                label: "Plantar plántula",
                 iconTexture: "btnPlantarPlantula",
                 unlocked: this.progress.sembrar.plantarPlantula.unlocked,
                 stars: this.progress.sembrar.plantarPlantula.stars,
