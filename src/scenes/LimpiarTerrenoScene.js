@@ -138,7 +138,7 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
             character: "CacaitoIndicaciones",
 
-            text: "Hora de preparar el terreno! Sigue el ritmo: alterna siempre entre una hoja y una roca. Las hojas se van con un toque, pero a las rocas tendrás que darles dos golpes para romperlas. ¡Cuidado dónde pisas! Tocar la tierra vacía o equivocarte de turno te costará un corazón.",
+            text: "Hora de preparar el terreno. Sigue el ritmo: alterna siempre entre una hoja y una roca. Las hojas se van con un toque, pero a las rocas tendrás que darles dos golpes para romperlas. ¡Cuidado dónde pisas! Tocar la tierra vacía o equivocarte de turno te costará un corazón.",
 
             audio: "vozLimpiarTerreno",
 
