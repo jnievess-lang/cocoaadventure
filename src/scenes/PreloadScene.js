@@ -48,9 +48,9 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("ArbolEsquinaSuperiorIzquierda","images/decorations/ArbolEsquinaSuperiorIzquierdav2.png");
 
         // Modulo Sembrar
-        this.load.image("btnLimpiarTerreno", "images/buttons/btnLimpiarTerreno2v.png");
-        this.load.image("btnPrepararTierra", "images/buttons/btnPrepararTierrav2.png");
-        this.load.image("btnPlantarPlantula", "images/buttons/btnPlantarPlantulav2.png");
+        this.load.image("btnLimpiarTerreno", "images/buttons/btnLimpiarTerreno3v.png");
+        this.load.image("btnPrepararTierra", "images/buttons/btnPrepararTierra3v.png");
+        this.load.image("btnPlantarPlantula", "images/buttons/btnPlantarPlantula3v.png");
         this.load.image("CacaitoSembrando", "images/characters/CacaitoSembrando.png");
 
         this.load.image("EstrellaLlena", "images/ui/EstrellaLlena.png");
