@@ -123,6 +123,11 @@ export default class PreloadScene extends Phaser.Scene {
         );
 
         this.load.image(
+            "PiedraCuarteada",
+            "/images/objects/PiedraCuarteada.png"
+        );
+
+        this.load.image(
             "Hoja",
             "/images/objects/Hoja.png"
         );
@@ -161,7 +166,7 @@ export default class PreloadScene extends Phaser.Scene {
         //Audios
         this.load.audio(
             "vozLimpiarTerreno",
-            "audio/voice/LimpiarTerreno.mp3"
+            "audio/voice/LimpiarTerreno2v.mp3"
         );
 
         this.load.audio("musicaFondo", "audio/music/MusicaFondo.mp3");

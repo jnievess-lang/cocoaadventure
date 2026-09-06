@@ -104,7 +104,7 @@ export default class ProcesarScene extends Phaser.Scene {
         const titulo = this.add.text(
             this.width * 0.52,
             this.height * 0.125,
-            "PROCESAR",
+            "Procesar",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.height * 0.055}px`,
