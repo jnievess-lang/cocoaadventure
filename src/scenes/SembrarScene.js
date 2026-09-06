@@ -174,7 +174,7 @@ export default class SembrarScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.69,
-                label: "Plantar plántula",
+                label: "Plantar plántulas",
                 iconTexture: "btnPlantarPlantula",
                 unlocked: this.progress.sembrar.plantarPlantula.unlocked,
                 stars: this.progress.sembrar.plantarPlantula.stars,
