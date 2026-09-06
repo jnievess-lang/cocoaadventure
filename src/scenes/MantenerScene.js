@@ -102,7 +102,7 @@ export default class MantenerScene extends Phaser.Scene {
         const titulo = this.add.text(
             this.width * 0.52,
             this.height * 0.125,
-            "MANTENIMIENTO",
+            "Mantenimiento",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.height * 0.055}px`,

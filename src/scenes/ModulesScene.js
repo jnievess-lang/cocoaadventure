@@ -99,7 +99,7 @@ export default class ModulesScene extends Phaser.Scene {
         const title = this.add.text(
             this.width * 0.52,
             this.height * 0.125,
-            "MÓDULOS",
+            "Módulos",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.height * 0.055}px`,

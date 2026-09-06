@@ -106,7 +106,7 @@ export default class SembrarScene extends Phaser.Scene {
         const title = this.add.text(
             this.width * 0.52,
             this.height * 0.125,
-            "SEMBRAR",
+            "Sembrar",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.height * 0.055}px`,
