@@ -449,7 +449,7 @@ export default class SeleccionarMadurasScene extends Phaser.Scene {
             }
         }
         else {
-            this.indicators.push(pod.showNotReady("IndicadorError"));
+            this.indicators.push(pod.showNotReady("IndicadorEspera"));
         }
 
         if (

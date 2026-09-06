@@ -24,7 +24,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("btnConfiguracion", "images/buttons/btnConfiguracionv2.png");
 
         // Pantalla de módulos
-        this.load.image("btnRegresar", "images/buttons/btnRegresarv2.png");
+        this.load.image("btnRegresar", "images/buttons/btnRegresar.png");
 
         // Pantalla de configuración
         this.load.image("fondoConfiguracion", "images/background/fondoConfiguracion.png");
