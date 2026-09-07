@@ -1,5 +1,4 @@
 import Phaser from "phaser";
-import TrashItem from "../objects/TrashItem";
 import ResultPanel from "../ui/ResultPanel";
 import ProgressManager from "../managers/ProgressManager";
 import TutorialPanel from "../ui/TutorialPanel";
@@ -9,7 +8,10 @@ import GestorAudioMinijuego from "../managers/GestorAudioMinijuego";
 const LEVEL_CONFIG = Object.freeze({
     totalTrash: 20,
     durationSeconds: 60,
-    maximumStars: 3
+    maximumStars: 3,
+    maximumLives: 3,
+    optimalTimeSeconds: 30,
+    twoStarTimeSeconds: 40
 });
 
 export default class LimpiarTerrenoScene extends Phaser.Scene {
@@ -28,11 +30,14 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
         this.cleanedTrash = 0;
         this.levelState = "tutorial";
         this.trashItems = [];
+        this.remainingByType = { Hoja: 0, Piedra: 0 };
+        this.requiredType = "Hoja";
         this.audio = new GestorAudioMinijuego(this);
 
         this.createBackground();
         this.createTerrain();
         this.crearHudMinijuego();
+        this.createTurnIndicator();
         this.audio.ensureMusic();
         this.showTutorial();
         this.setupLifecycleEvents();
@@ -104,15 +109,20 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
         this.hud = new HudMinijuego(this, {
             lives: {
-                enabled: false
+                maxLives: LEVEL_CONFIG.maximumLives,
+                centerX: 0.79,
+                centerY: 0.075
             },
             timer: {
-                durationSeconds: LEVEL_CONFIG.durationSeconds
+                durationSeconds: LEVEL_CONFIG.durationSeconds,
+                centerX: 0.5,
+                centerY: 0.075
             },
             controls: {},
             instructionAudio: "vozLimpiarTerreno",
             audioManager: this.audio,
-            onTimeUp: () => this.failLevel(),
+            onTimeUp: () => this.failLevel("tiempo"),
+            onLivesEmpty: () => this.failLevel("vidas"),
             onGameplaySuspended: () => this.suspendGameplay(),
             onGameplayResumed: () => this.resumeGameplay(),
             onExit: () => this.scene.start("SembrarScene")
@@ -128,7 +138,7 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
             character: "CacaitoIndicaciones",
 
-            text: "Hay que limpiar el terreno quitando las hojas y piedras que nos estorben.",
+            text: "Hora de preparar el terreno. Sigue el ritmo: alterna siempre entre una hoja y una roca. Las hojas se van con un toque, pero a las rocas tendrás que darles dos golpes para romperlas. ¡Cuidado dónde pisas! Tocar la tierra vacía o equivocarte de turno te costará un corazón.",
 
             audio: "vozLimpiarTerreno",
 
@@ -150,15 +160,14 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
         this.levelState = "playing";
         this.createTrash();
         this.hud.start();
+        this.turnIndicator.setVisible(true);
+        this.updateTurnIndicator();
 
     }
 
     createTrash() {
 
-        const textures = [
-            "Hoja",
-            "Piedra"
-        ];
+        const textures = ["Hoja", "Piedra"];
 
         const positions = [];
 
@@ -207,30 +216,16 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
             positions.push({ x, y });
 
-            const texture = Phaser.Utils.Array.GetRandom(textures);
+            const type = Phaser.Utils.Array.GetRandom(textures);
+            const trash = this.add.image(x, y, type)
+                .setInteractive({ useHandCursor: true })
+                .setDepth(2);
 
-            const trash = new TrashItem(
-
-                this,
-                x,
-                y,
-                texture,
-
-                () => {
-
-                    this.cleanedTrash++;
-
-                    console.log(`${this.cleanedTrash}/${this.totalTrash}`);
-
-                    if (this.cleanedTrash >= this.totalTrash) {
-
-                        this.completeLevel();
-
-                    }
-
-                }
-
-            );
+            trash.itemType = type;
+            trash.rockHits = 0;
+            trash.removing = false;
+            this.remainingByType[type]++;
+            trash.on("pointerdown", () => this.handleTrashTouch(trash));
 
             const targetWidth = this.width * 0.045;
 
@@ -239,8 +234,122 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
         }
 
+        // Esta capa solo recibe toques que no hayan alcanzado una hoja o roca.
+        this.emptyTerrainTouch = this.add.rectangle(
+            this.width / 2,
+            this.height / 2,
+            this.width,
+            this.height,
+            0x000000,
+            0
+        ).setInteractive().setDepth(1);
+        this.emptyTerrainTouch.on("pointerdown", () => this.registerMistake());
+
+        // La alternancia siempre comienza con hoja, salvo que no se haya
+        // generado ninguna; en ese caso solo quedan rocas por limpiar.
+        if (this.remainingByType.Hoja === 0) this.requiredType = "Piedra";
+
     }
-    
+
+    createTurnIndicator() {
+        const x = this.width * 0.16;
+        const y = this.height * 0.075;
+        const panel = this.add.rectangle(
+            x,
+            y,
+            this.width * 0.25,
+            this.height * 0.085,
+            0xFFF1C6,
+            0.96
+        ).setStrokeStyle(Math.max(2, this.height * 0.003), 0x7C431B);
+        const label = this.add.text(x - this.width * 0.04, y, "Sigue:", {
+            fontFamily: "Trebuchet MS",
+            fontSize: `${this.height * 0.027}px`,
+            color: "#5F3215",
+            fontStyle: "bold"
+        }).setOrigin(0.5);
+        this.turnIcon = this.add.image(x + this.width * 0.055, y, "Hoja");
+        this.turnIcon.setDisplaySize(this.height * 0.055, this.height * 0.055);
+        this.turnIndicator = this.add.container(0, 0, [panel, label, this.turnIcon])
+            .setDepth(50)
+            .setVisible(false);
+    }
+
+    updateTurnIndicator() {
+        if (!this.turnIcon) return;
+        this.turnIcon.setTexture(this.requiredType);
+    }
+
+    handleTrashTouch(trash) {
+        if (this.levelState !== "playing" || trash.removing) return;
+
+        if (trash.itemType !== this.requiredType) {
+            this.registerMistake();
+            return;
+        }
+
+        if (trash.itemType === "Piedra") {
+            this.handleRockTouch(trash);
+            return;
+        }
+
+        this.sound.play("sfxSeleccionCorrecta", { volume: 0.68 });
+        this.removeTrash(trash);
+        this.switchTurnAfterSuccess("Hoja");
+    }
+
+    handleRockTouch(rock) {
+        rock.rockHits++;
+
+        if (rock.rockHits === 1) {
+            rock.setTexture("PiedraCuarteada");
+            rock.setDisplaySize(this.width * 0.045, this.width * 0.045);
+            this.tweens.add({
+                targets: rock,
+                angle: { from: -7, to: 7 },
+                duration: 90,
+                yoyo: true
+            });
+            return;
+        }
+
+        this.sound.play("sfxSeleccionCorrecta", { volume: 0.68 });
+        this.removeTrash(rock);
+        this.switchTurnAfterSuccess("Piedra");
+    }
+
+    removeTrash(trash) {
+        trash.removing = true;
+        trash.disableInteractive();
+        this.remainingByType[trash.itemType]--;
+        this.cleanedTrash++;
+
+        this.tweens.add({
+            targets: trash,
+            scale: 0,
+            angle: 180,
+            duration: 180,
+            onComplete: () => trash.destroy()
+        });
+    }
+
+    switchTurnAfterSuccess(completedType) {
+        const nextType = completedType === "Hoja" ? "Piedra" : "Hoja";
+        // Si el siguiente tipo ya se agotó, se conserva el tipo que queda.
+        this.requiredType = this.remainingByType[nextType] > 0
+            ? nextType
+            : completedType;
+        this.updateTurnIndicator();
+
+        if (this.cleanedTrash >= this.totalTrash) this.completeLevel();
+    }
+
+    registerMistake() {
+        if (this.levelState !== "playing") return;
+
+        this.sound.play("sfxSeleccionIncorrecta", { volume: 0.72 });
+        this.hud.loseLife();
+    }
 
     completeLevel() {
 
@@ -249,6 +358,7 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
         this.levelState = "complete";
         this.hud.stop();
         this.disableTrash();
+        this.turnIndicator.setVisible(false);
 
         const stars = this.calculateStars();
 
@@ -277,18 +387,19 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
 
     }
 
-    failLevel() {
+    failLevel(reason) {
 
         if (this.levelState !== "playing") return;
 
         this.levelState = "failed";
         this.hud.stop();
         this.disableTrash();
+        this.turnIndicator.setVisible(false);
         this.sound.play("sfxDerrota", { volume: 0.65 });
 
             new ResultPanel(this, {
 
-        title: "Tiempo agotado",
+        title: reason === "vidas" ? "¡Practiquemos otra vez!" : "Tiempo agotado",
 
         stars: 0,
 
@@ -308,18 +419,17 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
     }
 
     calculateStars() {
+        const elapsed = LEVEL_CONFIG.durationSeconds - this.hud.getRemainingTime();
+        const lives = this.hud.getRemainingLives();
 
-        if (this.hud.getRemainingTime() >= 50) {
-
+        if (elapsed < LEVEL_CONFIG.optimalTimeSeconds && lives === LEVEL_CONFIG.maximumLives) {
             return 3;
-
         }
 
-        if (this.hud.getRemainingTime() >= 40) {
+        // Con una sola vida restante la regla del nivel siempre otorga una estrella.
+        if (lives === 1) return 1;
 
-            return 2;
-
-        }
+        if (lives === 2 || elapsed <= LEVEL_CONFIG.twoStarTimeSeconds) return 2;
 
         return 1;
 
@@ -335,7 +445,10 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
     resumeGameplay() {
 
         this.levelState = "playing";
-        this.trashItems.forEach(item => item.restoreInteraction());
+        this.trashItems.forEach(item => {
+            if (item.active && !item.removing) item.setInteractive({ useHandCursor: true });
+        });
+        if (this.emptyTerrainTouch?.active) this.emptyTerrainTouch.setInteractive();
 
     }
 
@@ -344,6 +457,7 @@ export default class LimpiarTerrenoScene extends Phaser.Scene {
         this.trashItems.forEach(item => {
             if (item.active) item.disableInteractive();
         });
+        if (this.emptyTerrainTouch?.active) this.emptyTerrainTouch.disableInteractive();
 
     }
 

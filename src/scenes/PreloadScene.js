@@ -24,7 +24,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("btnConfiguracion", "images/buttons/btnConfiguracionv2.png");
 
         // Pantalla de módulos
-        this.load.image("btnRegresar", "images/buttons/btnRegresarv2.png");
+        this.load.image("btnRegresar", "images/buttons/btnRegresar.png");
 
         // Pantalla de configuración
         this.load.image("fondoConfiguracion", "images/background/fondoConfiguracion.png");
@@ -48,9 +48,9 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("ArbolEsquinaSuperiorIzquierda","images/decorations/ArbolEsquinaSuperiorIzquierdav2.png");
 
         // Modulo Sembrar
-        this.load.image("btnLimpiarTerreno", "images/buttons/btnLimpiarTerreno2v.png");
-        this.load.image("btnPrepararTierra", "images/buttons/btnPrepararTierrav2.png");
-        this.load.image("btnPlantarPlantula", "images/buttons/btnPlantarPlantulav2.png");
+        this.load.image("btnLimpiarTerreno", "images/buttons/btnLimpiarTerreno3v.png");
+        this.load.image("btnPrepararTierra", "images/buttons/btnPrepararTierra3v.png");
+        this.load.image("btnPlantarPlantula", "images/buttons/btnPlantarPlantula3v.png");
         this.load.image("CacaitoSembrando", "images/characters/CacaitoSembrando.png");
 
         this.load.image("EstrellaLlena", "images/ui/EstrellaLlena.png");
@@ -123,6 +123,11 @@ export default class PreloadScene extends Phaser.Scene {
         );
 
         this.load.image(
+            "PiedraCuarteada",
+            "/images/objects/PiedraCuarteada.png"
+        );
+
+        this.load.image(
             "Hoja",
             "/images/objects/Hoja.png"
         );
@@ -161,7 +166,7 @@ export default class PreloadScene extends Phaser.Scene {
         //Audios
         this.load.audio(
             "vozLimpiarTerreno",
-            "audio/voice/LimpiarTerreno.mp3"
+            "audio/voice/LimpiarTerreno2v.mp3"
         );
 
         this.load.audio("musicaFondo", "audio/music/MusicaFondo.mp3");

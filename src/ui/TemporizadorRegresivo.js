@@ -17,7 +17,7 @@ export default class TemporizadorRegresivo extends Phaser.GameObjects.Container 
         const width = scene.scale.width;
         const height = scene.scale.height;
         const centerX = width * (config.centerX ?? 0.5);
-        const centerY = height * (config.centerY ?? 0.105);
+        const centerY = height * (config.centerY ?? 0.095);
 
         this.panel = scene.add.image(
             centerX,
@@ -25,11 +25,11 @@ export default class TemporizadorRegresivo extends Phaser.GameObjects.Container 
             config.panelTexture ?? "PanelTemporizador"
         );
         this.panel.setScale(
-            (width * (config.displayWidth ?? 0.155)) / this.panel.width
+            (width * (config.displayWidth ?? 0.13)) / this.panel.width
         );
 
         this.text = scene.add.text(
-            width * (config.textX ?? 0.523),
+            width * (config.textX ?? 0.52),
             centerY,
             this.formatTime(this.remainingTime),
             {

@@ -102,7 +102,7 @@ export default class MantenerScene extends Phaser.Scene {
         const titulo = this.add.text(
             this.width * 0.52,
             this.height * 0.125,
-            "MANTENIMIENTO",
+            "Mantenimiento",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.height * 0.055}px`,
@@ -154,7 +154,7 @@ export default class MantenerScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.34,
-                label: "REGAR",
+                label: "Regar",
                 iconTexture: "IconoRegadera",
                 unlocked: mantener.regar.unlocked,
                 stars: mantener.regar.stars,
@@ -163,7 +163,7 @@ export default class MantenerScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.34,
-                label: "QUITAR MALEZAS",
+                label: "Quitar malezas",
                 iconTexture: "TijeraPodaAbierta",
                 unlocked: mantener.malezas.unlocked,
                 stars: mantener.malezas.stars,
@@ -172,7 +172,7 @@ export default class MantenerScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.69,
-                label: "BUSCAR PLAGAS",
+                label: "Buscar plagas",
                 iconTexture: "IconoLupa",
                 unlocked: mantener.plagas.unlocked,
                 stars: mantener.plagas.stars,
@@ -181,7 +181,7 @@ export default class MantenerScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.69,
-                label: "CUIDADO CORRECTO",
+                label: "Cuidado correcto",
                 iconTexture: "IconoFungicida",
                 unlocked: mantener.cuidadoCorrecto.unlocked,
                 stars: mantener.cuidadoCorrecto.stars,

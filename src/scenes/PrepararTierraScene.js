@@ -86,7 +86,7 @@ export default class PrepararTierraScene extends Phaser.Scene {
                 durationSeconds: LEVEL_CONFIG.durationSeconds,
                 centerX: 0.43,
                 // El reloj ocupa el lado izquierdo del panel.
-                textX: 0.457
+                textX: 0.453
             },
             controls: {},
             instructionAudio: "vozPrepararTierra",

@@ -106,7 +106,7 @@ export default class CosecharScene extends Phaser.Scene {
         const title = this.add.text(
             this.width * 0.52,
             this.height * 0.125,
-            "COSECHA",
+            "Cosechar",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.height * 0.055}px`,
@@ -156,7 +156,7 @@ export default class CosecharScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.34,
-                label: "MAZORCAS LISTAS",
+                label: "Mazorcas listas",
                 iconTexture: "btnIconoMazorcasListas",
                 unlocked: this.progress.cosechar.seleccionarMaduras.unlocked,
                 stars: this.progress.cosechar.seleccionarMaduras.stars,
@@ -165,7 +165,7 @@ export default class CosecharScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.34,
-                label: "CORTE CUIDADOSO",
+                label: "Corte cuidadoso",
                 iconTexture: "btnIconoCorteCuidadoso",
                 unlocked: this.progress.cosechar.corteCuidadoso.unlocked,
                 stars: this.progress.cosechar.corteCuidadoso.stars,
@@ -174,7 +174,7 @@ export default class CosecharScene extends Phaser.Scene {
             {
                 x: this.width * 0.42,
                 y: this.height * 0.69,
-                label: "ABRIR MAZORCAS",
+                label: "Abrir mazorcas",
                 iconTexture: "btnIconoAbrirMazorcas",
                 unlocked: this.progress.cosechar.abrirMazorcas.unlocked,
                 stars: this.progress.cosechar.abrirMazorcas.stars,
@@ -183,7 +183,7 @@ export default class CosecharScene extends Phaser.Scene {
             {
                 x: this.width * 0.63,
                 y: this.height * 0.69,
-                label: "CLASIFICAR SEMILLAS",
+                label: "Clasificar semillas",
                 iconTexture: "btnIconoClasificarSemillas",
                 unlocked: this.progress.cosechar.revisionAcopio.unlocked,
                 stars: this.progress.cosechar.revisionAcopio.stars,

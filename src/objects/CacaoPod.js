@@ -109,7 +109,7 @@ export default class CacaoPod extends Phaser.GameObjects.Image {
 
     }
 
-    showDamaged() {
+    showDamaged(indicatorTexture) {
 
         this.scene.tweens.add({
             targets: this,
@@ -125,6 +125,10 @@ export default class CacaoPod extends Phaser.GameObjects.Image {
                 this.setAlpha(0.78);
             }
         });
+
+        return indicatorTexture
+            ? this.createIndicator(indicatorTexture)
+            : null;
 
     }
 
