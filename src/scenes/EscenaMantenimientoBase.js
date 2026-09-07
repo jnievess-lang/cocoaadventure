@@ -4,6 +4,7 @@ import GestorAudioMinijuego from "../managers/GestorAudioMinijuego";
 import TutorialPanel from "../ui/TutorialPanel";
 import ResultPanel from "../ui/ResultPanel";
 import ContadorObjetivos from "../ui/ContadorObjetivos";
+import ManoGuia from "../ui/ManoGuia";
 
 /**
  * Esqueleto común de los minijuegos del módulo Mantener.
@@ -38,16 +39,69 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
         this.estadoPrevio = null;
         this.resultadoMostrado = false;
         this.vozDeAyudaUsada = false;
+        this.temporizadores = new Set();
+        this.eventoPista = null;
 
         this.audio = new GestorAudioMinijuego(this);
 
         this.crearFondo();
         this.crearContador();
         this.crearHudMinijuego();
+        this.crearManoGuia();
         this.crearMecanica();
         this.audio.ensureMusic();
         this.mostrarTutorial();
         this.configurarCicloDeVida();
+    }
+
+    // ------------------------------------------------------------------
+    // Temporizadores de juego.
+    // ------------------------------------------------------------------
+
+    /**
+     * Espera que forma parte de la partida y, por tanto, debe detenerse cuando
+     * el nivel se suspende.
+     *
+     * `this.time.delayedCall` a secas no sirve: el reloj de la escena sigue
+     * corriendo durante la pausa y durante las voces del HUD, así que una espera
+     * podía vencer con el nivel detenido, salir por su propia guarda de estado y
+     * no volver a programarse nunca. Es lo que dejaba colgado a “Cuidado
+     * correcto” si se pausaba justo después de acertar.
+     */
+    programar(retraso, callback) {
+        const evento = this.time.delayedCall(retraso, () => {
+            this.temporizadores.delete(evento);
+            callback();
+        });
+
+        evento.paused = this.estado !== "jugando";
+        this.temporizadores.add(evento);
+
+        return evento;
+    }
+
+    pausarTemporizadores(pausados) {
+        this.temporizadores.forEach(evento => {
+            evento.paused = pausados;
+        });
+    }
+
+    cancelarTemporizadores() {
+        this.temporizadores.forEach(evento => evento.remove(false));
+        this.temporizadores.clear();
+        this.eventoPista = null;
+    }
+
+    /**
+     * Apaga solo la ayuda. Las esperas de la mecánica se dejan correr: son las
+     * que rematan la animación de lo último que hizo el niño, y todas comprueban
+     * el estado antes de tocar nada.
+     */
+    detenerPista() {
+        this.eventoPista?.remove(false);
+        this.temporizadores.delete(this.eventoPista);
+        this.eventoPista = null;
+        this.manoGuia?.ocultar();
     }
 
     crearFondo() {
@@ -83,6 +137,19 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
         this.contador = new ContadorObjetivos(this, {
             total: this.nivel.totalObjetivos,
             iconTexture: this.nivel.iconoContador
+        });
+    }
+
+    /**
+     * Ayuda visual del módulo, igual que en Cosecha. Se crea antes que la
+     * mecánica para que la lupa de “Buscar plagas” no la incluya en lo que
+     * amplía el cristal.
+     */
+    crearManoGuia() {
+        this.manoGuia = new ManoGuia(this, {
+            anchoVisual: this.alto * 0.15,
+            radioCirculo: this.alto * 0.052,
+            depth: 90
         });
     }
 
@@ -129,13 +196,48 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
         this.estado = "jugando";
         this.hud.start();
         this.habilitarMecanica();
+        this.reiniciarInactividad();
     }
+
+    // ------------------------------------------------------------------
+    // Ayuda por inactividad.
+    // ------------------------------------------------------------------
+
+    /**
+     * Cada vez que el niño hace algo, el reloj de la pista vuelve a cero. Si se
+     * queda quieto, la mano aparece sola y se repite hasta que vuelva a actuar.
+     */
+    reiniciarInactividad() {
+        this.detenerPista();
+
+        if (this.estado !== "jugando") return;
+
+        this.eventoPista = this.programar(
+            this.nivel.esperaPistaMs ?? 7000,
+            () => this.lanzarPista()
+        );
+    }
+
+    lanzarPista() {
+        if (this.estado !== "jugando") return;
+
+        this.mostrarPista();
+
+        this.eventoPista = this.programar(
+            this.nivel.repetirPistaMs ?? 9000,
+            () => this.lanzarPista()
+        );
+    }
+
+    /** Cada nivel decide qué señala la mano. Sin implementar, no hay pista. */
+    mostrarPista() {}
 
     registrarAcierto() {
         if (this.estado !== "jugando") return;
 
         this.sound.play("sfxSeleccionCorrecta", { volume: 0.68 });
         this.contador.avanzar();
+        this.reiniciarInactividad();
 
         if (this.contador.estaCompleto()) this.completarNivel();
     }
@@ -153,10 +255,23 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
 
         if (vidasRestantes <= 0) return;
 
+        this.reiniciarInactividad();
+
+        // Tras un fallo la mano no espera a la inactividad: es justo cuando hace
+        // falta. Si además toca la voz de ayuda, la mano entra al terminarla,
+        // para que se vea lo que la voz acaba de explicar.
         if (!this.vozDeAyudaUsada && this.nivel.voces.ayuda) {
             this.vozDeAyudaUsada = true;
-            this.hud.reproducirRetroalimentacion(this.nivel.voces.ayuda);
+
+            this.hud.reproducirRetroalimentacion(
+                this.nivel.voces.ayuda,
+                () => this.mostrarPista()
+            );
+
+            return;
         }
+
+        this.mostrarPista();
     }
 
     completarNivel() {
@@ -166,6 +281,7 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
         this.estado = "completado";
         this.hud.stop();
         this.deshabilitarMecanica();
+        this.detenerPista();
 
         const estrellas = this.hud.calculateStars(3);
         this.nivel.guardarProgreso(estrellas);
@@ -183,6 +299,7 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
         this.estado = "fallido";
         this.hud.stop();
         this.deshabilitarMecanica();
+        this.detenerPista();
         this.sound.play("sfxDerrota", { volume: 0.65 });
 
         if (razon === "tiempo") {
@@ -212,6 +329,8 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
 
         this.estado = razon ?? "suspendido";
         this.deshabilitarMecanica();
+        this.pausarTemporizadores(true);
+        this.manoGuia?.ocultar();
     }
 
     reanudarJuego() {
@@ -220,6 +339,7 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
         this.estado = this.estadoPrevio ?? "jugando";
         this.estadoPrevio = null;
         this.habilitarMecanica();
+        this.pausarTemporizadores(false);
     }
 
     configurarCicloDeVida() {
@@ -234,6 +354,8 @@ export default class EscenaMantenimientoBase extends Phaser.Scene {
                 "visibilitychange",
                 this.manejarVisibilidad
             );
+
+            this.cancelarTemporizadores();
 
             // Phaser ya destruye los GameObjects y el HUD de la escena.
             // Volver a destruirlos deja `scene` indefinido y rompe scene.start().

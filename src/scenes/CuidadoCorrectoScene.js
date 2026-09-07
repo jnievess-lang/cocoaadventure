@@ -7,7 +7,7 @@ import ProgressManager from "../managers/ProgressManager";
 import esCuidadoCorrecto, {
     obtenerCuidado,
     herramientaCorrecta,
-    PROBLEMAS_DE_PLANTA,
+    generarRondas,
     PLANTA_CON_MALEZA,
     HERRAMIENTA_REGADERA,
     HERRAMIENTA_GUANTES,
@@ -28,6 +28,15 @@ const HERRAMIENTAS = Object.freeze([
     { clave: "fungicida", textura: "IconoFungicida", etiqueta: "Fungicida" }
 ]);
 
+// Seis rondas sobre cuatro problemas: entran todos al menos una vez y dos
+// vuelven a salir con otra planta y otro enunciado, así que no basta con
+// memorizar el orden de la primera partida.
+const TOTAL_RONDAS = 6;
+
+// Tiempo por ronda contando lo que tarda la animación de resolución. Con las
+// cuatro rondas y 75 segundos anteriores sobraba más de la mitad del reloj.
+const SEGUNDOS_POR_RONDA = 9;
+
 const CONFIGURACION_NIVEL = Object.freeze({
 
     fondo: "FondoFincaCacao",
@@ -44,16 +53,23 @@ const CONFIGURACION_NIVEL = Object.freeze({
         tiempoAgotado: "vozCuidadoCorrectoTiempoAgotado"
     },
 
-    duracionSegundos: 75,
+    duracionSegundos: TOTAL_RONDAS * SEGUNDOS_POR_RONDA,
     vidasMaximas: 3,
 
-    totalObjetivos: PROBLEMAS_DE_PLANTA.length,
+    totalObjetivos: TOTAL_RONDAS,
     iconoContador: "PlantaSana",
 
     guardarProgreso: estrellas =>
         ProgressManager.completeCuidadoCorrecto(estrellas)
 
 });
+
+// Cuánto se queda la herramienta sobre la planta antes de volver. Debe cubrir la
+// animación más larga —la regadera inclinándose— o el icono se desvanece a mitad
+// del efecto y el agua cae de la nada.
+const ESPERA_HERRAMIENTA = 700;
+const ESPERA_RESOLUCION = 220;
+const ESPERA_SIGUIENTE_RONDA = 1400;
 
 export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
 
@@ -62,7 +78,7 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
     }
 
     crearMecanica() {
-        this.rondas = Phaser.Utils.Array.Shuffle(PROBLEMAS_DE_PLANTA.slice());
+        this.rondas = generarRondas(TOTAL_RONDAS);
         this.rondaActual = -1;
         this.esperandoRespuesta = false;
         this.planta = null;
@@ -124,20 +140,21 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
 
         this.rondaActual++;
 
-        const problema = this.rondas[this.rondaActual];
-        const cuidado = obtenerCuidado(problema);
+        const ronda = this.rondas[this.rondaActual];
+        const cuidado = obtenerCuidado(ronda?.problema);
 
         if (!cuidado) return;
 
-        this.problemaActual = problema;
-        this.textoEnunciado.setText(cuidado.enunciado);
+        this.problemaActual = ronda.problema;
+        this.textoEnunciado.setText(ronda.enunciado);
 
         this.crearPlanta(cuidado);
 
-        if (problema === PLANTA_CON_MALEZA) this.crearMalezaAcompanante();
+        if (ronda.problema === PLANTA_CON_MALEZA) this.crearMalezaAcompanante();
 
         this.esperandoRespuesta = true;
         this.selector.habilitar();
+        this.reiniciarInactividad();
     }
 
     crearPlanta(cuidado) {
@@ -188,13 +205,21 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
         this.selector.deshabilitar();
 
         this.aplicarHerramienta(clave);
-        this.registrarAcierto();
 
-        // El avance de la ronda se apoya en el reloj de la escena, nunca en el
-        // final de una animación: así una pausa lo detiene y ningún tween
-        // interrumpido puede dejar el nivel atascado.
-        this.time.delayedCall(220, () => this.resolverPlanta());
-        this.time.delayedCall(1100, () => this.terminarRonda());
+        // Las esperas se programan antes de contar el acierto: si esta era la
+        // última ronda, `registrarAcierto` termina el nivel, y programarlas
+        // después las dejaría nacer con el nivel ya detenido, sin llegar a
+        // mostrar la animación de la planta que acaba de curarse.
+        //
+        // Con `programar` el avance de la ronda se detiene junto con el nivel.
+        // Con `time.delayedCall` a secas el reloj seguía corriendo durante la
+        // pausa, la espera vencía con el nivel detenido, `terminarRonda` se
+        // salía por su guarda de estado y nadie volvía a llamar a la siguiente
+        // ronda: el nivel se quedaba muerto hasta que se acabara el tiempo.
+        this.programar(ESPERA_RESOLUCION, () => this.resolverPlanta());
+        this.programar(ESPERA_SIGUIENTE_RONDA, () => this.terminarRonda());
+
+        this.registrarAcierto();
     }
 
     aplicarHerramienta(clave) {
@@ -206,7 +231,10 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
             desdeY: origen?.y ?? this.alto * 0.85,
             hastaX: this.planta.x,
             hastaY: this.planta.y - this.planta.displayHeight * 0.55,
-            displayHeight: this.alto * 0.11
+            displayHeight: this.alto * 0.11,
+            // Sin esta espera el icono se iba a los 480 ms, dejando la regadera
+            // a medio inclinar y el agua cayendo sin nadie que la vierta.
+            sostener: ESPERA_HERRAMIENTA
         });
     }
 
@@ -230,7 +258,12 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
     }
 
     animarRiego() {
-        inclinarRegadera(this, this.herramientaEnVuelo, { grados: 45 });
+        // La inclinación debe caber dentro de la espera de la herramienta:
+        // 180 de ida + 300 sostenida + 180 de vuelta = 660 ms.
+        inclinarRegadera(this, this.herramientaEnVuelo, {
+            grados: 45,
+            sostener: 300
+        });
 
         regar(this, this.planta.x, this.planta.y - this.planta.displayHeight * 0.5, {
             depth: this.planta.depth + 5
@@ -297,6 +330,22 @@ export default class CuidadoCorrectoScene extends EscenaMantenimientoBase {
         this.planta = null;
 
         this.prepararRonda();
+    }
+
+    /** La mano señala la herramienta que cura lo que se ve en la planta. */
+    mostrarPista() {
+        if (!this.esperandoRespuesta || !this.manoGuia) return;
+
+        const clave = herramientaCorrecta(this.problemaActual);
+        const posicion = this.selector.obtenerPosicion(clave);
+
+        if (!posicion) return;
+
+        this.manoGuia.mostrarToque(
+            posicion.x,
+            posicion.y + this.alto * 0.02,
+            { duracionVisibleMs: 2600 }
+        );
     }
 
     habilitarMecanica() {

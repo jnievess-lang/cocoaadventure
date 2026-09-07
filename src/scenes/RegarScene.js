@@ -7,6 +7,11 @@ import {
     colocarRegaderaSobre
 } from "../utils/efectosMantenimiento";
 
+// Cuánto se inclina la regadera para verter. El mismo número manda en las tres
+// cuentas —dónde se coloca, cuánto gira y de dónde sale el agua— para que el
+// chorro nazca siempre en el pico y no flotando sobre él.
+const GRADOS_VERTIDO = 38;
+
 const CONFIGURACION_NIVEL = Object.freeze({
 
     fondo: "FondoFincaCacao",
@@ -66,16 +71,25 @@ const CONFIGURACION_NIVEL = Object.freeze({
     efecto: (escena, objetivo) => {
         const regadera = escena.herramienta;
 
-        colocarRegaderaSobre(escena, regadera, objetivo, {
+        // Los tweens que mueven la regadera se le anotan: si el niño la vuelve a
+        // agarrar antes de que termine de verter, el arrastre manda y estos se
+        // cortan en lugar de pelearse con el dedo.
+        regadera.registrarTweenEfecto(colocarRegaderaSobre(escena, regadera, objetivo, {
+            gradosAlVerter: -GRADOS_VERTIDO,
             onListo: () => {
-                inclinarRegadera(escena, regadera);
+                regadera.registrarTweenEfecto(inclinarRegadera(escena, regadera, {
+                    grados: GRADOS_VERTIDO
+                }));
 
                 if (escena.cache.audio.exists("sfxRiegoAgua")) {
                     escena.sound.play("sfxRiegoAgua", { volume: 0.5 });
                 }
 
                 escena.time.delayedCall(120, () => {
-                    const salida = boquillaDe(regadera) ?? {
+                    // Se pregunta por el pico ya inclinado del todo, no por el
+                    // de este instante: el emisor se queda fijo donde nace y la
+                    // regadera aún está terminando de girar.
+                    const salida = boquillaDe(regadera, -GRADOS_VERTIDO) ?? {
                         x: objetivo.x,
                         y: objetivo.y - objetivo.displayHeight
                     };
@@ -85,7 +99,7 @@ const CONFIGURACION_NIVEL = Object.freeze({
                     });
                 });
             }
-        });
+        }));
     },
 
     guardarProgreso: estrellas => ProgressManager.completeRegar(estrellas)

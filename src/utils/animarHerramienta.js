@@ -2,6 +2,10 @@
  * Lanza el icono de una herramienta hacia el punto tocado y lo devuelve a su
  * sitio. Es solo retroalimentación visual: el nivel nunca depende de que la
  * animación termine, y si el asset no cargó la acción continúa igual.
+ *
+ * `sostener` mantiene la herramienta en el destino antes de regresar, para que
+ * quien la usa pueda animarla ahí —la regadera inclinándose mientras vierte— sin
+ * que el icono se desvanezca a mitad del efecto.
  */
 export default function animarHerramienta(scene, config) {
     const { texture, desdeX, desdeY, hastaX, hastaY, displayHeight } = config;
@@ -35,6 +39,7 @@ export default function animarHerramienta(scene, config) {
                 angle: -12,
                 alpha: 0,
                 duration: 260,
+                delay: config.sostener ?? 0,
                 ease: "Sine.In",
                 onComplete: () => herramienta.destroy()
             });

@@ -165,8 +165,21 @@ apunta a esas rutas: **si respetas el nombre, no hay que tocar nada**.
 | --- | --- |
 | `IconoRegadera.png` | A green metal watering can tilted forward, pouring a few blue water droplets from its spout. |
 | `IconoGuantes.png` | A pair of yellow gardening gloves, one slightly overlapping the other. |
-| `IconoLupa.png` | A magnifying glass with a wooden brown handle and a shiny glass lens. |
+| `IconoLupa.png` | A magnifying glass with a wooden brown handle and a shiny glass lens. **Lente grande**: el cristal debe ocupar buena parte del cuadro, no ser un botoncito al final del mango. |
 | `IconoFungicida.png` | A spray bottle filled with green liquid, releasing a small fine mist from the nozzle. |
+
+> **La lupa es la excepción de tamaño: va a 768 × 768**, no a 512. Es el icono
+> que más grande se dibuja de todo el juego —ocupa 0,34 de la altura de la
+> pantalla— y a 512 se veía reescalado en móviles de densidad alta.
+>
+> **Si rehaces `IconoLupa.png` hay que volver a medir cuatro constantes.** El
+> nivel «Buscar plagas» centra su círculo de aumento en el cristal del dibujo,
+> no en el sprite entero, mediante `CRISTAL_LUPA` en
+> [`PlagasScene.js`](../src/scenes/PlagasScene.js): centro del cristal en `x` e
+> `y`, y los radios del vidrio y del aro dorado, todos en fracción del ancho.
+> Sin re-medirlos, el aumento y el anillo de progreso quedan descolocados
+> respecto al cristal. El propio comentario del código explica los dos márgenes
+> que se aplican sobre la medida cruda.
 
 ### Estados de la planta → `images/objects/`, 640 × 640 PNG
 
@@ -201,6 +214,27 @@ y úsala como referencia para las otras tres.
 | Archivo | Prompt del objeto |
 | --- | --- |
 | `IndicadorError.png` | A round glossy red circle badge with a thick white X mark in the center, twin of the attached green check badge. |
+
+## Pendiente: los efectos de sonido propios
+
+De los cuatro niveles solo Regar tiene sonido propio (`RiegoAgua.wav`, clave
+`sfxRiegoAgua`). Los otros tres se apoyan únicamente en `sfxSeleccionCorrecta` y
+`sfxSeleccionIncorrecta`, que son los mismos de todo el juego, así que arrancar
+una maleza y encontrar una plaga suenan igual.
+
+Estos tres archivos van en `public/audio/sfx/`. **No están registrados en
+[`PreloadScene.js`](../src/scenes/PreloadScene.js): hay que añadir la línea
+`this.load.audio(...)` junto a `sfxRiegoAgua` cuando el archivo exista**, o la
+carga fallará buscando un archivo que no está.
+
+| Archivo | Clave Phaser | Cuándo suena | Qué debe oírse |
+| --- | --- | --- | --- |
+| `ArrancarMaleza.wav` | `sfxArrancarMaleza` | Al arrancar una hierba en Quitar malezas | Un tirón corto y seco de raíces saliendo de la tierra, medio segundo. |
+| `HallazgoLupa.wav` | `sfxHallazgoLupa` | Al completar el círculo en Buscar plagas | Un «tin» breve y curioso de descubrimiento, sin épica. |
+| `RociarFungicida.wav` | `sfxRociarFungicida` | Al usar el fungicida en Cuidado correcto | Un pshhh corto de atomizador. |
+
+Igual que el resto del audio del proyecto, deben quedar por debajo de la voz:
+se reproducen con `volume` entre 0,4 y 0,6 y nunca deben tapar a Andrea.
 
 ## Opcional: los botones de nivel
 
