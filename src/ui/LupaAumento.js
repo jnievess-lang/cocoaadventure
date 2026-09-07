@@ -23,6 +23,8 @@ export default class LupaAumento {
         this.progreso = 0;
         this.objetivoActual = null;
         this.activa = false;
+        this.visibles = null;
+        this.escuchandoNuevos = null;
 
         this.crearCamara();
         this.crearAnillo();
@@ -55,6 +57,26 @@ export default class LupaAumento {
     definirContenido(visibles) {
         this.visibles = visibles;
         this.actualizarIgnorados();
+        this.vigilarNuevosObjetos();
+    }
+
+    /**
+     * Repasar la lista de hijos solo al mostrar la lupa no basta: lo que nace
+     * durante la partida —el destello de acierto, las partículas de un efecto—
+     * no estaría en ella y se dibujaría dos veces, una en la escena y otra
+     * ampliada dentro del cristal. Cada objeto nuevo se descarta al nacer.
+     */
+    vigilarNuevosObjetos() {
+        if (this.escuchandoNuevos) return;
+
+        this.escuchandoNuevos = objeto => {
+            if (!this.visibles?.includes(objeto)) this.camara.ignore(objeto);
+        };
+
+        this.scene.events.on(
+            Phaser.Scenes.Events.ADDED_TO_SCENE,
+            this.escuchandoNuevos
+        );
     }
 
     actualizarIgnorados() {
@@ -157,9 +179,23 @@ export default class LupaAumento {
     }
 
     destroy() {
+        if (this.escuchandoNuevos) {
+            this.scene?.events?.off(
+                Phaser.Scenes.Events.ADDED_TO_SCENE,
+                this.escuchandoNuevos
+            );
+
+            this.escuchandoNuevos = null;
+        }
+
         this.scene?.cameras?.remove(this.camara);
+
+        // La máscara se creó con `add: false`, así que no está en la lista de
+        // hijos y la escena no la destruye al cerrarse: hay que soltarla aquí o
+        // cada reintento del nivel deja un Graphics colgado.
         this.mascara?.destroy();
         this.anillo?.destroy();
+        this.scene = null;
     }
 
 }

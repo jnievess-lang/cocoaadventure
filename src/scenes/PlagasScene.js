@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 import EscenaBuscarObjetivos from "./EscenaBuscarObjetivos";
 import ProgressManager from "../managers/ProgressManager";
 import HerramientaArrastrable from "../ui/HerramientaArrastrable";
@@ -7,14 +8,34 @@ import LupaAumento from "../ui/LupaAumento";
  * Centro y radio del cristal dentro del dibujo de la lupa, medidos sobre el
  * propio archivo. Sin esto el aumento se centraría en el sprite entero, mango
  * incluido, y la imagen ampliada no coincidiría con el cristal.
+ *
+ * **Van atados a `icons/IconoLupa.webp`: si se rehace el dibujo hay que volver a
+ * medirlos.** Los de aquí salen de contar píxeles sobre la versión de 768:
+ * centro del azul en (0.637, 0.354), cristal de 0.264 y aro de 0.318 del ancho.
+ * Sobre esas medidas se aplican dos márgenes deliberados:
+ *
+ * - `radio` es el 92 % del cristal real, para que el círculo ampliado quede
+ *   dentro del vidrio y no se derrame sobre el marco dorado.
+ * - `radioAro` es el 106 % del aro real, para que el anillo de búsqueda se
+ *   dibuje encima del oro y no flotando por dentro.
  */
 const CRISTAL_LUPA = Object.freeze({
-    x: 0.674,
-    y: 0.309,
-    radio: 0.187,
+    x: 0.637,
+    y: 0.354,
+    radio: 0.244,
     // Radio del aro dorado, donde se dibuja el círculo de búsqueda.
-    radioAro: 0.275
+    radioAro: 0.336
 });
+
+/**
+ * Qué parte del cristal cuenta como «centrado» sobre una plaga.
+ *
+ * Va en fracción del radio, así que el cristal más grande del dibujo nuevo
+ * arrastra consigo la zona de acierto: es un 15 % más generosa que con la lupa
+ * pequeña. Es el efecto buscado —el nivel era difícil de mirar—, pero si queda
+ * demasiado fácil, bajarlo a 0.48 devuelve exactamente la precisión de antes.
+ */
+const ALCANCE_CRISTAL = 0.55;
 
 const CONFIGURACION_NIVEL = Object.freeze({
 
@@ -94,7 +115,11 @@ export default class PlagasScene extends EscenaBuscarObjetivos {
      */
     crearInteraccion() {
         const base = this.baseHerramienta;
-        const altoLupa = this.alto * 0.34;
+
+        // El dibujo nuevo es casi todo cristal, así que a 0.34 la lupa comía
+        // demasiada pantalla en reposo. A 0.30 el conjunto es más discreto y el
+        // círculo de aumento sigue siendo mayor que el de la lupa antigua.
+        const altoLupa = this.alto * 0.30;
 
         this.herramienta = new HerramientaArrastrable(this, {
             x: base.x,
@@ -118,6 +143,10 @@ export default class PlagasScene extends EscenaBuscarObjetivos {
         // para que la posición de la lupa y la del aumento sean la misma.
         this.herramienta.setOrigin(CRISTAL_LUPA.x, CRISTAL_LUPA.y);
 
+        // Después de mover el origen, porque es justo ese origen descentrado el
+        // que sacaba el mango fuera del lienzo cuando la lupa está en reposo.
+        this.encajarHerramientaEnPantalla();
+
         this.lupa = new LupaAumento(this, {
             radio: this.herramienta.displayWidth * CRISTAL_LUPA.radio,
             radioAnillo: this.herramienta.displayWidth * CRISTAL_LUPA.radioAro,
@@ -128,7 +157,7 @@ export default class PlagasScene extends EscenaBuscarObjetivos {
             depth: 120
         });
 
-        this.crearEtiquetaHerramienta(base);
+        this.crearEtiquetaHerramienta();
 
         // El cristal solo debe mostrar el escenario: fondo, árbol y objetivos.
         this.lupa.definirContenido([
@@ -136,6 +165,13 @@ export default class PlagasScene extends EscenaBuscarObjetivos {
             this.arbol,
             ...this.objetivos
         ].filter(Boolean));
+
+        // La lupa no es un GameObject: administra una cámara y una máscara que
+        // la escena no sabe recoger por su cuenta.
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.lupa?.destroy();
+            this.lupa = null;
+        });
     }
 
     update(tiempo, delta) {
@@ -149,7 +185,7 @@ export default class PlagasScene extends EscenaBuscarObjetivos {
 
     /** Solo cuenta lo que está bien centrado bajo el cristal. */
     objetivoBajoLupa() {
-        const alcance = this.lupa.radio * 0.55;
+        const alcance = this.lupa.radio * ALCANCE_CRISTAL;
 
         const candidatos = this.objetivos
             .filter(objetivo =>
