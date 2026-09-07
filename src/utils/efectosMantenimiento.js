@@ -20,17 +20,49 @@ function asegurarTexturaCirculo(scene, clave, color, radio) {
 }
 
 /**
- * Posición de la boquilla de la regadera, medida sobre el dibujo. El agua debe
- * nacer ahí y caer, no aparecer flotando encima de la regadera.
+ * Posición de la boquilla de la regadera, medida sobre el dibujo de 640 x 427:
+ * el centro de la roseta cae en (68, 139) px. El agua debe nacer ahí y caer, no
+ * aparecer flotando encima de la regadera.
  */
 export const BOQUILLA_REGADERA = Object.freeze({ x: 0.107, y: 0.325 });
 
-export function boquillaDe(regadera) {
-    if (!regadera?.active) return null;
+/**
+ * Desplazamiento de la boquilla respecto al centro de la regadera, ya girado.
+ *
+ * El giro es imprescindible: la boquilla está arriba y a la izquierda del
+ * centro, así que al inclinar la regadera para verter, el pico de verdad baja
+ * casi media altura del dibujo. Calcularlo sin girar dejaba el chorro naciendo
+ * muy por encima del pico, en el aire.
+ */
+function desplazamientoBoquilla(regadera, grados) {
+    const dx = (BOQUILLA_REGADERA.x - regadera.originX) * regadera.displayWidth;
+    const dy = (BOQUILLA_REGADERA.y - regadera.originY) * regadera.displayHeight;
+
+    const radianes = (grados * Math.PI) / 180;
+    const coseno = Math.cos(radianes);
+    const seno = Math.sin(radianes);
 
     return {
-        x: regadera.x + (BOQUILLA_REGADERA.x - regadera.originX) * regadera.displayWidth,
-        y: regadera.y + (BOQUILLA_REGADERA.y - regadera.originY) * regadera.displayHeight
+        x: dx * coseno - dy * seno,
+        y: dx * seno + dy * coseno
+    };
+}
+
+/**
+ * `grados` permite preguntar por el pico con una inclinación distinta de la
+ * actual, que es lo que hace falta mientras la regadera todavía está girando.
+ */
+export function boquillaDe(regadera, grados) {
+    if (!regadera?.active) return null;
+
+    const desplazamiento = desplazamientoBoquilla(
+        regadera,
+        grados ?? regadera.angle
+    );
+
+    return {
+        x: regadera.x + desplazamiento.x,
+        y: regadera.y + desplazamiento.y
     };
 }
 
@@ -151,12 +183,20 @@ export function arrancarConGuante(scene, objetivo, opciones = {}) {
 export function colocarRegaderaSobre(scene, regadera, objetivo, opciones = {}) {
     if (!regadera?.active || !objetivo?.active) return null;
 
+    // Se apunta con la inclinación que la regadera tendrá al verter, no con la
+    // que tiene ahora. Si se coloca en horizontal, al inclinarse después el pico
+    // cae dentro de las hojas y el chorro queda por encima de él.
+    const desplazamiento = desplazamientoBoquilla(
+        regadera,
+        opciones.gradosAlVerter ?? 0
+    );
+
     const picoX = objetivo.x;
     const picoY = objetivo.y - objetivo.displayHeight * (opciones.altura ?? 1.05);
 
     const destino = {
-        x: picoX + (regadera.originX - BOQUILLA_REGADERA.x) * regadera.displayWidth,
-        y: picoY + (regadera.originY - BOQUILLA_REGADERA.y) * regadera.displayHeight
+        x: picoX - desplazamiento.x,
+        y: picoY - desplazamiento.y
     };
 
     return scene.tweens.add({
@@ -171,11 +211,11 @@ export function colocarRegaderaSobre(scene, regadera, objetivo, opciones = {}) {
 
 /** Inclina la regadera mientras vierte y la devuelve a su ángulo. */
 export function inclinarRegadera(scene, regadera, opciones = {}) {
-    if (!regadera?.active) return;
+    if (!regadera?.active) return null;
 
     const anguloOriginal = regadera.angle;
 
-    scene.tweens.add({
+    return scene.tweens.add({
         targets: regadera,
         angle: anguloOriginal - (opciones.grados ?? 38),
         duration: 180,
