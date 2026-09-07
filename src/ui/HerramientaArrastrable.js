@@ -18,6 +18,8 @@ export default class HerramientaArrastrable extends Phaser.GameObjects.Image {
         this.baseY = config.y;
         this.arrastrando = false;
         this.habilitado = false;
+        this.tweenRegreso = null;
+        this.tweensEfecto = [];
 
         this.escalaBase = config.displayHeight / this.height;
 
@@ -68,6 +70,12 @@ export default class HerramientaArrastrable extends Phaser.GameObjects.Image {
         this.on("dragstart", () => {
             if (!this.habilitado) return;
 
+            // El regreso a la base puede seguir pendiente, sobre todo con la
+            // espera larga de la regadera. Si no se cancela aquí, vence en mitad
+            // del arrastre y la herramienta salta de la mano a su sitio.
+            this.cancelarRegreso();
+            this.cancelarEfectos();
+
             this.arrastrando = true;
             this.pista?.pause();
             this.setScale(this.escalaBase * (this.config.escalaAlArrastrar ?? 1.15));
@@ -95,8 +103,31 @@ export default class HerramientaArrastrable extends Phaser.GameObjects.Image {
         });
     }
 
+    /**
+     * Un efecto puede estar moviendo la herramienta cuando el niño la vuelve a
+     * agarrar: la regadera, por ejemplo, se acomoda sobre la planta y se inclina
+     * para verter. Esos tweens se anotan aquí para poder cortarlos al agarrarla
+     * y que no peleen con el arrastre.
+     */
+    registrarTweenEfecto(tween) {
+        if (tween) this.tweensEfecto.push(tween);
+        return tween;
+    }
+
+    cancelarEfectos() {
+        this.tweensEfecto.forEach(tween => tween.remove());
+        this.tweensEfecto = [];
+    }
+
+    cancelarRegreso() {
+        this.tweenRegreso?.remove();
+        this.tweenRegreso = null;
+    }
+
     volverABase(duracion, retraso = 0) {
-        this.scene.tweens.add({
+        this.cancelarRegreso();
+
+        this.tweenRegreso = this.scene.tweens.add({
             targets: this,
             x: this.baseX,
             y: this.baseY,
@@ -105,7 +136,12 @@ export default class HerramientaArrastrable extends Phaser.GameObjects.Image {
             duration: duracion,
             delay: retraso,
             ease: "Back.Out",
+            // El regreso arranca cuando el efecto ya se vio: a partir de aquí
+            // manda él, y cualquier resto de animación debe soltar el control.
+            onStart: () => this.cancelarEfectos(),
             onComplete: () => {
+                this.tweenRegreso = null;
+
                 if (!this.active) return;
 
                 this.setDepth(this.config.depth ?? 80);

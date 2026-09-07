@@ -82,13 +82,70 @@ export default class EscenaBuscarObjetivos extends EscenaMantenimientoBase {
             onSoltar: (x, y) => this.soltarHerramienta(x, y)
         });
 
-        this.crearEtiquetaHerramienta(base);
+        this.encajarHerramientaEnPantalla();
+        this.crearEtiquetaHerramienta();
     }
 
-    crearEtiquetaHerramienta(base) {
+    /**
+     * Mete la herramienta dentro del lienzo si su dibujo se sale.
+     *
+     * La base es una fracción de la pantalla, pero lo que ocupa la herramienta
+     * depende de la altura del lienzo y del origen de su dibujo. La lupa, que se
+     * ancla en el cristal y no en el centro, se salía por la izquierda en toda
+     * proporción de pantalla —hasta un 7,7 % del ancho en 4:3— y su mango caía
+     * por debajo del borde inferior.
+     *
+     * Se reserva sitio abajo para la etiqueta, que va debajo del dibujo.
+     */
+    encajarHerramientaEnPantalla(margen = 0.02) {
+        const herramienta = this.herramienta;
+
+        if (!herramienta) return;
+
+        const margenX = this.ancho * margen;
+        const margenY = this.alto * margen;
+        const reservaEtiqueta = this.alto * 0.075;
+
+        const izquierda = herramienta.x - herramienta.originX * herramienta.displayWidth;
+        const derecha = herramienta.x + (1 - herramienta.originX) * herramienta.displayWidth;
+        const arriba = herramienta.y - herramienta.originY * herramienta.displayHeight;
+        const abajo = herramienta.y + (1 - herramienta.originY) * herramienta.displayHeight;
+
+        let dx = 0;
+        let dy = 0;
+
+        if (izquierda < margenX) dx = margenX - izquierda;
+        else if (derecha > this.ancho - margenX) dx = this.ancho - margenX - derecha;
+
+        if (arriba < margenY) dy = margenY - arriba;
+        else if (abajo > this.alto - margenY - reservaEtiqueta) {
+            dy = this.alto - margenY - reservaEtiqueta - abajo;
+        }
+
+        if (!dx && !dy) return;
+
+        // Se mueve también la base, que es adonde la herramienta regresa al
+        // soltarla: si no, volvería al sitio recortado en cada uso.
+        herramienta.baseX += dx;
+        herramienta.baseY += dy;
+        herramienta.setPosition(herramienta.baseX, herramienta.baseY);
+    }
+
+    /**
+     * La etiqueta se coloca bajo el borde real del dibujo, no a una distancia
+     * fija de la base: con la lupa, mucho más alta y anclada en el cristal, una
+     * distancia fija la dejaba escrita encima del mango.
+     */
+    crearEtiquetaHerramienta() {
+        const herramienta = this.herramienta;
+
+        const y = herramienta.baseY
+            + (1 - herramienta.originY) * herramienta.displayHeight
+            + this.alto * 0.028;
+
         this.etiquetaHerramienta = this.add.text(
-            base.x,
-            base.y + this.alto * 0.12,
+            herramienta.baseX,
+            y,
             this.nivel.herramienta.etiqueta,
             {
                 fontFamily: "Trebuchet MS",
@@ -98,7 +155,7 @@ export default class EscenaBuscarObjetivos extends EscenaMantenimientoBase {
                 stroke: "#5F3215",
                 strokeThickness: 5
             }
-        ).setOrigin(0.5).setDepth(79);
+        ).setOrigin(0.5, 0).setDepth(79);
     }
 
     repartirObjetivos() {
@@ -152,12 +209,19 @@ export default class EscenaBuscarObjetivos extends EscenaMantenimientoBase {
     /** Objetivo sin resolver más cercano al punto, si lo hay. */
     objetivoEn(x, y) {
         const candidatos = this.objetivos
-            .filter(objetivo => objetivo.contienePunto(x, y))
+            // Un objetivo bloqueado está en pleno temblor de error y no volvería
+            // a responder: ignorarlo deja que el acierto de al lado sí cuente.
+            .filter(objetivo => !objetivo.bloqueado && objetivo.contienePunto(x, y))
             .sort((a, b) => a.distanciaA(x, y) - b.distanciaA(x, y));
 
         return candidatos[0] ?? null;
     }
 
+    /**
+     * Devuelve si la herramienta sirvió de algo. Solo entonces se queda sobre la
+     * planta el tiempo de la animación: tras un fallo debe volver enseguida, y
+     * no quedarse un segundo plantada encima de la planta equivocada.
+     */
     soltarHerramienta(x, y) {
         if (this.estado !== "jugando") return false;
 
@@ -166,12 +230,35 @@ export default class EscenaBuscarObjetivos extends EscenaMantenimientoBase {
         if (!objetivo) return false;
 
         objetivo.seleccionar();
-        return true;
+        return objetivo.esObjetivo;
     }
 
     resolverObjetivo(objetivo) {
         this.nivel.efecto?.(this, objetivo);
         this.registrarAcierto();
+    }
+
+    /** Objetivos correctos que aún faltan por atender. */
+    objetivosPendientes() {
+        return this.objetivos.filter(
+            objetivo => objetivo.esObjetivo && !objetivo.resuelto && objetivo.active
+        );
+    }
+
+    /** La mano recorre el camino real: de la base de la herramienta al objetivo. */
+    mostrarPista() {
+        const pendientes = this.objetivosPendientes();
+
+        if (!pendientes.length || !this.manoGuia) return;
+
+        const objetivo = Phaser.Utils.Array.GetRandom(pendientes);
+        const base = this.baseHerramienta;
+
+        this.manoGuia.mostrarDeslizamiento(
+            { x: base.x, y: base.y },
+            { x: objetivo.x, y: objetivo.y - objetivo.displayHeight * 0.35 },
+            { duracionMovimientoMs: 1100, duracionVisibleMs: 3200 }
+        );
     }
 
     habilitarMecanica() {
