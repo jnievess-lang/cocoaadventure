@@ -88,12 +88,6 @@ export default class MolerScene extends EscenaMantenimientoBase {
     }
 
     crearMolino() {
-        this.molino = this.add.image(
-            this.ancho * 0.30,
-            this.alto * 0.55,
-            "Molino"
-        );
-
         // La lámina incluye la mesa, así que se dibuja bastante más ancha que
         // la anterior para que la máquina conserve su tamaño en pantalla.
         //
@@ -103,6 +97,16 @@ export default class MolerScene extends EscenaMantenimientoBase {
         // círculo se salía del lienzo y su tramo superior quedaba fuera del
         // alcance del dedo.
         const anchoMolino = Math.min(this.ancho * 0.44, this.alto * 0.77);
+
+        // La mesa está cortada en seco por el borde izquierdo de la lámina.
+        // Se coloca ese borde fuera del lienzo para que la mesa se lea como
+        // que sigue más allá de la pantalla, en vez de terminar en un tajo
+        // recto flotando en mitad del aire.
+        this.molino = this.add.image(
+            anchoMolino / 2 - this.ancho * 0.03,
+            this.alto * 0.55,
+            "Molino"
+        );
 
         this.molino
             .setScale(anchoMolino / this.molino.width)
