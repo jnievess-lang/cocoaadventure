@@ -85,7 +85,7 @@ export default class SecarGranosScene extends EscenaMantenimientoBase {
             texturaLlena: "CanastaSolLlena",
             tipo: "bueno",
             capacidad: this.contar("bueno"),
-            etiqueta: "AL SOL"
+            etiqueta: "Al sol"
         });
 
         this.canastaDescarte = this.crearCanasta({
@@ -96,7 +96,7 @@ export default class SecarGranosScene extends EscenaMantenimientoBase {
             texturaLlena: "CanastaDescarteLlena",
             tipo: "agrietado",
             capacidad: this.contar("agrietado"),
-            etiqueta: "DESCARTE"
+            etiqueta: "Descarte"
         });
 
         this.canastas = [this.canastaBuenos, this.canastaDescarte];
