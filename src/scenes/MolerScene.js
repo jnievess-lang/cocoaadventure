@@ -20,9 +20,9 @@ const RADIO_EN_LAMINA = 0.38;
 const ANGULO_PUNO = Math.atan2(0.147, -0.121);
 
 const RECETA = Object.freeze([
-    { clave: "Azucar", etiqueta: "AZÚCAR", chorro: 0xFFF4D6 },
-    { clave: "MantecaCacao", etiqueta: "MANTECA DE CACAO", chorro: 0xF2D98B },
-    { clave: "Leche", etiqueta: "LECHE", chorro: 0xFFFFFF }
+    { clave: "Azucar", etiqueta: "Azúcar", chorro: 0xFFF4D6 },
+    { clave: "MantecaCacao", etiqueta: "Manteca de cacao", chorro: 0xF2D98B },
+    { clave: "Leche", etiqueta: "Leche", chorro: 0xFFFFFF }
 ]);
 
 const CONFIGURACION_NIVEL = Object.freeze({
@@ -159,7 +159,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
         this.etiquetaGiro = this.add.text(
             this.pivote.x,
             this.pivote.y + this.radioManivela * 1.5,
-            "GIRA",
+            "Gira",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.alto * 0.026}px`,
@@ -408,7 +408,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
     pedirSiguiente() {
         if (this.pasoReceta >= RECETA.length) return;
 
-        this.cartel.setText(`AGREGA:\n${RECETA[this.pasoReceta].etiqueta}`);
+        this.cartel.setText(`Agrega:\n${RECETA[this.pasoReceta].etiqueta}`);
 
         this.tweens.add({
             targets: this.cartel,
@@ -558,7 +558,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
     cerrarConLaBarra() {
         this.animando = true;
         this.hud.stop();
-        this.cartel.setText("¡MEZCLANDO!");
+        this.cartel.setText("¡Mezclando!");
 
         this.tweens.add({
             targets: this.tazon,
@@ -634,7 +634,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
                     ease: "Sine.InOut"
                 });
 
-                this.cartel.setText("¡CHOCOLATE!");
+                this.cartel.setText("¡Chocolate!");
                 this.animando = false;
 
                 // Recién ahora se puntúa: el nivel se da por terminado cuando

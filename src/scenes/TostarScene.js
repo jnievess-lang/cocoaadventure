@@ -108,7 +108,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         this.etiquetaTueste = this.add.text(
             this.ancho * 0.5,
             this.alto * 0.30,
-            "TUESTE 0 %",
+            "Tueste 0 %",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.alto * 0.030}px`,
@@ -122,7 +122,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         this.avisoFuera = this.add.text(
             this.ancho * 0.5,
             this.alto * 0.36,
-            "¡VUELVE A LA FRANJA VERDE!",
+            "¡Vuelve a la franja verde!",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.alto * 0.028}px`,
@@ -161,7 +161,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         this.textoBoton = this.add.text(
             this.boton.x,
             this.boton.y,
-            "AVIVAR\nFUEGO",
+            "Avivar\nfuego",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.alto * 0.026}px`,
@@ -213,8 +213,8 @@ export default class TostarScene extends EscenaMantenimientoBase {
      * Quedarse fuera de la franja también cuesta.
      *
      * Antes el único error posible era quemarse, así que dejar la aguja quieta
-     * abajo no tenía consecuencia: el nivel se podía "esperar". Ahora el
-     * descuido sostenido cobra una vida, avisando primero.
+     * abajo no tenía consecuencia: el nivel se podía "esperar". Ahora cruzar a
+     * rojo cuesta una vida en el acto, una sola vez por salida.
      */
     actualizarDescuido(segundos) {
         // Mientras la tanda arde ya se está cobrando el error del quemado; no
@@ -308,7 +308,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         }
 
         this.etiquetaTueste.setText(
-            `TUESTE ${Math.round(this.avanceTanda * 100)} %`
+            `Tueste ${Math.round(this.avanceTanda * 100)} %`
         );
 
         if (this.avanceTanda >= 1) this.completarTanda();
@@ -352,7 +352,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
             this.tandaQuemada = false;
             this.temperatura = 0.08;
             this.haLlegadoAlPunto = false;
-            this.etiquetaTueste.setText("TUESTE 0 %");
+            this.etiquetaTueste.setText("Tueste 0 %");
         });
     }
 
@@ -366,7 +366,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         this.mostrarAviso(false);
 
         this.granos.forEach(grano => grano.clearTint());
-        this.etiquetaTueste.setText("TUESTE 0 %");
+        this.etiquetaTueste.setText("Tueste 0 %");
 
         this.registrarAcierto();
     }
