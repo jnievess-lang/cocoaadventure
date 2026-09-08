@@ -163,7 +163,7 @@ export default class ProcesarScene extends Phaser.Scene {
                 x: this.width * 0.42,
                 y: this.height * 0.34,
                 label: "Secar granos",
-                iconTexture: "CanastaSecadoBuenos",
+                iconTexture: "IconoSecarGranos",
                 unlocked: procesar.secado.unlocked,
                 stars: procesar.secado.stars,
                 onClick: () => this.scene.start("SecarGranosScene")
@@ -172,7 +172,7 @@ export default class ProcesarScene extends Phaser.Scene {
                 x: this.width * 0.63,
                 y: this.height * 0.34,
                 label: "Tostar",
-                iconTexture: "GranoSecoBueno",
+                iconTexture: "IconoTostar",
                 unlocked: procesar.tostado.unlocked,
                 stars: procesar.tostado.stars,
                 onClick: () => this.scene.start("TostarScene")

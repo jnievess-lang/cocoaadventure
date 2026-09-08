@@ -171,6 +171,33 @@ export function componentes(esFondo, w, h, minimoPixeles = 400) {
         .sort((a, b) => b.area - a.area);
 }
 
+/**
+ * Reescala el canal alfa para que `minimo` pase a ser transparencia total.
+ *
+ * Hace falta cuando una lámina se exporta con la capa a media opacidad: el
+ * recorte es correcto, pero el fondo queda en alfa 128 en vez de 0 y el sprite
+ * se ve translúcido dentro del juego. Ojo: un alfa distinto de cero NO se nota
+ * mirando la imagen en un visor, solo midiéndolo.
+ */
+export async function normalizarAlfa(entrada, minimo) {
+    const { data, info } = await sharp(entrada)
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
+    const salida = Buffer.from(data);
+    const rango = 255 - minimo;
+
+    for (let i = 3; i < salida.length; i += info.channels) {
+        salida[i] = Math.max(
+            0,
+            Math.min(255, Math.round((data[i] - minimo) * (255 / rango)))
+        );
+    }
+
+    return { buffer: salida, info };
+}
+
 /** Recorta al contenido, escala al ancho pedido y escribe el WebP final. */
 export async function escribirWebp(buffer, info, destino, anchoObjetivo) {
     await sharp(buffer, { raw: info })

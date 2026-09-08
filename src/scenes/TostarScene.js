@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import EscenaMantenimientoBase from "./EscenaMantenimientoBase";
 import ProgressManager from "../managers/ProgressManager";
 import clasificarTueste from "../utils/clasificarTueste";
+import evaluarDescuido from "../utils/evaluarDescuido";
 
 const CONFIGURACION_NIVEL = Object.freeze({
 
@@ -50,6 +51,8 @@ export default class TostarScene extends EscenaMantenimientoBase {
         this.avanceTanda = 0;
         this.avivando = false;
         this.tandaQuemada = false;
+        this.descuido = 0;
+        this.haLlegadoAlPunto = false;
 
         this.crearTostadora();
         this.crearBarra();
@@ -105,7 +108,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         this.etiquetaTueste = this.add.text(
             this.ancho * 0.5,
             this.alto * 0.30,
-            "TUESTE 0 %",
+            "Tueste 0 %",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.alto * 0.030}px`,
@@ -115,6 +118,20 @@ export default class TostarScene extends EscenaMantenimientoBase {
                 strokeThickness: 6
             }
         ).setOrigin(0.5).setDepth(41);
+
+        this.avisoFuera = this.add.text(
+            this.ancho * 0.5,
+            this.alto * 0.36,
+            "¡Vuelve a la franja verde!",
+            {
+                fontFamily: "Trebuchet MS",
+                fontSize: `${this.alto * 0.028}px`,
+                color: "#FFE08A",
+                fontStyle: "bold",
+                stroke: "#7A2A0C",
+                strokeThickness: 6
+            }
+        ).setOrigin(0.5).setDepth(41).setVisible(false);
 
         this.colocarAguja();
     }
@@ -144,7 +161,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         this.textoBoton = this.add.text(
             this.boton.x,
             this.boton.y,
-            "AVIVAR\nFUEGO",
+            "Avivar\nfuego",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.alto * 0.026}px`,
@@ -186,9 +203,72 @@ export default class TostarScene extends EscenaMantenimientoBase {
         const segundos = delta / 1000;
 
         this.actualizarTemperatura(segundos);
+        this.actualizarDescuido(segundos);
         this.actualizarTueste(segundos);
         this.colocarAguja();
         this.pintarGranos();
+    }
+
+    /**
+     * Quedarse fuera de la franja también cuesta.
+     *
+     * Antes el único error posible era quemarse, así que dejar la aguja quieta
+     * abajo no tenía consecuencia: el nivel se podía "esperar". Ahora cruzar a
+     * rojo cuesta una vida en el acto, una sola vez por salida.
+     */
+    actualizarDescuido(segundos) {
+        // Mientras la tanda arde ya se está cobrando el error del quemado; no
+        // corresponde cobrar además el de estar fuera de punto.
+        if (this.tandaQuemada) return;
+
+        // El cobro no empieza hasta que la aguja alcanza el verde por primera
+        // vez en la tanda. La aguja arranca en rojo y tiene que cruzarlo para
+        // llegar al punto: sin esta espera, calentar costaría una vida siempre.
+        if (this.puntoDeTueste() === "punto") this.haLlegadoAlPunto = true;
+        if (!this.haLlegadoAlPunto) return;
+
+        const resultado = evaluarDescuido(
+            this.descuido,
+            this.puntoDeTueste(),
+            segundos
+        );
+
+        this.descuido = resultado.descuido;
+        this.mostrarAviso(resultado.avisar);
+
+        if (resultado.penalizar) this.descuidarTanda();
+    }
+
+    mostrarAviso(activo) {
+        if (this.avisoFuera.visible === activo) return;
+
+        // El parpadeo se mata siempre antes de volver a crearlo: encender y
+        // apagar el aviso varias veces apilaria tweens sobre el mismo texto.
+        this.tweens.killTweensOf(this.avisoFuera);
+
+        this.avisoFuera.setScale(1).setVisible(activo);
+        this.aguja.setFillStyle(activo ? 0xFF6B4A : 0xFFFFFF, 1);
+
+        if (!activo) return;
+
+        this.tweens.add({
+            targets: this.avisoFuera,
+            scale: 1.09,
+            duration: 340,
+            yoyo: true,
+            repeat: -1,
+            ease: "Sine.InOut"
+        });
+    }
+
+    descuidarTanda() {
+        this.mostrarAviso(false);
+
+        this.cameras.main.shake(140, 0.004);
+
+        // El tueste ya logrado no se pierde: perder la tanda entera es el
+        // castigo de quemarla, y conviene que los dos errores se distingan.
+        this.registrarError();
     }
 
     actualizarTemperatura(segundos) {
@@ -228,7 +308,7 @@ export default class TostarScene extends EscenaMantenimientoBase {
         }
 
         this.etiquetaTueste.setText(
-            `TUESTE ${Math.round(this.avanceTanda * 100)} %`
+            `Tueste ${Math.round(this.avanceTanda * 100)} %`
         );
 
         if (this.avanceTanda >= 1) this.completarTanda();
@@ -256,25 +336,37 @@ export default class TostarScene extends EscenaMantenimientoBase {
     quemar() {
         this.tandaQuemada = true;
         this.avanceTanda = 0;
+        this.descuido = 0;
+        this.mostrarAviso(false);
 
         this.cameras.main.shake(180, 0.006);
-        this.registrarError();
+        this.sound.play("sfxSeleccionIncorrecta", { volume: 0.5 });
+
+        // Sin vida aquí: cruzar a rojo ya la cobró al entrar, y llegar hasta
+        // el extremo es la misma salida. El castigo de quemarse es perder la
+        // tanda entera, que es lo que distingue este error del descuido.
 
         this.time.delayedCall(700, () => {
             if (!this.scene.isActive(this.clave)) return;
 
             this.tandaQuemada = false;
             this.temperatura = 0.08;
-            this.etiquetaTueste.setText("TUESTE 0 %");
+            this.haLlegadoAlPunto = false;
+            this.etiquetaTueste.setText("Tueste 0 %");
         });
     }
 
     completarTanda() {
         this.avanceTanda = 0;
         this.temperatura = 0.08;
+        this.descuido = 0;
+        // La tanda nueva vuelve a arrancar en rojo: se le devuelve el margen
+        // del primer ascenso.
+        this.haLlegadoAlPunto = false;
+        this.mostrarAviso(false);
 
         this.granos.forEach(grano => grano.clearTint());
-        this.etiquetaTueste.setText("TUESTE 0 %");
+        this.etiquetaTueste.setText("Tueste 0 %");
 
         this.registrarAcierto();
     }
@@ -286,6 +378,10 @@ export default class TostarScene extends EscenaMantenimientoBase {
     deshabilitarMecanica() {
         this.avivando = false;
         this.boton?.disableInteractive();
+
+        // Al pausar o terminar, el aviso no debe quedarse parpadeando encima
+        // del panel de resultados.
+        this.mostrarAviso(false);
     }
 
 }

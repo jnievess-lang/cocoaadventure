@@ -4,15 +4,25 @@ import ProgressManager from "../managers/ProgressManager";
 
 const VUELTAS_NECESARIAS = 3;
 
-// El eje de giro del molino, medido sobre Molino.webp: la polea está en el
-// 41,4 % del ancho y el 32,6 % del alto de la lámina. Se guarda como fracción
-// para que la manivela siga cuadrando en cualquier tamaño de pantalla.
-const EJE_EN_LAMINA = Object.freeze({ x: 0.414, y: 0.326 });
+// Geometría medida sobre Molino.webp. La lámina trae el molino montado en su
+// mesa, así que la máquina ocupa poco más de la mitad del ancho: por eso el
+// sprite se dibuja grande y el eje cae tan a la derecha.
+//
+// El eje es el centro de la polea; el radio es la distancia de esa polea al
+// puño de madera, para que el círculo de arrastre caiga sobre la manivela
+// dibujada. Si se cambia la lámina hay que volver a medir los tres valores.
+const EJE_EN_LAMINA = Object.freeze({ x: 0.62, y: 0.20 });
+const RADIO_EN_LAMINA = 0.38;
+
+// Ángulo en el que está dibujado el puño: abajo a la izquierda del eje. La
+// perilla arranca ahí para que se lea como la manivela y no como un botón
+// suelto flotando al otro lado.
+const ANGULO_PUNO = Math.atan2(0.147, -0.121);
 
 const RECETA = Object.freeze([
-    { clave: "Azucar", etiqueta: "AZÚCAR", chorro: 0xFFF4D6 },
-    { clave: "MantecaCacao", etiqueta: "MANTECA DE CACAO", chorro: 0xF2D98B },
-    { clave: "Leche", etiqueta: "LECHE", chorro: 0xFFFFFF }
+    { clave: "Azucar", etiqueta: "Azúcar", chorro: 0xFFF4D6 },
+    { clave: "MantecaCacao", etiqueta: "Manteca de cacao", chorro: 0xF2D98B },
+    { clave: "Leche", etiqueta: "Leche", chorro: 0xFFFFFF }
 ]);
 
 const CONFIGURACION_NIVEL = Object.freeze({
@@ -66,21 +76,44 @@ export default class MolerScene extends EscenaMantenimientoBase {
         this.animando = false;
         this.ingredientes = [];
 
+        // Mide cuánto se está girando ahora mismo, de 0 a 1. Sube con el
+        // movimiento del dedo y cae sola, así la máquina solo se mueve
+        // mientras el niño la mueve.
+        this.impulsoGiro = 0;
+        this.proximaMolida = 0;
+
         this.crearMolino();
         this.crearManivela();
         this.crearCartelReceta();
     }
 
     crearMolino() {
+        // La lámina incluye la mesa, así que se dibuja bastante más ancha que
+        // la anterior para que la máquina conserve su tamaño en pantalla.
+        //
+        // El límite por alto no es decorativo: el eje queda en la parte alta
+        // del sprite, así que el círculo de arrastre sobresale por encima. En
+        // una pantalla muy apaisada (20:9), midiendo solo con el ancho, ese
+        // círculo se salía del lienzo y su tramo superior quedaba fuera del
+        // alcance del dedo.
+        const anchoMolino = Math.min(this.ancho * 0.44, this.alto * 0.77);
+
+        // La mesa está cortada en seco por el borde izquierdo de la lámina.
+        // Se coloca ese borde fuera del lienzo para que la mesa se lea como
+        // que sigue más allá de la pantalla, en vez de terminar en un tajo
+        // recto flotando en mitad del aire.
         this.molino = this.add.image(
-            this.ancho * 0.27,
+            anchoMolino / 2 - this.ancho * 0.03,
             this.alto * 0.55,
             "Molino"
         );
 
         this.molino
-            .setScale((this.ancho * 0.26) / this.molino.width)
+            .setScale(anchoMolino / this.molino.width)
             .setDepth(10);
+
+        // Posición de reposo: la trepidación la desplaza y hay que devolverla.
+        this.molinoEnReposo = { x: this.molino.x, y: this.molino.y };
     }
 
     /**
@@ -97,7 +130,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
                 this.molino.displayHeight * (EJE_EN_LAMINA.y - 0.5)
         };
 
-        this.radioManivela = this.molino.displayWidth * 0.30;
+        this.radioManivela = this.molino.displayWidth * RADIO_EN_LAMINA;
 
         this.guia = this.add.circle(
             this.pivote.x,
@@ -112,8 +145,8 @@ export default class MolerScene extends EscenaMantenimientoBase {
             .setDepth(30);
 
         this.perilla = this.add.circle(
-            this.pivote.x + this.radioManivela,
-            this.pivote.y,
+            this.pivote.x + Math.cos(ANGULO_PUNO) * this.radioManivela,
+            this.pivote.y + Math.sin(ANGULO_PUNO) * this.radioManivela,
             this.radioManivela * 0.24,
             0xD9541F,
             1
@@ -126,7 +159,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
         this.etiquetaGiro = this.add.text(
             this.pivote.x,
             this.pivote.y + this.radioManivela * 1.5,
-            "GIRA",
+            "Gira",
             {
                 fontFamily: "Trebuchet MS",
                 fontSize: `${this.alto * 0.026}px`,
@@ -180,6 +213,12 @@ export default class MolerScene extends EscenaMantenimientoBase {
 
         this.anguloAcumulado += Math.abs(delta);
 
+        // Un cuarto de vuelta de un tirón basta para llegar al máximo.
+        this.impulsoGiro = Math.min(
+            1,
+            this.impulsoGiro + Math.abs(delta) * 2.4
+        );
+
         this.perilla.x = this.pivote.x + Math.cos(angulo) * this.radioManivela;
         this.perilla.y = this.pivote.y + Math.sin(angulo) * this.radioManivela;
 
@@ -199,6 +238,75 @@ export default class MolerScene extends EscenaMantenimientoBase {
         if (this.vueltasHechas >= VUELTAS_NECESARIAS && this.fase === "moliendo") {
             this.abrirReceta();
         }
+    }
+
+    /**
+     * Da vida a la máquina mientras se muele.
+     *
+     * El sprite es una lámina plana con su mesa incluida, así que girarlo
+     * entero haría rodar tambien la mesa: no se puede "girar el molino". Lo
+     * que sí se lee como que está trabajando es que trepide y que suelte
+     * cacao molido por la boca, y ambas cosas solo ocurren mientras el dedo
+     * está dando vueltas de verdad.
+     */
+    update(tiempo, delta) {
+        if (this.fase !== "moliendo" || !this.molino) return;
+        if (this.estado !== "jugando") return;
+
+        const segundos = delta / 1000;
+
+        this.impulsoGiro = Math.max(0, this.impulsoGiro - 2.2 * segundos);
+
+        this.trepidar(tiempo);
+
+        if (this.impulsoGiro > 0.18 && tiempo >= this.proximaMolida) {
+            // Cuanto más rápido gira, más seguido cae cacao.
+            this.proximaMolida = tiempo + 90 - this.impulsoGiro * 45;
+            this.soltarMolido();
+        }
+    }
+
+    trepidar(tiempo) {
+        const amplitud = this.impulsoGiro * this.molino.displayWidth * 0.006;
+
+        this.molino.x = this.molinoEnReposo.x +
+            Math.sin(tiempo * 0.045) * amplitud;
+
+        this.molino.y = this.molinoEnReposo.y +
+            Math.cos(tiempo * 0.062) * amplitud * 0.6;
+
+        this.molino.setAngle(Math.sin(tiempo * 0.038) * this.impulsoGiro * 0.7);
+    }
+
+    /** Una mota de cacao molido cayendo de la boca del molino a la mesa. */
+    soltarMolido() {
+        const izquierda = this.molino.x - this.molino.displayWidth / 2;
+        const arriba = this.molino.y - this.molino.displayHeight / 2;
+
+        // Boca de salida, medida sobre la lámina igual que el eje.
+        const x = izquierda + this.molino.displayWidth * 0.80 +
+            Phaser.Math.Between(-6, 6);
+
+        const y = arriba + this.molino.displayHeight * 0.43;
+
+        const mota = this.add.circle(
+            x,
+            y,
+            Phaser.Math.Between(3, 6),
+            Phaser.Math.RND.pick([0x6B3A1E, 0x5A2E16, 0x7C4A28]),
+            1
+        ).setDepth(11);
+
+        this.tweens.add({
+            targets: mota,
+            y: y + this.molino.displayHeight * 0.16,
+            x: x + Phaser.Math.Between(-10, 10),
+            alpha: 0,
+            scale: 0.4,
+            duration: Phaser.Math.Between(420, 620),
+            ease: "Quad.In",
+            onComplete: () => mota.destroy()
+        });
     }
 
     crearCartelReceta() {
@@ -226,6 +334,12 @@ export default class MolerScene extends EscenaMantenimientoBase {
     abrirReceta() {
         this.fase = "receta";
         this.girando = false;
+
+        // La trepidación se apaga con la fase: hay que devolver la máquina a
+        // su sitio o se queda torcida donde la dejó el último fotograma.
+        this.impulsoGiro = 0;
+        this.molino.setPosition(this.molinoEnReposo.x, this.molinoEnReposo.y);
+        this.molino.setAngle(0);
 
         this.guia.setVisible(false);
         this.perilla.setVisible(false);
@@ -294,7 +408,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
     pedirSiguiente() {
         if (this.pasoReceta >= RECETA.length) return;
 
-        this.cartel.setText(`AGREGA:\n${RECETA[this.pasoReceta].etiqueta}`);
+        this.cartel.setText(`Agrega:\n${RECETA[this.pasoReceta].etiqueta}`);
 
         this.tweens.add({
             targets: this.cartel,
@@ -444,7 +558,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
     cerrarConLaBarra() {
         this.animando = true;
         this.hud.stop();
-        this.cartel.setText("¡MEZCLANDO!");
+        this.cartel.setText("¡Mezclando!");
 
         this.tweens.add({
             targets: this.tazon,
@@ -520,7 +634,7 @@ export default class MolerScene extends EscenaMantenimientoBase {
                     ease: "Sine.InOut"
                 });
 
-                this.cartel.setText("¡CHOCOLATE!");
+                this.cartel.setText("¡Chocolate!");
                 this.animando = false;
 
                 // Recién ahora se puntúa: el nivel se da por terminado cuando
