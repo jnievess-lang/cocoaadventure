@@ -36,7 +36,10 @@ const SPRITES = [
     // media resolución (1024x454 es la mitad exacta de 2048x908) y trae el
     // paisaje entero; el canal alfa que tenía fue lo que despistó. El bueno es
     // `Molino.jpeg`, que sí trae el molino solo sobre blanco.
-    ["Molino.jpeg", "minigames/procesar/molienda/Molino.webp", 5, 640],
+    // `MolinoCompleto.png` trae el molino ya montado sobre la mesa, que es lo
+    // que necesita: su mordaza de sujecion tiene asi un tablon donde morder.
+    // Ya viene recortado con alfa propio, por eso tolerancia 0.
+    ["MolinoCompleto.png", "minigames/procesar/molienda/Molino.webp", 0, 640],
     ["TazonChocolate.png", "minigames/procesar/molienda/TazonChocolate.webp", 5, 512],
     ["BarraChocolate.png", "minigames/procesar/molienda/BarraChocolate.webp", 5, 512],
     ["Azúcar.png", "minigames/procesar/molienda/Azucar.webp", 5, 256],
