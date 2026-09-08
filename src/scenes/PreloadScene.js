@@ -276,14 +276,19 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("FondoMolienda", "images/background/FondoMolienda.webp");
 
         // Nivel 1: secar granos
-        this.load.image("CanastaSecadoVacia", "images/minigames/procesar/secado/CanastaSecadoVacia.webp");
-        this.load.image("CanastaSecadoBuenos", "images/minigames/procesar/secado/CanastaSecadoBuenos.webp");
-        this.load.image("CanastaSecadoDanados", "images/minigames/procesar/secado/CanastaSecadoDanados.webp");
+        this.load.image("CanastaSol", "images/minigames/procesar/secado/CanastaSol.webp");
+        this.load.image("CanastaSolLlena", "images/minigames/procesar/secado/CanastaSolLlena.webp");
+        this.load.image("CanastaDescarte", "images/minigames/procesar/secado/CanastaDescarte.webp");
+        this.load.image("CanastaDescarteLlena", "images/minigames/procesar/secado/CanastaDescarteLlena.webp");
         this.load.image("GranoSecoBueno", "images/minigames/procesar/secado/GranoSecoBueno.webp");
         this.load.image("GranoSecoAgrietado", "images/minigames/procesar/secado/GranoSecoAgrietado.webp");
+        // Icono del recuadro de Secar granos en ProcesarScene.
+        this.load.image("IconoSecarGranos", "images/minigames/procesar/secado/IconoSecarGranos.webp");
 
         // Nivel 2: tostar
         this.load.image("BarraTueste", "images/minigames/procesar/tostado/BarraTueste.webp");
+        // Icono del recuadro de Tostar en ProcesarScene.
+        this.load.image("IconoTostar", "images/minigames/procesar/tostado/IconoTostar.webp");
 
         // Nivel 4: moler
         this.load.image("Molino", "images/minigames/procesar/molienda/Molino.webp");

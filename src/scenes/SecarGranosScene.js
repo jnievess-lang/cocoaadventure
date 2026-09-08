@@ -73,13 +73,16 @@ export default class SecarGranosScene extends EscenaMantenimientoBase {
         const anchoCanasta = this.ancho * 0.17;
         const y = this.alto * 0.80;
 
-        // Las dos empiezan vacías: cuál es cuál lo dice la etiqueta, no el
-        // contenido. Así el niño lee en vez de reconocer el dibujo.
+        // Cada destino tiene su propia canasta vacía, distinguible por el
+        // emblema: sol para la que va a secar, descarte para la otra. El
+        // dibujo y la etiqueta dicen lo mismo, que es lo que pide la guía de
+        // recursos: el texto nunca puede ser el único canal.
         this.canastaBuenos = this.crearCanasta({
             x: this.ancho * 0.22,
             y,
             ancho: anchoCanasta,
-            texturaLlena: "CanastaSecadoBuenos",
+            textura: "CanastaSol",
+            texturaLlena: "CanastaSolLlena",
             tipo: "bueno",
             capacidad: this.contar("bueno"),
             etiqueta: "AL SOL"
@@ -89,7 +92,8 @@ export default class SecarGranosScene extends EscenaMantenimientoBase {
             x: this.ancho * 0.78,
             y,
             ancho: anchoCanasta,
-            texturaLlena: "CanastaSecadoDanados",
+            textura: "CanastaDescarte",
+            texturaLlena: "CanastaDescarteLlena",
             tipo: "agrietado",
             capacidad: this.contar("agrietado"),
             etiqueta: "DESCARTE"
@@ -99,7 +103,7 @@ export default class SecarGranosScene extends EscenaMantenimientoBase {
     }
 
     crearCanasta(config) {
-        const imagen = this.add.image(config.x, config.y, "CanastaSecadoVacia");
+        const imagen = this.add.image(config.x, config.y, config.textura);
 
         imagen
             .setScale(config.ancho / imagen.width)

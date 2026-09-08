@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { mkdirSync } from "fs";
-import { quitarFondo, componentes } from "./lib.mjs";
+import { quitarFondo, componentes, normalizarAlfa } from "./lib.mjs";
 
 const DIR = "C:/Users/Gary.S/Downloads/Assets";
 const PUB = "public/images";
@@ -17,11 +17,16 @@ const FONDOS = [
 
 // [origen, destino, tolerancia, ancho final]
 const SPRITES = [
-    // OJO con el nombre del tercero: el archivo trae "Graños" con eñe. Se
-    // escribe tal cual o no se encuentra.
-    ["CanastaVacia.jpeg", "minigames/procesar/secado/CanastaSecadoVacia.webp", 5, 512],
-    ["CanastaGranosBuenos.jpeg", "minigames/procesar/secado/CanastaSecadoBuenos.webp", 5, 512],
-    ["CanastaGrañosDañados.jpeg", "minigames/procesar/secado/CanastaSecadoDanados.webp", 5, 512],
+    // Canastas de Secar granos: cada destino tiene su lamina vacia y su
+    // lamina llena. Las cuatro vienen ya recortadas, por eso tolerancia 0.
+    //
+    // `CanastaSol.png` se exporto con la capa al 50 %: su recorte es correcto
+    // pero el fondo quedo en alfa 128 en vez de 0, y sin corregirlo la canasta
+    // se ve translucida en el juego. `alfaMinimo` reescala 128..255 a 0..255.
+    ["CanastaSol.png", "minigames/procesar/secado/CanastaSol.webp", 0, 512, { alfaMinimo: 128 }],
+    ["CanastaDescarte.png", "minigames/procesar/secado/CanastaDescarte.webp", 0, 512],
+    ["CanastaGranosBuenosSol.png", "minigames/procesar/secado/CanastaSolLlena.webp", 0, 512],
+    ["CanastaGranosDañadosDescarte.png", "minigames/procesar/secado/CanastaDescarteLlena.webp", 0, 512],
     ["barrapulsar.jpeg", "minigames/procesar/tostado/BarraTueste.webp", 6, 1024],
     // `cacaotostado.jpeg` queda fuera: es un montón de granos oscuros sobre
     // fondo oscuro y el relleno se cuela entre ellos, así que sale moteado de
@@ -36,7 +41,14 @@ const SPRITES = [
     ["BarraChocolate.png", "minigames/procesar/molienda/BarraChocolate.webp", 5, 512],
     ["Azúcar.png", "minigames/procesar/molienda/Azucar.webp", 5, 256],
     ["Leche.png", "minigames/procesar/molienda/Leche.webp", 5, 256],
-    ["MantecaCacao.png", "minigames/procesar/molienda/MantecaCacao.webp", 5, 256]
+    ["MantecaCacao.png", "minigames/procesar/molienda/MantecaCacao.webp", 5, 256],
+    // Iconos de los recuadros de ProcesarScene. Van aparte de la textura
+    // que usa el minijuego: `GranoSecoBueno` sigue sirviendo dentro de Secar,
+    // Tostar y Descascarillar, y pisarla cambiaria tambien el arte de la
+    // partida.
+    // Tolerancia 0: ambas fuentes ya vienen recortadas con alfa propio.
+    ["CanastaGranosBuenos2.png", "minigames/procesar/secado/IconoSecarGranos.webp", 0, 512],
+    ["Horno.png", "minigames/procesar/tostado/IconoTostar.webp", 0, 512]
 ];
 
 // Láminas con varios objetos sueltos: se extrae el mejor ejemplar.
@@ -63,11 +75,18 @@ for (const [origen, destino] of FONDOS) {
 }
 
 console.log("--- Sprites (alfa por difusion desde el borde) ---");
-for (const [origen, destino, tolerancia, ancho] of SPRITES) {
+for (const [origen, destino, tolerancia, ancho, opciones = {}] of SPRITES) {
     let entrada = sharp(`${DIR}/${origen}`);
 
     if (tolerancia > 0) {
         const { buffer, info } = await quitarFondo(`${DIR}/${origen}`, { tolerancia });
+        entrada = sharp(buffer, { raw: info });
+    }
+    else if (opciones.alfaMinimo) {
+        const { buffer, info } = await normalizarAlfa(
+            `${DIR}/${origen}`,
+            opciones.alfaMinimo
+        );
         entrada = sharp(buffer, { raw: info });
     }
 
